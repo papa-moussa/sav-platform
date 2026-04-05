@@ -1,0 +1,990 @@
+openapi: 3.0.3
+info:
+  title: SAV Platform API
+  description: API multi-tenant SaaS pour la gestion de service après-vente
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: Serveur de développement
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, example: admin@sav.local }
+        password: { type: string, example: Admin1234! }
+
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string }
+        role: { type: string, enum: [SUPER_ADMIN, ADMIN, TECHNICIEN, RECEPTIONNISTE] }
+        nom: { type: string }
+        companyId: { type: integer, nullable: true }
+        companyNom: { type: string, nullable: true }
+
+    CompanyRequest:
+      type: object
+      required: [name, slug, email]
+      properties:
+        name: { type: string, example: "Acme Corp" }
+        slug: { type: string, example: "acme-corp" }
+        email: { type: string, format: email }
+        phone: { type: string }
+        address: { type: string }
+
+    CompanyResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        email: { type: string }
+        phone: { type: string }
+        address: { type: string }
+        status: { type: string, enum: [ACTIVE, SUSPENDED] }
+        userCount: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    UserRequest:
+      type: object
+      required: [nom, email, password, role]
+      properties:
+        nom: { type: string, example: "Jean Dupont" }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 6 }
+        role: { type: string, enum: [ADMIN, TECHNICIEN, RECEPTIONNISTE] }
+        siteId: { type: integer, nullable: true }
+
+    UserResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        nom: { type: string }
+        email: { type: string }
+        role: { type: string }
+        actif: { type: boolean }
+        siteId: { type: integer, nullable: true }
+        siteNom: { type: string, nullable: true }
+
+    AdminUserResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserResponse'
+        - type: object
+          properties:
+            companyId: { type: integer, nullable: true }
+            companyNom: { type: string, nullable: true }
+
+    SiteRequest:
+      type: object
+      required: [nom, adresse]
+      properties:
+        nom: { type: string, example: "Agence Paris Nord" }
+        adresse: { type: string }
+        telephone: { type: string }
+
+    SiteResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        nom: { type: string }
+        adresse: { type: string }
+        telephone: { type: string }
+
+    ClientRequest:
+      type: object
+      required: [nom, telephone]
+      properties:
+        nom: { type: string, example: "Marie Martin" }
+        telephone: { type: string, example: "+33612345678" }
+        email: { type: string, format: email }
+        adresse: { type: string }
+
+    ClientResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        nom: { type: string }
+        telephone: { type: string }
+        email: { type: string }
+        adresse: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    TicketRequest:
+      type: object
+      required: [clientId, typeAppareil, marqueModele, descriptionPanne, siteId]
+      properties:
+        clientId: { type: integer }
+        typeAppareil: { type: string, enum: [SMARTPHONE, TABLETTE, ORDINATEUR, TELEVISEUR, CONSOLE, AUTRE] }
+        marqueModele: { type: string, example: "Samsung Galaxy S21" }
+        descriptionPanne: { type: string }
+        siteId: { type: integer }
+
+    TicketResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        numero: { type: string, example: "TKT-2024-00001" }
+        statut: { type: string, enum: [EN_ATTENTE, EN_COURS, EN_ATTENTE_PIECES, REPARE, EN_ATTENTE_FEEDBACK, CLOTURE, ANNULE] }
+        typeAppareil: { type: string }
+        marqueModele: { type: string }
+        descriptionPanne: { type: string }
+        clientNom: { type: string }
+        clientTelephone: { type: string }
+        technicienNom: { type: string, nullable: true }
+        siteNom: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    TicketStatusRequest:
+      type: object
+      required: [statut]
+      properties:
+        statut: { type: string, enum: [EN_ATTENTE, EN_COURS, EN_ATTENTE_PIECES, REPARE, EN_ATTENTE_FEEDBACK, CLOTURE, ANNULE] }
+        commentaire: { type: string }
+
+    AssignRequest:
+      type: object
+      required: [technicienId]
+      properties:
+        technicienId: { type: integer }
+
+    PieceRequest:
+      type: object
+      required: [reference, designation, quantite, seuilAlerte, prixUnitaire, siteId]
+      properties:
+        reference: { type: string, example: "ECRAN-SAM-S21" }
+        designation: { type: string, example: "Écran Samsung S21" }
+        categorieAppareil: { type: string }
+        marqueCompatible: { type: string }
+        quantite: { type: integer }
+        seuilAlerte: { type: integer }
+        prixUnitaire: { type: number, format: double }
+        siteId: { type: integer }
+
+    PieceResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        reference: { type: string }
+        designation: { type: string }
+        categorieAppareil: { type: string }
+        marqueCompatible: { type: string }
+        quantite: { type: integer }
+        seuilAlerte: { type: integer }
+        prixUnitaire: { type: number }
+        siteId: { type: integer }
+        siteNom: { type: string }
+        enAlerte: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    EntreeStockRequest:
+      type: object
+      required: [quantite]
+      properties:
+        quantite: { type: integer, minimum: 1 }
+        motif: { type: string }
+
+    SortieStockRequest:
+      type: object
+      required: [quantite]
+      properties:
+        quantite: { type: integer, minimum: 1 }
+        motif: { type: string }
+        interventionId: { type: integer, nullable: true }
+
+    InterventionRequest:
+      type: object
+      required: [ticketId, description]
+      properties:
+        ticketId: { type: integer }
+        description: { type: string }
+        resultat: { type: string, enum: [EN_COURS, RESOLU, ECHEC], nullable: true }
+
+    InterventionResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        ticketId: { type: integer }
+        description: { type: string }
+        resultat: { type: string, nullable: true }
+        technicienNom: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    NotificationRequest:
+      type: object
+      required: [title, message, type]
+      properties:
+        title: { type: string, maxLength: 150 }
+        message: { type: string, maxLength: 1000 }
+        type: { type: string, enum: [INFO, ALERT, MAINTENANCE] }
+        targetCompanyId: { type: integer, nullable: true }
+
+    NotificationResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        message: { type: string }
+        type: { type: string }
+        targetCompanyId: { type: integer, nullable: true }
+        targetCompanyNom: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    AdminStatsResponse:
+      type: object
+      properties:
+        totalCompanies: { type: integer }
+        activeCompanies: { type: integer }
+        suspendedCompanies: { type: integer }
+        totalUsers: { type: integer }
+        totalTickets: { type: integer }
+        totalFeedbacks: { type: integer }
+        averageRating: { type: number }
+        recentActivity:
+          type: array
+          items:
+            type: object
+            properties:
+              type: { type: string }
+              description: { type: string }
+              companyName: { type: string }
+              timestamp: { type: string, format: date-time }
+
+    PageResponse:
+      type: object
+      properties:
+        content: { type: array, items: {} }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
+        last: { type: boolean }
+
+    ErrorResponse:
+      type: object
+      properties:
+        message: { type: string }
+        status: { type: integer }
+        timestamp: { type: string, format: date-time }
+
+paths:
+
+  # ─── Authentication ──────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      tags: [Authentification]
+      summary: Connexion
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+            examples:
+              admin:
+                summary: Admin demo
+                value: { email: admin@sav.local, password: Admin1234! }
+              superadmin:
+                summary: Super Admin
+                value: { email: superadmin@sav.io, password: SuperAdmin1234! }
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '401':
+          description: Identifiants invalides
+
+  # ─── Admin — Companies ────────────────────────────────────────────────────────
+  /admin/companies:
+    get:
+      tags: [Companies (SUPER_ADMIN)]
+      summary: Liste toutes les entreprises
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/CompanyResponse' }
+    post:
+      tags: [Companies (SUPER_ADMIN)]
+      summary: Créer une entreprise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompanyRequest' }
+            example:
+              name: "Test Company"
+              slug: "test-company"
+              email: "contact@testcompany.fr"
+              phone: "+33612345678"
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CompanyResponse' }
+        '409':
+          description: Slug ou email déjà utilisé
+
+  /admin/companies/{id}:
+    get:
+      tags: [Companies (SUPER_ADMIN)]
+      summary: Détail d'une entreprise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CompanyResponse' }
+    put:
+      tags: [Companies (SUPER_ADMIN)]
+      summary: Modifier une entreprise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompanyRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CompanyResponse' }
+
+  /admin/companies/{id}/status:
+    patch:
+      tags: [Companies (SUPER_ADMIN)]
+      summary: Activer / Suspendre une entreprise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Statut mis à jour
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CompanyResponse' }
+
+  # ─── Admin — Stats ────────────────────────────────────────────────────────────
+  /admin/stats:
+    get:
+      tags: [Administration globale]
+      summary: Statistiques globales SaaS
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminStatsResponse' }
+
+  # ─── Admin — Users ────────────────────────────────────────────────────────────
+  /admin/users:
+    get:
+      tags: [Administration globale]
+      summary: Liste globale des utilisateurs (tous tenants)
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string, default: '' }
+        - name: companyId
+          in: query
+          schema: { type: integer }
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResponse' }
+
+  /admin/users/{id}/actif:
+    patch:
+      tags: [Administration globale]
+      summary: Activer / Désactiver un utilisateur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminUserResponse' }
+
+  /admin/users/{id}/reset-password:
+    post:
+      tags: [Administration globale]
+      summary: Réinitialiser le mot de passe (envoi email)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Mot de passe réinitialisé et envoyé par email
+
+  # ─── Admin — Notifications ────────────────────────────────────────────────────
+  /admin/notifications:
+    get:
+      tags: [Notifications]
+      summary: Liste des notifications
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResponse' }
+    post:
+      tags: [Notifications]
+      summary: Créer une notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NotificationRequest' }
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationResponse' }
+
+  # ─── Users ────────────────────────────────────────────────────────────────────
+  /users:
+    get:
+      tags: [Utilisateurs]
+      summary: Liste des utilisateurs de la company courante
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string, default: '' }
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResponse' }
+    post:
+      tags: [Utilisateurs]
+      summary: Créer un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserRequest' }
+      responses:
+        '201':
+          description: Créé
+
+  /users/{id}/actif:
+    patch:
+      tags: [Utilisateurs]
+      summary: Activer / Désactiver un utilisateur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+
+  # ─── Sites ────────────────────────────────────────────────────────────────────
+  /sites:
+    get:
+      tags: [Sites]
+      summary: Liste des sites de la company
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SiteResponse' }
+    post:
+      tags: [Sites]
+      summary: Créer un site
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SiteRequest' }
+      responses:
+        '201':
+          description: Créé
+
+  /sites/{id}:
+    get:
+      tags: [Sites]
+      summary: Détail d'un site
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+    put:
+      tags: [Sites]
+      summary: Modifier un site
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SiteRequest' }
+      responses:
+        '200':
+          description: OK
+
+  # ─── Clients ──────────────────────────────────────────────────────────────────
+  /clients:
+    get:
+      tags: [Clients]
+      summary: Liste des clients
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResponse' }
+    post:
+      tags: [Clients]
+      summary: Créer un client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientRequest' }
+      responses:
+        '201':
+          description: Créé
+
+  /clients/{id}:
+    get:
+      tags: [Clients]
+      summary: Détail d'un client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+    put:
+      tags: [Clients]
+      summary: Modifier un client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientRequest' }
+      responses:
+        '200':
+          description: OK
+
+  # ─── Tickets ──────────────────────────────────────────────────────────────────
+  /tickets:
+    get:
+      tags: [Tickets SAV]
+      summary: Liste des tickets
+      parameters:
+        - name: statut
+          in: query
+          schema: { type: string, enum: [EN_ATTENTE, EN_COURS, EN_ATTENTE_PIECES, REPARE, EN_ATTENTE_FEEDBACK, CLOTURE, ANNULE] }
+        - name: siteId
+          in: query
+          schema: { type: integer }
+        - name: technicienId
+          in: query
+          schema: { type: integer }
+        - name: clientId
+          in: query
+          schema: { type: integer }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResponse' }
+    post:
+      tags: [Tickets SAV]
+      summary: Créer un ticket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TicketRequest' }
+      responses:
+        '201':
+          description: Créé
+
+  /tickets/{id}:
+    get:
+      tags: [Tickets SAV]
+      summary: Détail d'un ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+
+  /tickets/{id}/statut:
+    patch:
+      tags: [Tickets SAV]
+      summary: Changer le statut d'un ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TicketStatusRequest' }
+      responses:
+        '200':
+          description: OK
+
+  /tickets/{id}/assign:
+    post:
+      tags: [Tickets SAV]
+      summary: Assigner un ticket à un technicien
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssignRequest' }
+      responses:
+        '200':
+          description: OK
+
+  /tickets/{id}/qrcode:
+    get:
+      tags: [Tickets SAV]
+      summary: Générer le QR Code de feedback
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: QR Code en base64
+
+  # ─── Stock / Pièces ───────────────────────────────────────────────────────────
+  /pieces:
+    get:
+      tags: [Stock]
+      summary: Liste des pièces
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: siteId
+          in: query
+          schema: { type: integer }
+        - name: alerteOnly
+          in: query
+          schema: { type: boolean }
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageResponse' }
+    post:
+      tags: [Stock]
+      summary: Créer une pièce
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PieceRequest' }
+      responses:
+        '201':
+          description: Créé
+
+  /pieces/{id}:
+    get:
+      tags: [Stock]
+      summary: Détail d'une pièce
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+    put:
+      tags: [Stock]
+      summary: Modifier une pièce
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PieceRequest' }
+      responses:
+        '200':
+          description: OK
+
+  /pieces/{id}/entree:
+    post:
+      tags: [Stock]
+      summary: Entrée de stock
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EntreeStockRequest' }
+      responses:
+        '200':
+          description: OK
+
+  /pieces/{id}/sortie:
+    post:
+      tags: [Stock]
+      summary: Sortie de stock
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SortieStockRequest' }
+      responses:
+        '200':
+          description: OK
+
+  /pieces/{id}/mouvements:
+    get:
+      tags: [Stock]
+      summary: Historique des mouvements d'une pièce
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+
+  # ─── Réparations / Interventions ──────────────────────────────────────────────
+  /reparations:
+    get:
+      tags: [Réparations]
+      summary: Liste des interventions
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: size
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: OK
+    post:
+      tags: [Réparations]
+      summary: Créer une intervention
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InterventionRequest' }
+      responses:
+        '201':
+          description: Créé
+
+  /reparations/{id}:
+    get:
+      tags: [Réparations]
+      summary: Détail d'une intervention
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+
+  # ─── Reporting ────────────────────────────────────────────────────────────────
+  /reporting/dashboard:
+    get:
+      tags: [Reporting]
+      summary: Statistiques du dashboard
+      parameters:
+        - name: periode
+          in: query
+          schema: { type: string, enum: [TODAY, WEEK, MONTH, YEAR], default: MONTH }
+        - name: siteId
+          in: query
+          schema: { type: integer }
+      responses:
+        '200':
+          description: OK
+
+  # ─── Feedback (public) ────────────────────────────────────────────────────────
+  /feedback/initiate-otp:
+    get:
+      tags: [Feedback client]
+      summary: Initier l'OTP via token QR
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: OTP envoyé par SMS
+
+  /feedback/verify-otp:
+    post:
+      tags: [Feedback client]
+      summary: Vérifier le code OTP
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string }
+                otp: { type: string, example: "123456" }
+      responses:
+        '200':
+          description: OTP valide, retourne un accessToken
+
+  /feedback/submit:
+    post:
+      tags: [Feedback client]
+      summary: Soumettre le feedback
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accessToken: { type: string }
+                noteTechnicien: { type: integer, minimum: 1, maximum: 5 }
+                commentaireTechnicien: { type: string }
+                noteEntreprise: { type: integer, minimum: 1, maximum: 5 }
+                commentaireEntreprise: { type: string }
+      responses:
+        '200':
+          description: Feedback enregistré
