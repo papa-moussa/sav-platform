@@ -51,6 +51,7 @@
     </TestPlan>
     <hashTree>
 
+      <!-- ═══ TG1 — TESTS FONCTIONNELS ═══ -->
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG1 — Tests Fonctionnels" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
@@ -61,8 +62,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Global Headers — Content-Type only (NO Authorization)" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Global Headers (no Authorization)" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -74,6 +74,7 @@
             </elementProp>
           </collectionProp>
         </HeaderManager>
+        <hashTree/>
 
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="F-0 Authentifications (once)" enabled="true"/>
         <hashTree>
@@ -88,6 +89,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <stringProp name="Argument.value">{"email":"${SUPER_ADMIN_EMAIL}","password":"${SUPER_ADMIN_PASSWORD}"}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -98,11 +100,15 @@
               <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">TOKEN_SA_NOT_FOUND</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-0b POST /api/auth/login (Company ADMIN)" enabled="true">
@@ -116,6 +122,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <stringProp name="Argument.value">{"email":"${COMPANY_ADMIN_EMAIL}","password":"${COMPANY_ADMIN_PASSWORD}"}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -126,19 +133,24 @@
               <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">TOKEN_ADMIN_NOT_FOUND</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
         </hashTree>
 
-        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SECTION A — Super Admin endpoints (token_sa)" enabled="true">
+        <!-- SECTION A : SUPER_ADMIN (token_sa) -->
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SECTION A — Super Admin (token_sa)" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
         </TransactionController>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth — SUPER_ADMIN token" enabled="true">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth — Bearer token_sa" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
@@ -146,6 +158,7 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-1 GET /api/admin/stats" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
@@ -156,10 +169,13 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-2 GET /api/admin/companies" enabled="true">
@@ -171,10 +187,13 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-2b GET /api/admin/users" enabled="true">
@@ -186,18 +205,22 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
         </hashTree>
 
-        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SECTION B — Company Admin endpoints (token_admin)" enabled="true">
+        <!-- SECTION B : Company ADMIN (token_admin) -->
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SECTION B — Company Admin (token_admin)" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
         </TransactionController>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth — Company ADMIN token" enabled="true">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth — Bearer token_admin" enabled="true">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
@@ -205,6 +228,7 @@
               </elementProp>
             </collectionProp>
           </HeaderManager>
+          <hashTree/>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-3 GET /api/sites" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
@@ -219,11 +243,15 @@
               <stringProp name="JSONPostProcessor.jsonPathExprs">$[0].id</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">1</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-4 POST /api/clients" enabled="true">
@@ -236,7 +264,8 @@
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
-                  <stringProp name="Argument.value">{"nom":"Client Fonctionnel JMeter","telephone":"0600000001","email":"client.jmeter@test.com"}</stringProp>
+                  <stringProp name="Argument.value">{"nom":"Client JMeter Test","telephone":"0600000099","email":"jmeter.test@test.com"}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -247,6 +276,7 @@
               <stringProp name="JSONPostProcessor.jsonPathExprs">$.id</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">1</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200 or 201" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="49586">200</stringProp>
@@ -255,6 +285,7 @@
               <intProp name="Assertion.test_type">40</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-5 POST /api/tickets" enabled="true">
@@ -267,7 +298,8 @@
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
-                  <stringProp name="Argument.value">{"titre":"Panne ecran Test JMeter","description":"Ecran ne s allume plus","categorieAppareil":"SMARTPHONE","marque":"Samsung","modele":"Galaxy S21","clientId":${f_clientId},"siteId":${f_siteId}}</stringProp>
+                  <stringProp name="Argument.value">{"titre":"Panne ecran JMeter","description":"Test fonctionnel JMeter","categorieAppareil":"SMARTPHONE","marque":"Samsung","modele":"Galaxy S21","clientId":${f_clientId},"siteId":${f_siteId}}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -278,16 +310,21 @@
               <stringProp name="JSONPostProcessor.jsonPathExprs">$.id</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">1</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
             <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract f_feedbackToken" enabled="true">
               <stringProp name="JSONPostProcessor.referenceNames">f_feedbackToken</stringProp>
               <stringProp name="JSONPostProcessor.jsonPathExprs">$.feedbackToken</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">NO_TOKEN</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 201" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">201</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">201</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-6 GET /api/tickets/${f_ticketId} (assert OUVERT)" enabled="true">
@@ -299,13 +336,16 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert statut OUVERT" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="1">OUVERT</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="1">OUVERT</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">2</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-7 PATCH /api/tickets/${f_ticketId}/statut (EN_COURS)" enabled="true">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-7 PATCH statut EN_COURS" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
@@ -317,16 +357,20 @@
                   <stringProp name="Argument.name">statut</stringProp>
                   <stringProp name="Argument.value">EN_COURS</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-8 GET /api/tickets/${f_ticketId} (confirm EN_COURS)" enabled="true">
@@ -338,10 +382,13 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert statut EN_COURS" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="1">EN_COURS</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="1">EN_COURS</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">2</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-9 POST /api/reparations" enabled="true">
@@ -355,6 +402,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <stringProp name="Argument.value">{"ticketId":${f_ticketId},"notes":"Remplacement ecran OLED effectue"}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -368,6 +416,7 @@
               <intProp name="Assertion.test_type">40</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-10 GET /api/feedback/${f_feedbackToken}/init (QR scan)" enabled="true">
@@ -379,13 +428,16 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
 
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-11 PATCH /api/tickets/${f_ticketId}/statut (RESOLU)" enabled="true">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-11 PATCH statut RESOLU" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
@@ -397,32 +449,48 @@
                   <stringProp name="Argument.name">statut</stringProp>
                   <stringProp name="Argument.value">RESOLU</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
+            <hashTree/>
           </hashTree>
         </hashTree>
 
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree — TG1" enabled="true">
-          <objProp><name>saveConfig</name><value class="SampleSaveConfiguration">
-            <time>true</time><latency>true</latency><responseCode>true</responseCode>
-            <responseMessage>true</responseMessage><encoding>false</encoding>
-            <requestHeaders>true</requestHeaders><responseHeaders>true</responseHeaders>
-            <responseData>true</responseData><samplerData>true</samplerData>
-            <assertions>true</assertions><subresults>true</subresults>
-          </value></objProp>
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <responseCode>true</responseCode>
+              <responseMessage>true</responseMessage>
+              <encoding>false</encoding>
+              <requestHeaders>true</requestHeaders>
+              <responseHeaders>true</responseHeaders>
+              <responseData>true</responseData>
+              <samplerData>true</samplerData>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+            </value>
+          </objProp>
           <stringProp name="filename"></stringProp>
         </ResultCollector>
+        <hashTree/>
       </hashTree>
 
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG2 — Perf : 100 Techniciens (tickets)" enabled="false">
+      <!-- ═══ TG2 — PERF : 100 Techniciens ═══ -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG2 — Perf : 100 Techniciens" enabled="false">
         <intProp name="ThreadGroup.num_threads">100</intProp>
         <intProp name="ThreadGroup.ramp_time">60</intProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
@@ -433,7 +501,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers — Content-Type" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers Content-Type" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -445,6 +513,8 @@
             </elementProp>
           </collectionProp>
         </HeaderManager>
+        <hashTree/>
+
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Login once" enabled="true"/>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login Company ADMIN" enabled="true">
@@ -458,6 +528,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <stringProp name="Argument.value">{"email":"${COMPANY_ADMIN_EMAIL}","password":"${COMPANY_ADMIN_PASSWORD}"}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -468,8 +539,10 @@
               <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">NO_TOKEN</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
           </hashTree>
         </hashTree>
+
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth Header" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
@@ -478,6 +551,8 @@
             </elementProp>
           </collectionProp>
         </HeaderManager>
+        <hashTree/>
+
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Scenario Technicien" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
         </TransactionController>
@@ -490,11 +565,13 @@
             <stringProp name="HTTPSampler.method">GET</stringProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Think Time 1-3s" enabled="true">
             <stringProp name="ConstantTimer.delay">1000</stringProp>
             <stringProp name="RandomTimer.range">2000</stringProp>
           </GaussianRandomTimer>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/tickets/${LOAD_TICKET_ID}" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -503,11 +580,13 @@
             <stringProp name="HTTPSampler.method">GET</stringProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Think Time 0.5-2s" enabled="true">
             <stringProp name="ConstantTimer.delay">500</stringProp>
             <stringProp name="RandomTimer.range">1500</stringProp>
           </GaussianRandomTimer>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/sites" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -517,16 +596,24 @@
           </HTTPSamplerProxy>
           <hashTree/>
         </hashTree>
+
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report — TG2" enabled="true">
-          <objProp><name>saveConfig</name><value class="SampleSaveConfiguration">
-            <time>true</time><latency>true</latency><responseCode>true</responseCode>
-            <assertions>true</assertions>
-          </value></objProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <responseCode>true</responseCode>
+              <assertions>true</assertions>
+            </value>
+          </objProp>
           <stringProp name="filename">tg2-perf-results.csv</stringProp>
         </ResultCollector>
+        <hashTree/>
       </hashTree>
 
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG3 — Perf : 50 Super-Admins (dashboard)" enabled="false">
+      <!-- ═══ TG3 — PERF : 50 Super-Admins ═══ -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG3 — Perf : 50 Super-Admins" enabled="false">
         <intProp name="ThreadGroup.num_threads">50</intProp>
         <intProp name="ThreadGroup.ramp_time">30</intProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
@@ -537,7 +624,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers — Content-Type" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers Content-Type" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -549,6 +636,8 @@
             </elementProp>
           </collectionProp>
         </HeaderManager>
+        <hashTree/>
+
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Login SUPER_ADMIN once" enabled="true"/>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login SUPER_ADMIN" enabled="true">
@@ -562,19 +651,22 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <stringProp name="Argument.value">{"email":"${SUPER_ADMIN_EMAIL}","password":"${SUPER_ADMIN_PASSWORD}"}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract token_sa" enabled="true">
+            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract token" enabled="true">
               <stringProp name="JSONPostProcessor.referenceNames">auth_token</stringProp>
               <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">NO_TOKEN</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
           </hashTree>
         </hashTree>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth Header — SUPER_ADMIN" enabled="true">
+
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth Header SUPER_ADMIN" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
@@ -582,6 +674,8 @@
             </elementProp>
           </collectionProp>
         </HeaderManager>
+        <hashTree/>
+
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Scenario Super Admin Dashboard" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
         </TransactionController>
@@ -594,11 +688,13 @@
             <stringProp name="HTTPSampler.method">GET</stringProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Think Time 1-2s" enabled="true">
             <stringProp name="ConstantTimer.delay">1000</stringProp>
             <stringProp name="RandomTimer.range">1000</stringProp>
           </GaussianRandomTimer>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/admin/companies" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -607,11 +703,13 @@
             <stringProp name="HTTPSampler.method">GET</stringProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Think Time 0.5-1.5s" enabled="true">
             <stringProp name="ConstantTimer.delay">500</stringProp>
             <stringProp name="RandomTimer.range">1000</stringProp>
           </GaussianRandomTimer>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/admin/users" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -621,15 +719,23 @@
           </HTTPSamplerProxy>
           <hashTree/>
         </hashTree>
+
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report — TG3" enabled="true">
-          <objProp><name>saveConfig</name><value class="SampleSaveConfiguration">
-            <time>true</time><latency>true</latency><responseCode>true</responseCode>
-            <assertions>true</assertions>
-          </value></objProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <responseCode>true</responseCode>
+              <assertions>true</assertions>
+            </value>
+          </objProp>
           <stringProp name="filename">tg3-perf-results.csv</stringProp>
         </ResultCollector>
+        <hashTree/>
       </hashTree>
 
+      <!-- ═══ TG4 — STRESS : 500 Users ═══ -->
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG4 — Stress : 500 Users" enabled="false">
         <intProp name="ThreadGroup.num_threads">500</intProp>
         <intProp name="ThreadGroup.ramp_time">30</intProp>
@@ -641,7 +747,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers — Content-Type" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Headers Content-Type" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -653,6 +759,8 @@
             </elementProp>
           </collectionProp>
         </HeaderManager>
+        <hashTree/>
+
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Login once" enabled="true"/>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login Company ADMIN" enabled="true">
@@ -666,6 +774,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <stringProp name="Argument.value">{"email":"${COMPANY_ADMIN_EMAIL}","password":"${COMPANY_ADMIN_PASSWORD}"}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -676,8 +785,10 @@
               <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
               <stringProp name="JSONPostProcessor.defaultValues">NO_TOKEN</stringProp>
             </JSONPathExtractor>
+            <hashTree/>
           </hashTree>
         </hashTree>
+
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth Header" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
@@ -686,7 +797,9 @@
             </elementProp>
           </collectionProp>
         </HeaderManager>
-        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Scenario Stress — Tickets + Scans" enabled="true">
+        <hashTree/>
+
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Scenario Stress" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
         </TransactionController>
         <hashTree>
@@ -698,6 +811,7 @@
             <stringProp name="HTTPSampler.method">GET</stringProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/tickets/${LOAD_TICKET_ID} (stress)" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -706,6 +820,7 @@
             <stringProp name="HTTPSampler.method">GET</stringProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /api/tickets (stress create)" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -716,28 +831,43 @@
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
-                  <stringProp name="Argument.value">{"titre":"Ticket Stress ${__threadNum}","description":"Test de charge automatise","categorieAppareil":"SMARTPHONE","marque":"Apple","modele":"iPhone 14","clientId":${LOAD_CLIENT_ID},"siteId":${LOAD_SITE_ID}}</stringProp>
+                  <stringProp name="Argument.value">{"titre":"Ticket Stress ${__threadNum}","description":"Test de charge","categorieAppareil":"SMARTPHONE","marque":"Apple","modele":"iPhone 14","clientId":${LOAD_CLIENT_ID},"siteId":${LOAD_SITE_ID}}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
         </hashTree>
+
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report — TG4 Stress" enabled="true">
-          <objProp><name>saveConfig</name><value class="SampleSaveConfiguration">
-            <time>true</time><latency>true</latency><responseCode>true</responseCode>
-            <assertions>true</assertions>
-          </value></objProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <responseCode>true</responseCode>
+              <assertions>true</assertions>
+            </value>
+          </objProp>
           <stringProp name="filename">tg4-stress-results.csv</stringProp>
         </ResultCollector>
+        <hashTree/>
+
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree — TG4 errors only" enabled="true">
           <boolProp name="ResultCollector.error_logging">true</boolProp>
-          <objProp><name>saveConfig</name><value class="SampleSaveConfiguration">
-            <time>true</time><latency>true</latency><responseCode>true</responseCode>
-            <responseData>true</responseData>
-          </value></objProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <responseCode>true</responseCode>
+              <responseData>true</responseData>
+            </value>
+          </objProp>
           <stringProp name="filename"></stringProp>
         </ResultCollector>
+        <hashTree/>
       </hashTree>
 
     </hashTree>
