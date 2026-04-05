@@ -1,0 +1,112 @@
+<app-modal
+  [title]="title"
+  description="Renseignez les informations de la pièce détachée."
+  [isOpen]="true"
+  [hasFooter]="true"
+  (closed)="cancelled.emit()"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    @if (error()) {
+      <div class="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{{ error() }}</div>
+    }
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Référence -->
+      <app-input
+        formControlName="reference"
+        label="Référence *"
+        placeholder="REF-001"
+        errorMessage="Référence requise"
+      ></app-input>
+
+      <!-- Désignation -->
+      <app-input
+        formControlName="designation"
+        label="Désignation *"
+        placeholder="Compresseur, moteur..."
+        errorMessage="Désignation requise"
+      ></app-input>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Catégorie -->
+      <div class="flex flex-col gap-1.5">
+        <label hlmLabel for="form-piece-categorie">Catégorie *</label>
+        <select hlmSelect id="form-piece-categorie" formControlName="categorieAppareil" class="w-full bg-background">
+          <option [ngValue]="null">Sélectionner une catégorie</option>
+          @for (cat of categories; track cat) {
+            <option [value]="cat">{{ categorieLabels[cat] }}</option>
+          }
+        </select>
+        @if (form.get('categorieAppareil')?.invalid && form.get('categorieAppareil')?.touched) {
+          <span class="text-sm text-destructive">Catégorie requise.</span>
+        }
+      </div>
+
+      <!-- Marque compatible -->
+      <app-input
+        formControlName="marqueCompatible"
+        label="Marque compatible"
+        placeholder="Samsung, LG..."
+      ></app-input>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- Quantité -->
+      <div class="flex flex-col gap-1.5">
+        @if (isEdit) {
+          <label hlmLabel>Quantité actuelle</label>
+          <div class="flex items-center h-10 px-3 rounded-md border border-border bg-muted text-muted-foreground text-sm">
+            Modifiable via Entrée/Sortie (Actuel: {{ form.get('quantite')?.value }})
+          </div>
+        } @else {
+          <app-input
+            formControlName="quantite"
+            label="Quantité initiale *"
+            type="number"
+            placeholder="0"
+            errorMessage="Quantité invalide"
+          ></app-input>
+        }
+      </div>
+
+      <!-- Seuil d'alerte -->
+      <app-input
+        formControlName="seuilAlerte"
+        label="Seuil d'alerte *"
+        type="number"
+        placeholder="5"
+        errorMessage="Seuil invalide"
+      ></app-input>
+
+      <!-- Prix unitaire -->
+      <app-input
+        formControlName="prixUnitaire"
+        label="Prix unitaire (XOF)"
+        type="number"
+        placeholder="0"
+      ></app-input>
+    </div>
+
+    <!-- Site -->
+    <div class="flex flex-col gap-1.5">
+      <label hlmLabel for="form-piece-site">Site *</label>
+      <select hlmSelect id="form-piece-site" formControlName="siteId" class="w-full bg-background">
+        <option [ngValue]="null">Sélectionner un site</option>
+        @for (site of sites(); track site.id) {
+          <option [value]="site.id">{{ site.nom }}</option>
+        }
+      </select>
+      @if (form.get('siteId')?.invalid && form.get('siteId')?.touched) {
+        <span class="text-sm text-destructive">Site requis.</span>
+      }
+    </div>
+  </form>
+
+  <div modal-footer class="flex gap-3 justify-end w-full">
+    <app-button variant="outline" (click)="cancelled.emit()">Annuler</app-button>
+    <app-button [loading]="saving()" (click)="submit()">
+      {{ isEdit ? 'Enregistrer les modifications' : 'Créer la pièce' }}
+    </app-button>
+  </div>
+</app-modal>

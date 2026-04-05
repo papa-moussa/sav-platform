@@ -1,0 +1,397 @@
+<div class="p-6 lg:p-8 space-y-6 min-h-full">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Entreprises</h1>
+      <p class="text-sm text-slate-500 mt-0.5 font-medium">Gérez les tenants de la plateforme SAV</p>
+    </div>
+    <button
+      (click)="openCreate()"
+      class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-primary-500 to-indigo-600 text-white text-sm font-bold rounded-xl shadow-md shadow-primary-500/20 hover:shadow-primary-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
+    >
+      <ng-icon name="lucidePlus" class="w-4 h-4"></ng-icon>
+      Nouvelle entreprise
+    </button>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl">
+      <ng-icon name="lucideCircleAlert" class="w-5 h-5 text-red-500 shrink-0"></ng-icon>
+      <p class="text-sm font-semibold text-red-600">{{ error() }}</p>
+      <button
+        (click)="loadCompanies()"
+        class="ml-auto text-xs font-bold text-red-500 hover:text-red-700 underline"
+      >Réessayer</button>
+    </div>
+  }
+
+  <!-- Search + refresh bar -->
+  <div class="flex items-center gap-3">
+    <div class="relative flex-1 max-w-sm">
+      <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+        <ng-icon name="lucideSearch" class="w-4 h-4 text-slate-400"></ng-icon>
+      </div>
+      <input
+        type="text"
+        placeholder="Rechercher par nom, slug, email..."
+        (input)="onSearchInput($event)"
+        class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all shadow-sm"
+      />
+    </div>
+    <button
+      (click)="loadCompanies()"
+      class="flex items-center gap-1.5 px-3.5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+      [disabled]="loading()"
+    >
+      <ng-icon name="lucideRefreshCw" class="w-4 h-4" [class.animate-spin]="loading()"></ng-icon>
+    </button>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+
+    @if (loading()) {
+      <div class="p-8 space-y-4">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="flex items-center gap-4 animate-pulse">
+            <div class="w-10 h-10 bg-slate-100 rounded-xl shrink-0"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-3 bg-slate-100 rounded w-40"></div>
+              <div class="h-2.5 bg-slate-100 rounded w-24"></div>
+            </div>
+            <div class="h-6 w-16 bg-slate-100 rounded-full"></div>
+            <div class="h-8 w-20 bg-slate-100 rounded-lg"></div>
+          </div>
+        }
+      </div>
+    } @else if (filteredCompanies().length === 0) {
+      <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+        <ng-icon name="lucideBuilding2" class="w-12 h-12 mb-3 opacity-30"></ng-icon>
+        @if (searchQuery()) {
+          <p class="text-sm font-semibold">Aucun résultat pour "{{ searchQuery() }}"</p>
+        } @else {
+          <p class="text-sm font-semibold">Aucune entreprise enregistrée</p>
+          <button
+            (click)="openCreate()"
+            class="mt-4 flex items-center gap-2 px-4 py-2 bg-primary-500 text-white text-sm font-bold rounded-xl hover:bg-primary-600 transition-colors"
+          >
+            <ng-icon name="lucidePlus" class="w-4 h-4"></ng-icon>
+            Créer la première entreprise
+          </button>
+        }
+      </div>
+    } @else {
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50/60 border-b border-slate-100">
+              <th class="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-6 py-3.5">Entreprise</th>
+              <th class="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Slug</th>
+              <th class="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Email</th>
+              <th class="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Statut</th>
+              <th class="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Utilisateurs</th>
+              <th class="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Créé le</th>
+              <th class="text-right text-[11px] font-bold text-slate-400 uppercase tracking-wider px-6 py-3.5">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            @for (company of filteredCompanies(); track company.id) {
+              <tr class="hover:bg-slate-50/40 transition-colors group">
+                <!-- Name -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                      <span class="text-[13px] font-extrabold text-primary-600">
+                        {{ company.name.charAt(0).toUpperCase() }}
+                      </span>
+                    </div>
+                    <div class="min-w-0">
+                      <p class="font-bold text-slate-800 truncate">{{ company.name }}</p>
+                      @if (company.phone) {
+                        <p class="text-[11px] text-slate-400 font-medium">{{ company.phone }}</p>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <!-- Slug -->
+                <td class="px-4 py-4">
+                  <code class="text-[12px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">{{ company.slug }}</code>
+                </td>
+                <!-- Email -->
+                <td class="px-4 py-4">
+                  <span class="text-[13px] text-slate-600 font-medium">{{ company.email }}</span>
+                </td>
+                <!-- Status -->
+                <td class="px-4 py-4 text-center">
+                  @if (company.status === 'ACTIVE') {
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                      Actif
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-100">
+                      <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>
+                      Suspendu
+                    </span>
+                  }
+                </td>
+                <!-- Users -->
+                <td class="px-4 py-4 text-center">
+                  <span class="text-[13px] font-bold text-slate-700">{{ company.userCount }}</span>
+                </td>
+                <!-- Date -->
+                <td class="px-4 py-4 text-center">
+                  <span class="text-[12px] text-slate-400 font-medium">{{ formatDate(company.createdAt) }}</span>
+                </td>
+                <!-- Actions -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center justify-end gap-2">
+                    <button
+                      (click)="openEdit(company)"
+                      class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                      title="Modifier"
+                    >
+                      <ng-icon name="lucidePencil" class="w-3.5 h-3.5"></ng-icon>
+                      Éditer
+                    </button>
+                    <button
+                      (click)="openToggleConfirm(company)"
+                      class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold rounded-lg transition-colors"
+                      [class.text-amber-600]="company.status === 'ACTIVE'"
+                      [class.bg-amber-50]="company.status === 'ACTIVE'"
+                      [class.hover:bg-amber-100]="company.status === 'ACTIVE'"
+                      [class.text-emerald-600]="company.status === 'SUSPENDED'"
+                      [class.bg-emerald-50]="company.status === 'SUSPENDED'"
+                      [class.hover:bg-emerald-100]="company.status === 'SUSPENDED'"
+                      [title]="company.status === 'ACTIVE' ? 'Suspendre' : 'Activer'"
+                    >
+                      <ng-icon [name]="company.status === 'ACTIVE' ? 'lucideToggleRight' : 'lucideToggleLeft'" class="w-3.5 h-3.5"></ng-icon>
+                      {{ company.status === 'ACTIVE' ? 'Suspendre' : 'Activer' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table footer -->
+      <div class="px-6 py-3 border-t border-slate-50 bg-slate-50/30 flex items-center justify-between">
+        <p class="text-[12px] font-medium text-slate-400">
+          {{ filteredCompanies().length }} entreprise{{ filteredCompanies().length > 1 ? 's' : '' }}
+          @if (searchQuery()) { trouvée{{ filteredCompanies().length > 1 ? 's' : '' }} }
+        </p>
+      </div>
+
+    }
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- Create / Edit Modal -->
+<!-- ================================================================ -->
+@if (showModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in">
+
+      <!-- Modal header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div>
+          <h2 class="text-[16px] font-extrabold text-slate-900">
+            {{ editingCompany() ? 'Modifier l\'entreprise' : 'Nouvelle entreprise' }}
+          </h2>
+          <p class="text-[12px] text-slate-400 font-medium mt-0.5">
+            {{ editingCompany() ? editingCompany()!.name : 'Créer un nouveau tenant' }}
+          </p>
+        </div>
+        <button
+          (click)="closeModal()"
+          class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+        >
+          <ng-icon name="lucideX" class="w-4 h-4"></ng-icon>
+        </button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="p-6">
+        <form [formGroup]="form" (ngSubmit)="submitForm()" class="space-y-4">
+
+          <!-- Name -->
+          <div class="space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700">Nom <span class="text-red-400">*</span></label>
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="Acme Corp"
+              (input)="onNameChange($event)"
+              class="w-full px-3.5 py-2.5 text-sm rounded-xl border bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              [class.border-slate-200]="!fieldInvalid('name')"
+              [class.border-red-300]="fieldInvalid('name')"
+            />
+            @if (fieldInvalid('name')) {
+              <p class="text-xs text-red-500 font-medium">Le nom est requis (minimum 2 caractères).</p>
+            }
+          </div>
+
+          <!-- Slug -->
+          <div class="space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700">
+              Slug <span class="text-red-400">*</span>
+              <span class="ml-1.5 text-[11px] font-normal text-slate-400">(lettres minuscules, chiffres, tirets)</span>
+            </label>
+            <input
+              type="text"
+              formControlName="slug"
+              placeholder="acme-corp"
+              class="w-full px-3.5 py-2.5 text-sm font-mono rounded-xl border bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              [class.border-slate-200]="!fieldInvalid('slug')"
+              [class.border-red-300]="fieldInvalid('slug')"
+            />
+            @if (fieldInvalid('slug')) {
+              <p class="text-xs text-red-500 font-medium">Slug invalide. Utilisez uniquement a-z, 0-9, tirets.</p>
+            }
+          </div>
+
+          <!-- Email -->
+          <div class="space-y-1.5">
+            <label class="block text-sm font-semibold text-slate-700">Email <span class="text-red-400">*</span></label>
+            <input
+              type="email"
+              formControlName="email"
+              placeholder="contact@acme.com"
+              class="w-full px-3.5 py-2.5 text-sm rounded-xl border bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              [class.border-slate-200]="!fieldInvalid('email')"
+              [class.border-red-300]="fieldInvalid('email')"
+            />
+            @if (fieldInvalid('email')) {
+              <p class="text-xs text-red-500 font-medium">Veuillez saisir un email valide.</p>
+            }
+          </div>
+
+          <!-- Phone + Address row -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="block text-sm font-semibold text-slate-700">Téléphone</label>
+              <input
+                type="tel"
+                formControlName="phone"
+                placeholder="+33 1 23 45 67 89"
+                class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="block text-sm font-semibold text-slate-700">Adresse</label>
+              <input
+                type="text"
+                formControlName="address"
+                placeholder="Paris, France"
+                class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 transition-all"
+              />
+            </div>
+          </div>
+
+          <!-- Modal error -->
+          @if (modalError()) {
+            <div class="flex items-center gap-3 p-3.5 bg-red-50 border border-red-100 rounded-xl animate-in fade-in">
+              <ng-icon name="lucideCircleAlert" class="w-4 h-4 text-red-500 shrink-0"></ng-icon>
+              <p class="text-sm font-semibold text-red-600">{{ modalError() }}</p>
+            </div>
+          }
+
+          <!-- Modal actions -->
+          <div class="flex items-center gap-3 pt-2">
+            <button
+              type="button"
+              (click)="closeModal()"
+              class="flex-1 h-10 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              [disabled]="form.invalid || modalLoading()"
+              class="flex-1 h-10 flex items-center justify-center gap-2 text-sm font-bold text-white bg-gradient-to-r from-primary-500 to-indigo-600 rounded-xl shadow-md shadow-primary-500/20 hover:shadow-primary-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+            >
+              @if (modalLoading()) {
+                <ng-icon name="lucideLoader" class="w-4 h-4 animate-spin"></ng-icon>
+              } @else {
+                <ng-icon name="lucideCheck" class="w-4 h-4"></ng-icon>
+              }
+              {{ editingCompany() ? 'Enregistrer' : 'Créer' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ================================================================ -->
+<!-- Toggle Status Confirm Modal -->
+<!-- ================================================================ -->
+@if (confirmCompany()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in">
+
+      <div class="p-6 text-center space-y-4">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
+          [class.bg-amber-50]="confirmCompany()!.status === 'ACTIVE'"
+          [class.bg-emerald-50]="confirmCompany()!.status === 'SUSPENDED'"
+        >
+          <ng-icon name="lucideTriangleAlert"
+            class="w-7 h-7"
+            [class.text-amber-500]="confirmCompany()!.status === 'ACTIVE'"
+            [class.text-emerald-500]="confirmCompany()!.status === 'SUSPENDED'"
+          ></ng-icon>
+        </div>
+
+        <div>
+          <h3 class="text-[16px] font-extrabold text-slate-900">
+            {{ confirmCompany()!.status === 'ACTIVE' ? 'Suspendre l\'entreprise ?' : 'Activer l\'entreprise ?' }}
+          </h3>
+          <p class="text-sm text-slate-500 font-medium mt-1.5">
+            {{ confirmCompany()!.name }}
+          </p>
+          <p class="text-[13px] text-slate-400 mt-2">
+            @if (confirmCompany()!.status === 'ACTIVE') {
+              Les utilisateurs ne pourront plus se connecter.
+            } @else {
+              Les utilisateurs pourront à nouveau se connecter.
+            }
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            (click)="closeToggleConfirm()"
+            class="flex-1 h-10 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+            [disabled]="toggleLoading()"
+          >
+            Annuler
+          </button>
+          <button
+            (click)="confirmToggle()"
+            [disabled]="toggleLoading()"
+            class="flex-1 h-10 flex items-center justify-center gap-2 text-sm font-bold text-white rounded-xl transition-all disabled:opacity-60"
+            [class.bg-amber-500]="confirmCompany()!.status === 'ACTIVE'"
+            [class.hover:bg-amber-600]="confirmCompany()!.status === 'ACTIVE'"
+            [class.bg-emerald-500]="confirmCompany()!.status === 'SUSPENDED'"
+            [class.hover:bg-emerald-600]="confirmCompany()!.status === 'SUSPENDED'"
+          >
+            @if (toggleLoading()) {
+              <ng-icon name="lucideLoader" class="w-4 h-4 animate-spin"></ng-icon>
+            }
+            {{ confirmCompany()!.status === 'ACTIVE' ? 'Suspendre' : 'Activer' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

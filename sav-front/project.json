@@ -1,0 +1,92 @@
+{
+  "name": "sav-front",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "includedScripts": [],
+  "projectType": "application",
+  "root": "sav-front",
+  "prefix": "app",
+  "sourceRoot": "sav-front/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/sav-front",
+        "browser": "./sav-front/src/main.ts",
+        "tsConfig": "./sav-front/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "./sav-front/public"
+          }
+        ],
+        "styles": ["./sav-front/src/styles.css"],
+        "stylePreprocessorOptions": {
+          "includePaths": ["./sav-front/src"]
+        },
+        "server": "./sav-front/src/main.server.ts",
+        "ssr": {
+          "entry": "./sav-front/src/server.ts"
+        },
+        "outputMode": "server"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "sav-front:build:production"
+        },
+        "development": {
+          "buildTarget": "sav-front:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["./sav-front/src"]
+      }
+    },
+    "test": {
+      "executor": "@angular/build:unit-test",
+      "options": {}
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "sav-front:build",
+        "port": 4200,
+        "staticFilePath": "dist/sav-front/browser",
+        "spa": true
+      }
+    }
+  }
+}

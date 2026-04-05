@@ -1,0 +1,317 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+  <div class="w-full max-w-lg">
+
+    <!-- ─── CHARGEMENT ───────────────────────────────────────────────── -->
+    @if (state() === 'loading') {
+      <div class="flex flex-col items-center gap-4 py-20">
+        <div class="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p class="text-slate-500 font-medium">Chargement…</p>
+      </div>
+    }
+
+    <!-- ─── ERREUR ───────────────────────────────────────────────────── -->
+    @if (state() === 'error') {
+      <div class="bg-white rounded-[28px] shadow-xl p-10 text-center space-y-5">
+        <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500">
+            <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">Lien invalide</h2>
+        <p class="text-slate-500 text-[15px] leading-relaxed">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- ─── DÉJÀ SOUMIS ──────────────────────────────────────────────── -->
+    @if (state() === 'already-submitted') {
+      <div class="bg-white rounded-[28px] shadow-xl p-10 text-center space-y-5">
+        <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">Feedback déjà envoyé</h2>
+        <p class="text-slate-500 text-[15px] leading-relaxed">
+          Vous avez déjà évalué cette intervention. Merci pour votre retour !
+        </p>
+      </div>
+    }
+
+    <!-- ─── OTP ENVOYÉ — Saisie du code ─────────────────────────────── -->
+    @if (state() === 'otp-sent' || state() === 'verifying-otp') {
+      <div class="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-400">
+
+        <!-- En-tête -->
+        <div class="text-center pb-2">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.27 12 19.79 19.79 0 0 1 1.21 3.33 2 2 0 0 1 3.18 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.15a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-slate-800">Vérification SMS</h1>
+          <p class="text-slate-500 text-[14px] mt-1 leading-relaxed">
+            {{ otpMessage() || ('Un code a été envoyé au ' + maskedPhone()) }}
+          </p>
+        </div>
+
+        <!-- Carte OTP -->
+        <div class="bg-white rounded-[24px] shadow-sm border border-slate-100 p-7 space-y-5">
+
+          <!-- Numéro masqué -->
+          <div class="flex items-center gap-3 bg-slate-50 rounded-2xl px-4 py-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400 shrink-0">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.27 12 19.79 19.79 0 0 1 1.21 3.33 2 2 0 0 1 3.18 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.15a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16z"/>
+            </svg>
+            <span class="font-mono font-semibold text-slate-700 text-[15px]">{{ maskedPhone() }}</span>
+          </div>
+
+          <!-- Input OTP -->
+          <div class="space-y-2">
+            <label class="text-[12px] font-bold text-slate-500 uppercase tracking-wide">
+              Code de vérification (6 chiffres)
+            </label>
+            <input
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              autocomplete="one-time-code"
+              placeholder="• • • • • •"
+              [ngModel]="otpInput()"
+              (ngModelChange)="otpInput.set($event)"
+              (keydown.enter)="verifyOtp()"
+              [disabled]="state() === 'verifying-otp'"
+              class="w-full h-14 rounded-2xl border border-slate-200 px-5 text-center text-2xl font-mono font-bold tracking-[0.5em]
+                     placeholder:text-slate-200 placeholder:tracking-normal
+                     focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
+                     disabled:opacity-60 transition-all" />
+
+            @if (otpError()) {
+              <p class="text-red-500 text-[13px] font-medium flex items-center gap-1.5 animate-in fade-in duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+                </svg>
+                {{ otpError() }}
+              </p>
+            }
+          </div>
+
+          <!-- Bouton Valider -->
+          <button type="button" (click)="verifyOtp()"
+            [disabled]="otpInput().length !== 6 || state() === 'verifying-otp'"
+            class="w-full h-13 rounded-2xl font-bold text-[15px] transition-all
+                   bg-primary text-white shadow-lg shadow-primary/20
+                   hover:bg-primary/90 hover:-translate-y-0.5 active:translate-y-0
+                   disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none
+                   flex items-center justify-center gap-2.5 py-3.5">
+            @if (state() === 'verifying-otp') {
+              <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              Vérification…
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+              Valider le code
+            }
+          </button>
+        </div>
+
+        <!-- Renvoi du code -->
+        <div class="text-center">
+          <p class="text-[13px] text-slate-500">
+            Vous n'avez pas reçu le code ?
+          </p>
+          <button type="button" (click)="resendOtp()" [disabled]="resending()"
+            class="mt-1 text-[13px] font-semibold text-primary hover:text-primary/80 disabled:opacity-50
+                   flex items-center gap-1.5 mx-auto transition-colors">
+            @if (resending()) {
+              <div class="w-3.5 h-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+              Renvoi en cours…
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+              Renvoyer le code
+            }
+          </button>
+        </div>
+
+      </div>
+    }
+
+    <!-- ─── CONFIRMATION ─────────────────────────────────────────────── -->
+    @if (state() === 'submitted') {
+      <div class="bg-white rounded-[28px] shadow-xl p-10 text-center space-y-5 animate-in zoom-in-95 duration-300">
+        <div class="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
+          <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800">Merci pour votre avis !</h2>
+        <p class="text-slate-500 text-[15px] leading-relaxed">
+          Votre évaluation a bien été enregistrée. Elle nous aide à améliorer continuellement
+          la qualité de notre service.
+        </p>
+        <p class="text-[13px] text-slate-400 pt-2">Vous pouvez fermer cette page.</p>
+      </div>
+    }
+
+    <!-- ─── FORMULAIRE ───────────────────────────────────────────────── -->
+    @if (state() === 'form') {
+      <div class="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-400">
+
+        <!-- En-tête -->
+        <div class="text-center pb-2">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-slate-800">Votre avis compte</h1>
+          <p class="text-slate-500 text-[14px] mt-1">Évaluez notre prestation en 30 secondes</p>
+        </div>
+
+        <!-- Carte ticket -->
+        @if (formData(); as data) {
+          <div class="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-[13px] font-bold text-slate-500">{{ data.ticketNumero }}</span>
+              <span class="text-[11px] font-bold uppercase tracking-wide bg-slate-100 text-slate-500 px-2 py-1 rounded-lg">
+                {{ getTypeLabel(data.typeAppareil) }}
+              </span>
+            </div>
+            <p class="font-semibold text-slate-800 text-[15px]">{{ data.marqueModele }}</p>
+            @if (data.technicienNom) {
+              <div class="flex items-center gap-2 text-[13px] text-slate-500 pt-1 border-t border-slate-50">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Technicien : <strong class="text-slate-700">{{ data.technicienNom }}</strong></span>
+              </div>
+            }
+            <div class="flex items-center gap-2 text-[13px] text-slate-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>{{ data.siteNom }}</span>
+            </div>
+          </div>
+
+          <!-- Note technicien -->
+          <div class="bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 space-y-4">
+            <div>
+              <h3 class="text-[15px] font-bold text-slate-800">Votre technicien</h3>
+              <p class="text-[13px] text-slate-500 mt-0.5">
+                Comment évaluez-vous le travail de {{ data.technicienNom ?? 'votre technicien' }} ?
+              </p>
+            </div>
+            <div class="flex gap-2">
+              @for (star of stars; track star) {
+                <button type="button" (click)="setNoteTechnicien(star)"
+                  class="w-12 h-12 rounded-xl flex items-center justify-center transition-all active:scale-95"
+                  [class]="star <= noteTechnicien()
+                    ? 'bg-amber-400 text-white shadow-md shadow-amber-200'
+                    : 'bg-slate-100 text-slate-300 hover:bg-amber-50 hover:text-amber-300'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                    [attr.fill]="star <= noteTechnicien() ? 'currentColor' : 'none'"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </button>
+              }
+            </div>
+            @if (noteTechnicien() > 0) {
+              <p class="text-[12px] font-semibold text-amber-600 animate-in fade-in duration-200">
+                {{ ['', 'Très insatisfait', 'Insatisfait', 'Correct', 'Satisfait', 'Excellent'][noteTechnicien()] }}
+              </p>
+            }
+            <div class="space-y-1.5">
+              <label class="text-[12px] font-bold text-slate-500 uppercase tracking-wide">Commentaire (optionnel)</label>
+              <textarea
+                [ngModel]="commentaireTechnicien()"
+                (ngModelChange)="commentaireTechnicien.set($event)"
+                rows="2"
+                placeholder="Décrivez votre expérience avec le technicien…"
+                class="w-full rounded-xl border-slate-200 p-3 text-[14px] font-medium resize-none transition-all focus:ring-2 focus:ring-primary/20"></textarea>
+            </div>
+          </div>
+
+          <!-- Note entreprise -->
+          <div class="bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 space-y-4">
+            <div>
+              <h3 class="text-[15px] font-bold text-slate-800">Notre service</h3>
+              <p class="text-[13px] text-slate-500 mt-0.5">Comment évaluez-vous votre expérience globale ?</p>
+            </div>
+            <div class="flex gap-2">
+              @for (star of stars; track star) {
+                <button type="button" (click)="setNoteEntreprise(star)"
+                  class="w-12 h-12 rounded-xl flex items-center justify-center transition-all active:scale-95"
+                  [class]="star <= noteEntreprise()
+                    ? 'bg-primary text-white shadow-md shadow-primary/30'
+                    : 'bg-slate-100 text-slate-300 hover:bg-primary/10 hover:text-primary/60'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                    [attr.fill]="star <= noteEntreprise() ? 'currentColor' : 'none'"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </button>
+              }
+            </div>
+            @if (noteEntreprise() > 0) {
+              <p class="text-[12px] font-semibold text-primary animate-in fade-in duration-200">
+                {{ ['', 'Très insatisfait', 'Insatisfait', 'Correct', 'Satisfait', 'Excellent'][noteEntreprise()] }}
+              </p>
+            }
+            <div class="space-y-1.5">
+              <label class="text-[12px] font-bold text-slate-500 uppercase tracking-wide">Commentaire (optionnel)</label>
+              <textarea
+                [ngModel]="commentaireEntreprise()"
+                (ngModelChange)="commentaireEntreprise.set($event)"
+                rows="2"
+                placeholder="Partagez vos remarques sur le service…"
+                class="w-full rounded-xl border-slate-200 p-3 text-[14px] font-medium resize-none transition-all focus:ring-2 focus:ring-primary/20"></textarea>
+            </div>
+          </div>
+
+          <!-- Bouton soumettre -->
+          <button type="button" (click)="submit()"
+            [disabled]="!canSubmit()"
+            class="w-full h-14 rounded-[20px] font-bold text-[16px] transition-all
+                   bg-primary text-white shadow-xl shadow-primary/30
+                   hover:bg-primary/90 hover:-translate-y-0.5 active:translate-y-0
+                   disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none
+                   flex items-center justify-center gap-3">
+            @if (submitting()) {
+              <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              Envoi en cours…
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+              Envoyer mon évaluation
+            }
+          </button>
+
+          @if (!canSubmit() && !submitting()) {
+            <p class="text-center text-[12px] text-slate-400">
+              Veuillez attribuer une note au technicien et au service pour continuer.
+            </p>
+          }
+        }
+      </div>
+    }
+
+  </div>
+</div>

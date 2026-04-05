@@ -1,0 +1,113 @@
+<div class="space-y-10">
+  <!-- En-tête -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+    <h2 class="text-2xl font-bold tracking-tight text-slate-800">Clients</h2>
+    <app-button (click)="openDialog()">
+      <ng-icon name="lucidePlus" class="w-4 h-4 mr-2"></ng-icon> Nouveau client
+    </app-button>
+  </div>
+
+  <!-- Recherche -->
+  <app-filter-bar
+    [hasSearch]="true"
+    [hasFilters]="false"
+    [hasReset]="false"
+    searchPlaceholder="Nom, téléphone, email..."
+    [searchValue]="searchControl.value ?? ''"
+    (searchChange)="searchControl.setValue($event)">
+  </app-filter-bar>
+
+  <!-- Tableau -->
+  <app-card class="overflow-hidden">
+    @if (loading()) {
+      <div class="py-20 text-center flex flex-col items-center text-slate-400 space-y-4">
+        <div class="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p class="text-[13px] font-medium">Chargement des clients…</p>
+      </div>
+    } @else if (clients().length === 0) {
+      <div class="py-20 text-center text-slate-400 flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
+          <ng-icon name="lucideUsers" class="w-8 h-8 text-slate-300"></ng-icon>
+        </div>
+        <p class="text-[15px] font-bold text-slate-600">Aucun client trouvé</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table hlmTable class="w-full text-sm">
+          <thead hlmThead>
+            <tr hlmTrow class="bg-slate-50/50 border-b border-slate-100">
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pl-6">Nom</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Téléphone</th>
+              <th hlmTh class="text-center hidden sm:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Email</th>
+              <th hlmTh class="text-center hidden md:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Adresse</th>
+              <th hlmTh class="text-center hidden md:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Créé le</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pr-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody hlmTbody>
+            @for (client of clients(); track client.id) {
+              <tr hlmTrow class="group hover:bg-slate-50/80 transition-colors border-b border-slate-50 last:border-none">
+                <td hlmTd class="text-center pl-6 py-4">
+                  <div class="flex items-center justify-center gap-2">
+                    <span class="font-semibold text-slate-800 text-[14px]">{{ client.nom }}</span>
+                  </div>
+                </td>
+                <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-600">{{ client.telephone }}</td>
+                <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-500 hidden sm:table-cell">{{ client.email ?? '—' }}</td>
+                <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-500 hidden sm:table-cell">{{ client.adresse ?? '—' }}</td>
+                <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-400 hidden md:table-cell">{{ formatDate(client.createdAt) }}</td>
+                <td hlmTd class="text-center py-4 pr-6">
+                  <button class="w-8 h-8 rounded-full hover:bg-slate-200 inline-flex items-center justify-center text-slate-300 group-hover:text-primary transition-colors">
+                    <ng-icon name="lucideUserPlus" class="w-4 h-4"></ng-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <app-pagination
+        [page]="currentPage()"
+        [totalPages]="totalPages()"
+        [totalElements]="totalElements()"
+        [size]="pageSize()"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  </app-card>
+</div>
+
+<!-- Dialog création client -->
+@if (showDialog()) {
+  <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <h3 class="text-[17px] font-bold text-slate-800">Nouveau client</h3>
+        <button (click)="closeDialog()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-400 transition-colors">
+          <ng-icon name="lucideX" class="w-5 h-5"></ng-icon>
+        </button>
+      </div>
+
+      <div class="px-6 py-5 space-y-4">
+        @if (error()) {
+          <div class="bg-red-50 border border-red-100 text-red-600 text-[13px] font-medium px-4 py-3 rounded-xl flex items-center gap-2">
+            <ng-icon name="lucideAlertTriangle" class="w-4 h-4"></ng-icon> {{ error() }}
+          </div>
+        }
+
+        <app-input [formControl]="$any(newClientForm.get('nom'))" label="Nom complet *" placeholder="Entrez le nom"></app-input>
+        <app-input [formControl]="$any(newClientForm.get('telephone'))" label="Téléphone *" placeholder="06..."></app-input>
+        <app-input [formControl]="$any(newClientForm.get('email'))" type="email" label="Email" placeholder="client@email.com"></app-input>
+        <app-input [formControl]="$any(newClientForm.get('adresse'))" label="Adresse" placeholder="Adresse complète..."></app-input>
+      </div>
+
+      <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+        <app-button variant="ghost" (click)="closeDialog()">Annuler</app-button>
+        <app-button (click)="saveClient()" [loading]="saving()">
+          Enregistrer
+        </app-button>
+      </div>
+    </div>
+  </div>
+}

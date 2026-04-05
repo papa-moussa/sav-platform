@@ -1,0 +1,111 @@
+<app-modal
+  [title]="piece.designation"
+  [description]="'Réf. ' + piece.reference + ' — ' + piece.siteNom"
+  [isOpen]="true"
+  [hasFooter]="true"
+  class="max-w-2xl"
+  (closed)="closed.emit()"
+>
+  <div class="space-y-5">
+    <!-- Fiche pièce -->
+    <div class="grid grid-cols-2 gap-3 text-sm">
+      <div class="p-3 rounded-lg bg-muted/40 border border-border space-y-0.5">
+        <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Catégorie</p>
+        <p class="font-medium text-foreground">{{ categorieLabels[piece.categorieAppareil] }}</p>
+      </div>
+      <div class="p-3 rounded-lg bg-muted/40 border border-border space-y-0.5">
+        <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Marque compatible</p>
+        <p class="font-medium text-foreground">{{ piece.marqueCompatible ?? '—' }}</p>
+      </div>
+      <div class="p-3 rounded-lg border border-border space-y-0.5"
+        [class.bg-destructive/10]="piece.enAlerteStock"
+        [class.bg-emerald-50]="!piece.enAlerteStock"
+      >
+        <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Quantité en stock</p>
+        <div class="flex items-center gap-2">
+          @if (piece.enAlerteStock) {
+            <ng-icon name="lucideAlertTriangle" class="w-4 h-4 text-destructive"></ng-icon>
+            <p class="font-bold text-destructive text-lg">{{ piece.quantite }}</p>
+          } @else {
+            <ng-icon name="lucidePackage" class="w-4 h-4 text-emerald-600"></ng-icon>
+            <p class="font-bold text-emerald-600 text-lg">{{ piece.quantite }}</p>
+          }
+        </div>
+      </div>
+      <div class="p-3 rounded-lg bg-muted/40 border border-border space-y-0.5">
+        <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Seuil d'alerte</p>
+        <p class="font-medium text-foreground">{{ piece.seuilAlerte }} unité(s)</p>
+      </div>
+      <div class="p-3 rounded-lg bg-muted/40 border border-border space-y-0.5">
+        <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Prix unitaire</p>
+        <p class="font-medium text-foreground">{{ formatPrice(piece.prixUnitaire) }}</p>
+      </div>
+      <div class="p-3 rounded-lg bg-muted/40 border border-border space-y-0.5">
+        <p class="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Site</p>
+        <p class="font-medium text-foreground">{{ piece.siteNom }}</p>
+      </div>
+    </div>
+
+    <!-- Historique mouvements -->
+    <div>
+      <h3 class="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+        Historique des mouvements
+        <span class="text-xs font-normal text-muted-foreground">({{ mouvements().length }} entrée(s))</span>
+      </h3>
+
+      @if (loadingMouvements()) {
+        <div class="py-8 flex items-center justify-center text-muted-foreground gap-2">
+          <div class="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+          <span class="text-sm">Chargement...</span>
+        </div>
+      } @else if (mouvements().length === 0) {
+        <div class="py-8 text-center text-muted-foreground">
+          <p class="text-sm">Aucun mouvement enregistré pour cette pièce.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto rounded-lg border border-border">
+          <table hlmTable class="w-full text-sm">
+            <thead hlmThead>
+              <tr hlmTrow class="bg-muted/30">
+                <th hlmTh class="text-center">Type</th>
+                <th hlmTh class="text-center">Qté</th>
+                <th hlmTh class="text-center">Motif</th>
+                <th hlmTh class="text-center hidden sm:table-cell">Par</th>
+                <th hlmTh class="text-center hidden sm:table-cell">Date</th>
+              </tr>
+            </thead>
+            <tbody hlmTbody>
+              @for (mouv of mouvements(); track mouv.id) {
+                <tr hlmTrow class="hover:bg-muted/30 transition-colors">
+                  <td hlmTd class="text-center">
+                    @if (mouv.type === 'ENTREE') {
+                      <span class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
+                        <ng-icon name="lucideArrowUp" class="w-3 h-3"></ng-icon>
+                        Entrée +{{ mouv.quantite }}
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                        <ng-icon name="lucideArrowDown" class="w-3 h-3"></ng-icon>
+                        Sortie -{{ mouv.quantite }}
+                      </span>
+                    }
+                  </td>
+                  <td hlmTd class="text-center font-mono font-semibold">{{ mouv.quantite }}</td>
+                  <td hlmTd class="text-center text-muted-foreground max-w-[160px] truncate">
+                    {{ mouv.motif ?? (mouv.interventionId ? 'Intervention #' + mouv.interventionId : '—') }}
+                  </td>
+                  <td hlmTd class="text-center hidden sm:table-cell text-muted-foreground">{{ mouv.createdByNom }}</td>
+                  <td hlmTd class="text-center hidden sm:table-cell text-muted-foreground whitespace-nowrap">{{ formatDateTime(mouv.createdAt) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div modal-footer class="flex justify-end w-full">
+    <app-button variant="outline" (click)="closed.emit()">Fermer</app-button>
+  </div>
+</app-modal>

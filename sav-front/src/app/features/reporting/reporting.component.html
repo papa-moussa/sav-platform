@@ -1,0 +1,172 @@
+<div class="space-y-10 pb-10">
+  <!-- En-tête -->
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <div>
+      <h2 class="text-3xl font-extrabold tracking-tight text-slate-900">Tableau de bord</h2>
+      <p class="text-[14px] text-slate-500 font-medium mt-1">Analyse des performances et activités du SAV</p>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white border border-slate-200 p-2 rounded-2xl shadow-sm flex flex-col sm:flex-row items-center gap-2" [formGroup]="filters">
+      <div class="flex items-center gap-2 px-3 self-stretch sm:self-auto border-b sm:border-b-0 sm:border-r border-slate-100 pb-2 sm:pb-0">
+        <ng-icon name="lucideFilter" class="w-4 h-4 text-slate-400"></ng-icon>
+        <select hlmSelect formControlName="siteId" class="border-none bg-transparent focus:ring-0 text-[13px] font-bold text-slate-600 min-w-[140px]">
+          <option [ngValue]="null">Tous les sites</option>
+          @for (site of sites(); track site.id) {
+            <option [value]="site.id">{{ site.nom }}</option>
+          }
+        </select>
+      </div>
+      
+      <div class="min-w-[280px] w-full sm:w-auto">
+        <app-date-range-picker formControlName="range" />
+      </div>
+
+      <button (click)="loadStats()" class="p-2.5 hover:bg-slate-50 rounded-xl text-slate-400 hover:text-primary transition-colors" title="Actualiser">
+        <ng-icon name="lucideRefreshCw" class="w-4 h-4" [class.animate-spin]="loading()"></ng-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <app-card class="p-6 relative overflow-hidden group">
+      <div class="flex justify-between items-start">
+        <div class="space-y-1">
+          <p class="text-[12px] font-extrabold text-slate-400 uppercase tracking-widest">Total Tickets</p>
+          <h3 class="text-3xl font-black text-slate-900 tracking-tighter">{{ stats()?.totalTickets ?? 0 }}</h3>
+        </div>
+        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <ng-icon name="lucideActivity" class="text-blue-500 w-6 h-6"></ng-icon>
+        </div>
+      </div>
+      <div class="mt-6 flex items-center text-[13px] font-bold">
+        <span class="text-slate-500">Volume sur la période</span>
+      </div>
+    </app-card>
+
+    <app-card class="p-6 relative overflow-hidden group">
+      <div class="flex justify-between items-start">
+        <div class="space-y-1">
+          <p class="text-[12px] font-extrabold text-slate-400 uppercase tracking-widest">Résolutions</p>
+          <h3 class="text-3xl font-black text-emerald-600 tracking-tighter">{{ stats()?.resolvedTickets ?? 0 }}</h3>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <ng-icon name="lucideTrendingUp" class="text-emerald-500 w-6 h-6"></ng-icon>
+        </div>
+      </div>
+      <div class="mt-6 flex items-center text-[13px] font-bold">
+        <span class="text-emerald-500">{{ stats()?.totalTickets ? (stats()!.resolvedTickets / stats()!.totalTickets * 100 | number:'1.0-0') : 0 }}%</span>
+        <span class="text-slate-500 ml-1.5">taux de clôture</span>
+      </div>
+    </app-card>
+
+    <app-card class="p-6 relative overflow-hidden group">
+      <div class="flex justify-between items-start">
+        <div class="space-y-1">
+          <p class="text-[12px] font-extrabold text-slate-400 uppercase tracking-widest">Recettes (CA)</p>
+          <h3 class="text-3xl font-black text-amber-600 tracking-tighter">{{ formatCurrency(stats()?.estimatedRevenue ?? 0) }}</h3>
+        </div>
+        <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <ng-icon name="lucideDollarSign" class="text-amber-500 w-6 h-6"></ng-icon>
+        </div>
+      </div>
+      <div class="mt-6 flex items-center text-[13px] font-bold text-slate-500">
+        Basé pièces sorties
+      </div>
+    </app-card>
+
+    <app-card class="p-6 relative overflow-hidden group">
+      <div class="flex justify-between items-start">
+        <div class="space-y-1">
+          <p class="text-[12px] font-extrabold text-slate-400 uppercase tracking-widest">Acquisitions</p>
+          <h3 class="text-3xl font-black text-purple-600 tracking-tighter">{{ stats()?.newClients ?? 0 }}</h3>
+        </div>
+        <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <ng-icon name="lucideUsers" class="text-purple-500 w-6 h-6"></ng-icon>
+        </div>
+      </div>
+      <div class="mt-6 flex items-center text-[13px] font-bold">
+        <span class="text-slate-500">Total : </span>
+        <span class="text-purple-600 ml-1.5">{{ stats()?.totalClients ?? 0 }}</span>
+      </div>
+    </app-card>
+  </div>
+
+  <!-- Charts Block -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
+    <!-- Activity Chart -->
+    <app-card class="lg:col-span-2 p-8 shadow-sm h-full flex flex-col">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h3 class="text-[16px] font-black text-slate-800">Évolution de l'activité</h3>
+          <p class="text-[12px] text-slate-400 font-bold uppercase tracking-wider mt-1">Comparaison Créations vs Résolutions</p>
+        </div>
+      </div>
+      <div class="flex-grow min-h-[400px]">
+        @if (loading()) {
+          <div class="h-full flex items-center justify-center text-slate-300 animate-pulse">
+             Chargement des données...
+          </div>
+        } @else {
+          <apx-chart
+            [series]="activityChartOptions.series"
+            [chart]="activityChartOptions.chart"
+            [xaxis]="activityChartOptions.xaxis"
+            [yaxis]="activityChartOptions.yaxis"
+            [stroke]="activityChartOptions.stroke"
+            [grid]="activityChartOptions.grid"
+            [colors]="activityChartOptions.colors"
+            [tooltip]="activityChartOptions.tooltip"
+            [dataLabels]="activityChartOptions.dataLabels"
+          ></apx-chart>
+        }
+      </div>
+    </app-card>
+
+    <!-- Status Distribution -->
+    <app-card class="p-8 shadow-sm h-full flex flex-col">
+      <h3 class="text-[15px] font-black text-slate-800 mb-6">Charge par Statut</h3>
+      <div class="flex-grow flex items-center justify-center min-h-[400px]">
+        @if (loading()) {
+           <div class="w-full h-64 bg-slate-50 rounded-2xl animate-pulse"></div>
+        } @else {
+          <apx-chart
+            class="w-full"
+            [series]="statusChartOptions.series"
+            [chart]="statusChartOptions.chart"
+            [labels]="statusChartOptions.labels"
+            [colors]="statusChartOptions.colors"
+            [legend]="statusChartOptions.legend"
+            [dataLabels]="statusChartOptions.dataLabels"
+            [plotOptions]="statusChartOptions.plotOptions"
+          ></apx-chart>
+        }
+      </div>
+    </app-card>
+  </div>
+
+  <!-- Bottom Row: Full Width Bar Chart -->
+  <div class="mt-8">
+    <app-card class="p-8 shadow-sm w-full">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h3 class="text-[15px] font-black text-slate-800">Performance des Techniciens</h3>
+          <p class="text-[12px] text-slate-400 font-bold uppercase tracking-wider mt-1">Nombre d'interventions clôturées par membre de l'équipe</p>
+        </div>
+      </div>
+      @if (loading()) {
+         <div class="h-[400px] w-full bg-slate-50 rounded-2xl animate-pulse"></div>
+      } @else {
+        <apx-chart
+          [series]="techChartOptions.series"
+          [chart]="techChartOptions.chart"
+          [plotOptions]="techChartOptions.plotOptions"
+          [xaxis]="techChartOptions.xaxis"
+          [colors]="techChartOptions.colors"
+          [dataLabels]="techChartOptions.dataLabels"
+        ></apx-chart>
+      }
+    </app-card>
+  </div>
+</div>

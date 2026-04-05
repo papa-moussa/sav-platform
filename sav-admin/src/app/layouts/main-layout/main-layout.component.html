@@ -1,0 +1,146 @@
+<div class="flex h-screen bg-[#fcfcfd] font-sans overflow-hidden">
+
+  <!-- Mobile overlay -->
+  @if (mobileOpen()) {
+    <div
+      class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
+      (click)="toggleMobile()"
+    ></div>
+  }
+
+  <!-- Sidebar -->
+  <aside
+    class="flex flex-col bg-white border-r border-slate-100 shadow-[1px_0_12px_rgba(0,0,0,0.03)] transition-all duration-300 ease-in-out relative z-50 shrink-0"
+    [class.w-[84px]]="isCollapsed()"
+    [class.w-[260px]]="!isCollapsed()"
+    [class.-translate-x-full]="!mobileOpen()"
+    [class.translate-x-0]="mobileOpen()"
+    [class.fixed]="true"
+    [class.md:relative]="true"
+    [class.md:translate-x-0]="true"
+    [class.h-full]="true"
+  >
+
+    <!-- Logo -->
+    <div
+      class="h-[72px] flex items-center px-5 overflow-hidden shrink-0 cursor-pointer border-b border-slate-50"
+      (click)="toggleCollapse()"
+    >
+      <div class="flex items-center gap-3 min-w-max">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center shadow-md shadow-primary-500/25 shrink-0">
+          <ng-icon name="lucideBuilding2" class="text-white w-5 h-5"></ng-icon>
+        </div>
+        <div
+          class="transition-all duration-300 overflow-hidden"
+          [class.opacity-0]="isCollapsed()"
+          [class.w-0]="isCollapsed()"
+          [class.opacity-100]="!isCollapsed()"
+        >
+          <h1 class="text-[17px] font-extrabold text-slate-800 leading-none tracking-tight whitespace-nowrap">SAV Admin</h1>
+          <p class="text-[10px] font-bold text-primary-500 uppercase tracking-widest mt-0.5 whitespace-nowrap">Super Portail</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-1 custom-scrollbar">
+      @if (!isCollapsed()) {
+        <p class="px-3 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Navigation</p>
+      }
+
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="bg-primary-50 text-primary-700 shadow-[inset_3px_0_0_0_#6366f1] font-semibold"
+          [routerLinkActiveOptions]="{ exact: !!item.exact }"
+          class="group flex items-center gap-3.5 px-3 py-3 rounded-xl text-[13.5px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-200"
+          [title]="isCollapsed() ? item.label : ''"
+        >
+          <div class="flex items-center justify-center w-5 min-w-[20px]">
+            <ng-icon [name]="item.icon" class="w-5 h-5 transition-transform group-hover:scale-110"></ng-icon>
+          </div>
+          <span
+            class="whitespace-nowrap transition-all duration-300 overflow-hidden"
+            [class.opacity-0]="isCollapsed()"
+            [class.w-0]="isCollapsed()"
+            [class.opacity-100]="!isCollapsed()"
+          >
+            {{ item.label }}
+          </span>
+        </a>
+      }
+    </nav>
+
+    <!-- Collapse toggle button (desktop) -->
+    <button
+      (click)="toggleCollapse()"
+      class="absolute -right-3.5 top-[28px] w-7 h-7 bg-white border border-slate-200 rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-primary-500 hover:border-primary-300 transition-all z-50 hidden md:flex"
+    >
+      <ng-icon [name]="isCollapsed() ? 'lucideChevronRight' : 'lucideChevronLeft'" class="w-3.5 h-3.5"></ng-icon>
+    </button>
+
+    <!-- User profile -->
+    <div class="p-3 border-t border-slate-100 bg-slate-50/40 shrink-0">
+      @if (!isCollapsed()) {
+        <div class="bg-white rounded-2xl border border-slate-100 p-3 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-primary-100 border border-primary-200 flex items-center justify-center shrink-0">
+              <span class="text-[14px] font-extrabold text-primary-600">
+                {{ (authService.currentNom() ?? 'A').charAt(0).toUpperCase() }}
+              </span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[13px] font-bold text-slate-800 truncate">{{ authService.currentNom() }}</p>
+              <div class="flex items-center gap-1 mt-0.5">
+                <ng-icon name="lucideShield" class="w-2.5 h-2.5 text-primary-500"></ng-icon>
+                <p class="text-[10px] font-bold text-primary-500 uppercase tracking-wider">Super Admin</p>
+              </div>
+            </div>
+          </div>
+          <button
+            (click)="logout()"
+            class="w-full mt-3 flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[12px] font-bold text-red-500 hover:bg-red-50 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
+          >
+            <ng-icon name="lucideLogOut" class="w-3.5 h-3.5"></ng-icon>
+            Déconnexion
+          </button>
+        </div>
+      } @else {
+        <button
+          (click)="logout()"
+          class="w-full flex items-center justify-center p-2.5 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+          title="Déconnexion"
+        >
+          <ng-icon name="lucideLogOut" class="w-4 h-4"></ng-icon>
+        </button>
+      }
+    </div>
+  </aside>
+
+  <!-- Main content area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+    <!-- Top bar (mobile) -->
+    <header class="md:hidden h-14 bg-white border-b border-slate-100 flex items-center justify-between px-4 shrink-0">
+      <button
+        (click)="toggleMobile()"
+        class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 transition-colors"
+      >
+        <ng-icon [name]="mobileOpen() ? 'lucideX' : 'lucideMenu'" class="w-5 h-5"></ng-icon>
+      </button>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center">
+          <ng-icon name="lucideBuilding2" class="text-white w-3.5 h-3.5"></ng-icon>
+        </div>
+        <span class="text-[15px] font-bold text-slate-800">SAV Admin</span>
+      </div>
+      <div class="w-9"></div>
+    </header>
+
+    <!-- Page content -->
+    <main class="flex-1 overflow-y-auto custom-scrollbar">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>

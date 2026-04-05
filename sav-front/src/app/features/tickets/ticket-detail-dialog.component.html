@@ -1,0 +1,468 @@
+<div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+  <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+
+    <!-- Header -->
+    <div class="px-8 py-6 border-b border-slate-100 flex-shrink-0 bg-slate-50/50">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-sm font-bold text-slate-800">{{ ticket.numero }}</span>
+            <span hlmBadge [class]="statutColors[ticket.statut] + ' px-2 py-0.5 rounded-[6px] text-[11px] font-bold tracking-wide uppercase'">
+              {{ statutLabels[ticket.statut] }}
+            </span>
+            @if (ticket.sousGarantie) {
+              <span class="bg-primary/10 text-primary px-2 py-0.5 rounded-[6px] text-[11px] font-bold tracking-wide uppercase">
+                Garantie
+              </span>
+            }
+          </div>
+          <p class="text-sm font-medium text-slate-500 mt-1.5 flex items-center gap-2">
+            <span class="text-slate-800 font-semibold">{{ ticket.clientNom }}</span>
+            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+            {{ typeLabels[ticket.typeAppareil] }} {{ ticket.marqueModele }}
+          </p>
+        </div>
+        <button (click)="closed.emit()" class="w-10 h-10 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Onglets -->
+      <div class="flex gap-2 mt-6">
+        @for (tab of [
+          {id: 'info', label: 'Informations'},
+          {id: 'interventions', label: 'Interventions (' + ticket.interventions.length + ')'},
+          {id: 'actions', label: 'Actions'}
+        ]; track tab.id) {
+          @if (!(viewMode === 'technical' && tab.id === 'actions')) {
+            <button (click)="setTab($any(tab.id))"
+              class="relative px-4 py-2 text-[13px] font-bold rounded-xl transition-all"
+              [ngClass]="activeTab() === tab.id
+                ? 'bg-slate-800 text-white shadow-sm'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'">
+              {{ tab.label }}
+              @if (tab.id === 'info' && ticket.statut === 'EN_ATTENTE_FEEDBACK' && !ticket.feedbackSoumis) {
+                <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-purple-500 border-2 border-white"></span>
+              }
+            </button>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Corps scrollable -->
+    <div class="px-8 py-6 overflow-y-auto flex-1 custom-scrollbar">
+
+      <!-- Messages -->
+      @if (error()) {
+        <div class="mb-6 bg-red-50 border border-red-100 text-red-600 text-[13px] font-medium px-4 py-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          {{ error() }}
+        </div>
+      }
+      @if (successMsg()) {
+        <div class="mb-6 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[13px] font-medium px-4 py-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          {{ successMsg() }}
+        </div>
+      }
+
+      <!-- ─── ONGLET INFORMATIONS ─────────────────────────────────────── -->
+      @if (activeTab() === 'info') {
+        <div class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+
+          <!-- ─── Bandeau QR Code (EN_ATTENTE_FEEDBACK) ────────────────────── -->
+          @if (ticket.statut === 'EN_ATTENTE_FEEDBACK') {
+            <div class="rounded-[20px] border-2 border-purple-200 bg-purple-50 p-5">
+              @if (ticket.feedbackSoumis) {
+                <!-- Feedback déjà reçu -->
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-600"><path d="M20 6 9 17l-5-5"/></svg>
+                  </div>
+                  <div>
+                    <p class="font-bold text-slate-800 text-[14px]">Feedback client reçu</p>
+                    <p class="text-[13px] text-slate-500">Le ticket sera clôturé automatiquement.</p>
+                  </div>
+                </div>
+              } @else {
+                <!-- QR Code à remettre au client -->
+                <div class="flex flex-col sm:flex-row items-center gap-5">
+                  <div class="flex-shrink-0">
+                    @if (loadingQr()) {
+                      <div class="w-36 h-36 rounded-2xl bg-purple-100 flex items-center justify-center">
+                        <div class="w-7 h-7 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
+                      </div>
+                    } @else if (qrCode()) {
+                      <img [src]="'data:image/png;base64,' + qrCode()!.base64Image"
+                           alt="QR Code feedback"
+                           class="w-36 h-36 rounded-2xl border-4 border-white shadow-md cursor-pointer"
+                           title="Cliquer pour agrandir" />
+                    } @else {
+                      <div class="w-36 h-36 rounded-2xl bg-purple-100 flex flex-col items-center justify-center gap-2 text-purple-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                          <rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/>
+                          <path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/>
+                        </svg>
+                        <span class="text-[11px] font-bold">Chargement…</span>
+                      </div>
+                    }
+                  </div>
+                  <div class="flex-1 text-center sm:text-left space-y-2">
+                    <p class="font-bold text-slate-800 text-[15px]">En attente du feedback client</p>
+                    <p class="text-[13px] text-slate-500 leading-relaxed">
+                      Remettez ce QR Code au client. Il le scanne pour évaluer la prestation
+                      et le ticket se clôturera automatiquement.
+                    </p>
+                    @if (qrCode()) {
+                      <p class="text-[11px] text-purple-500 font-semibold">
+                        Expire le {{ qrCode()!.expiresAt | date:'dd/MM/yyyy' }}
+                      </p>
+                    }
+                    <button (click)="loadQrCode()" [disabled]="loadingQr()"
+                      class="mt-1 h-8 px-4 rounded-lg bg-purple-600 text-white font-bold text-[12px] hover:bg-purple-700 transition-all disabled:opacity-50 inline-flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                      Rafraîchir le QR
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="grid grid-cols-2 gap-6 bg-slate-50 p-6 rounded-[20px] border border-slate-100">
+            <div>
+              <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Client</p>
+              <p class="font-semibold text-slate-800 text-[14px]">{{ ticket.clientNom }}</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Technicien</p>
+              <p class="font-semibold text-slate-800 text-[14px]">{{ ticket.technicienNom ?? '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Site</p>
+              <p class="font-semibold text-slate-800 text-[14px]">{{ ticket.siteNom }}</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Appareil</p>
+              <p class="font-semibold text-slate-800 text-[14px]">{{ typeLabels[ticket.typeAppareil] }}</p>
+              <p class="text-slate-500 font-medium text-[13px] mt-0.5">{{ ticket.marqueModele }}</p>
+            </div>
+            @if (ticket.numeroSerie) {
+              <div>
+                <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">N° de série</p>
+                <p class="font-mono font-bold text-slate-700 text-[14px]">{{ ticket.numeroSerie }}</p>
+              </div>
+            }
+            @if (ticket.dateAchat) {
+              <div>
+                <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Date d'achat</p>
+                <p class="font-semibold text-slate-800 text-[14px]">{{ formatDate(ticket.dateAchat) }}</p>
+              </div>
+            }
+            <div>
+              <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Créé le</p>
+              <p class="font-semibold text-slate-800 text-[14px]">{{ formatDateTime(ticket.createdAt) }}</p>
+            </div>
+            <div>
+              <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">Mis à jour</p>
+              <p class="font-semibold text-slate-800 text-[14px]">{{ formatDateTime(ticket.updatedAt) }}</p>
+            </div>
+          </div>
+          <div>
+            <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 pl-1">Description de la panne</p>
+            <div class="text-[14px] font-medium text-slate-700 bg-white shadow-sm rounded-2xl p-5 border border-slate-100 leading-relaxed min-h-24">
+              {{ ticket.descriptionPanne }}
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ─── ONGLET INTERVENTIONS ────────────────────────────────────── -->
+      @if (activeTab() === 'interventions') {
+        <div class="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300 pb-10">
+          
+          <!-- Historique -->
+          @if (ticket.interventions.length === 0) {
+            <div class="py-12 text-center text-slate-400 flex flex-col items-center">
+              <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+              <p class="text-[15px] font-bold text-slate-600">Aucune intervention</p>
+              <p class="text-[13px] mt-1">Les techniciens n'ont pas encore ajouté de rapport.</p>
+            </div>
+          } @else {
+            <div class="space-y-4">
+              <h3 class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pl-1 mb-4">Historique des interventions</h3>
+              @for (interv of ticket.interventions; track interv.id) {
+                <div class="bg-white shadow-sm rounded-[20px] border border-slate-100 p-6 transition-all hover:shadow-md">
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-sm">
+                        {{ interv.technicienNom ? interv.technicienNom.charAt(0).toUpperCase() : 'T' }}
+                      </div>
+                      <div>
+                        <span class="text-[14px] font-bold text-slate-800 block">{{ interv.technicienNom }}</span>
+                        <span class="text-[12px] font-medium text-slate-400">{{ formatDateTime(interv.createdAt) }}</span>
+                      </div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-[6px] text-[11px] font-bold tracking-wide uppercase" [ngClass]="{
+                        'bg-blue-50 text-blue-600': interv.resultat === 'EN_COURS',
+                        'bg-emerald-50 text-emerald-600': interv.resultat === 'REPARE',
+                        'bg-red-50 text-red-600': interv.resultat === 'IRREPARABLE'
+                      }">
+                      {{ interv.resultat === 'EN_COURS' ? 'En cours' : interv.resultat === 'REPARE' ? 'Réparé' : 'Irréparable' }}
+                    </span>
+                  </div>
+                  <div class="space-y-4 pt-4 border-t border-slate-50">
+                    <div>
+                      <span class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pl-1">Diagnostic</span>
+                      <p class="text-[14px] font-medium text-slate-800 mt-1.5 bg-slate-50 p-3 rounded-xl leading-relaxed">{{ interv.diagnostic }}</p>
+                    </div>
+                    <div>
+                      <span class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pl-1">Actions réalisées</span>
+                      <p class="text-[14px] font-medium text-slate-800 mt-1.5 bg-slate-50 p-3 rounded-xl leading-relaxed">{{ interv.actionsRealisees }}</p>
+                    </div>
+                    @if (interv.observations) {
+                      <div>
+                        <span class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest pl-1">Observations</span>
+                        <p class="text-[13px] font-medium text-slate-600 mt-1.5">{{ interv.observations }}</p>
+                      </div>
+                    }
+                    @if (interv.tempsPasseHeures) {
+                      <div class="inline-flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span class="text-[12px] font-bold text-slate-700">{{ interv.tempsPasseHeures }}h passées</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Formulaire Fusionné (Si technique) -->
+          @if (viewMode === 'technical') {
+            <div class="mt-12 pt-12 border-t-2 border-slate-100 border-dashed space-y-10">
+               
+               <!-- Section Changement de Statut (Intégrée) -->
+               @if (canChangeStatut && allowedTransitions.length > 0) {
+                 <div class="bg-white rounded-[24px] border border-slate-200 p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                       <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                       </div>
+                       <h4 class="text-[15px] font-bold text-slate-800">Mettre à jour le statut du ticket</h4>
+                    </div>
+                    <div class="flex gap-2 flex-wrap mb-5">
+                       @for (s of allowedTransitions; track s) {
+                         <button (click)="selectedStatut.set(s)"
+                           class="px-4 py-2 text-[12px] font-bold rounded-xl border-2 transition-all flex items-center gap-2"
+                           [ngClass]="selectedStatut() === s
+                             ? 'border-primary bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]'
+                             : 'border-slate-100 text-slate-500 hover:border-slate-200 hover:bg-slate-50'">
+                           <span class="w-2 h-2 rounded-full" [class]="statutColors[s].replace('bg-', 'bg-current')"></span>
+                           {{ statutLabels[s] }}
+                         </button>
+                       }
+                    </div>
+                    <button class="h-11 px-6 rounded-xl bg-slate-800 text-white font-bold text-[13px] transition-all hover:bg-slate-700 active:scale-[0.98] disabled:opacity-50" (click)="changeStatut()" [disabled]="!selectedStatut() || savingStatut()">
+                       @if (savingStatut()) { Application en cours... } @else { Appliquer le nouveau statut }
+                    </button>
+                 </div>
+               }
+
+               <!-- Section Nouvelle Intervention -->
+               @if (canAddIntervention) {
+                  <div class="bg-slate-50 rounded-[28px] border border-slate-200 p-8 shadow-inner">
+                     <h4 class="text-[16px] font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        Saisir une nouvelle intervention
+                     </h4>
+                     <div [formGroup]="interventionForm" class="space-y-5">
+                       <div class="space-y-2">
+                         <label for="diagnostic-tech" class="text-[13px] font-extrabold text-slate-500 uppercase tracking-wider ml-1">Diagnostic *</label>
+                         <textarea id="diagnostic-tech" formControlName="diagnostic" rows="3" class="w-full rounded-[18px] border-slate-200 p-4 text-[14px] font-medium transition-all focus:ring-4 focus:ring-primary/10 resize-none shadow-sm" placeholder="Quel est le problème constaté ?"></textarea>
+                       </div>
+                       <div class="space-y-2">
+                         <label for="actionsRealisees-tech" class="text-[13px] font-extrabold text-slate-500 uppercase tracking-wider ml-1">Actions réalisées *</label>
+                         <textarea id="actionsRealisees-tech" formControlName="actionsRealisees" rows="3" class="w-full rounded-[18px] border-slate-200 p-4 text-[14px] font-medium transition-all focus:ring-4 focus:ring-primary/10 resize-none shadow-sm" placeholder="Qu'avez-vous fait pour réparer ?"></textarea>
+                       </div>
+                       <div class="space-y-2">
+                         <label for="observations-tech" class="text-[13px] font-extrabold text-slate-500 uppercase tracking-wider ml-1">Observations</label>
+                         <input id="observations-tech" formControlName="observations" type="text" class="w-full h-12 px-5 rounded-[18px] border-slate-200 text-[14px] font-medium transition-all focus:ring-4 focus:ring-primary/10 shadow-sm" placeholder="Notes complémentaires..." />
+                       </div>
+                       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                         <div class="space-y-2">
+                           <label for="tempsPasseHeures-tech" class="text-[13px] font-extrabold text-slate-500 uppercase tracking-wider ml-1">Temps (heures)</label>
+                           <input id="tempsPasseHeures-tech" formControlName="tempsPasseHeures" type="number" step="0.5" min="0" class="w-full h-12 px-5 rounded-[18px] border-slate-200 text-[14px] font-medium transition-all focus:ring-4 focus:ring-primary/10 shadow-sm" />
+                         </div>
+                         <div class="space-y-2">
+                           <label for="resultat-tech" class="text-[13px] font-extrabold text-slate-500 uppercase tracking-wider ml-1">Résultat final de l'acte *</label>
+                           <select id="resultat-tech" formControlName="resultat" class="w-full h-12 px-5 rounded-[18px] border-slate-200 text-[14px] font-medium bg-white transition-all focus:ring-4 focus:ring-primary/10 shadow-sm appearance-none cursor-pointer">
+                             <option value="EN_COURS">En cours</option>
+                             <option value="REPARE">Réparé</option>
+                             <option value="IRREPARABLE">Irréparable</option>
+                           </select>
+                         </div>
+                       </div>
+                       <button class="w-full h-14 rounded-[20px] bg-primary text-white font-bold text-[15px] mt-4 transition-all shadow-xl shadow-primary/25 hover:bg-primary/90 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 flex items-center justify-center gap-2" (click)="addIntervention()" [disabled]="savingIntervention()">
+                         @if (savingIntervention()) { 
+                           <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                           Enregistrement… 
+                         } @else { 
+                           Valider l'intervention
+                         }
+                       </button>
+                     </div>
+                  </div>
+               }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ─── ONGLET ACTIONS ─────────────────────────────────────────── -->
+      @if (activeTab() === 'actions') {
+        <div class="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+
+          <!-- Changer statut -->
+          @if (canChangeStatut && allowedTransitions.length > 0) {
+            <div class="bg-white shadow-sm rounded-[20px] border border-slate-100 p-6">
+              <h4 class="text-[15px] font-bold text-slate-800 mb-2">Modifier le statut</h4>
+              <p class="text-[13px] font-medium text-slate-500 mb-4">
+                Statut actuel : <span class="font-bold text-slate-700">{{ statutLabels[ticket.statut] }}</span>
+              </p>
+              <div class="flex gap-2 flex-wrap mb-4">
+                @for (s of allowedTransitions; track s) {
+                  <button (click)="selectedStatut.set(s)"
+                    class="px-4 py-2 text-[13px] font-bold rounded-xl border-2 transition-all"
+                    [ngClass]="selectedStatut() === s
+                      ? 'border-slate-800 bg-slate-800 text-white'
+                      : 'border-slate-200 text-slate-600 hover:border-slate-300'">
+                    {{ statutLabels[s] }}
+                  </button>
+                }
+              </div>
+              <button class="h-11 px-6 rounded-xl bg-primary text-white font-bold text-[14px] transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none" (click)="changeStatut()" [disabled]="!selectedStatut() || savingStatut()">
+                @if (savingStatut()) { Application… } @else { Appliquer ce statut }
+              </button>
+            </div>
+          }
+
+          @if (canChangeStatut && allowedTransitions.length === 0) {
+            <div class="bg-slate-50 rounded-[20px] border border-slate-100 p-6 text-center">
+              <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <p class="text-[14px] font-semibold text-slate-800">Ce ticket est clôturé</p>
+              <p class="text-[13px] font-medium text-slate-500 mt-1">Aucune transition de statut n'est possible.</p>
+            </div>
+          }
+
+          <!-- QR Code feedback (EN_ATTENTE_FEEDBACK ou token disponible) -->
+          @if (ticket.statut === 'EN_ATTENTE_FEEDBACK' || ticket.qrTokenDisponible) {
+            <div class="bg-purple-50 border border-purple-100 rounded-[20px] p-6">
+              <div class="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <h4 class="text-[15px] font-bold text-slate-800 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600">
+                      <rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/>
+                      <path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/>
+                    </svg>
+                    QR Code feedback client
+                  </h4>
+                  <p class="text-[13px] text-slate-500 mt-1">
+                    @if (ticket.feedbackSoumis) {
+                      <span class="text-emerald-600 font-semibold">✓ Feedback reçu — ticket clôturé automatiquement.</span>
+                    } @else {
+                      Remettez ce QR Code au client pour qu'il évalue la prestation.
+                    }
+                  </p>
+                </div>
+                @if (!ticket.feedbackSoumis) {
+                  <button (click)="loadQrCode()" [disabled]="loadingQr()"
+                    class="flex-shrink-0 h-9 px-4 rounded-xl bg-purple-600 text-white font-bold text-[13px] transition-all hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2">
+                    @if (loadingQr()) {
+                      <div class="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    }
+                    {{ qrCode() ? 'Rafraîchir' : 'Afficher le QR' }}
+                  </button>
+                }
+              </div>
+              @if (qrCode()) {
+                <div class="flex flex-col items-center gap-3 pt-2">
+                  <img [src]="'data:image/png;base64,' + qrCode()!.base64Image"
+                       alt="QR Code feedback"
+                       class="w-44 h-44 rounded-2xl border-4 border-white shadow-lg" />
+                  <p class="text-[11px] text-slate-400">
+                    Expire le {{ qrCode()!.expiresAt | date:'dd/MM/yyyy' }}
+                  </p>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Assigner technicien -->
+          @if (canAssign) {
+            <div class="bg-white shadow-sm rounded-[20px] border border-slate-100 p-6">
+              <h4 class="text-[15px] font-bold text-slate-800 mb-4">Assigner un technicien</h4>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <select 
+                  [ngModel]="selectedTechnicienId()"
+                  (ngModelChange)="selectedTechnicienId.set($event)"
+                  class="flex-1 h-11 px-4 rounded-xl border border-slate-200 text-[14px] font-medium text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                  <option [ngValue]="null">— Non assigné —</option>
+                  @for (t of techniciens(); track t.id) {
+                    <option [ngValue]="t.id">{{ t.nom }}</option>
+                  }
+                </select>
+                <button class="h-11 px-6 rounded-xl bg-slate-800 text-white font-bold text-[14px] transition-all hover:bg-slate-700 active:scale-[0.98] disabled:opacity-50 flex-shrink-0" (click)="assignTechnicien()" [disabled]="savingAssign()">
+                  @if (savingAssign()) { … } @else { Assigner }
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Ajouter intervention -->
+          @if (canAddIntervention) {
+            <div class="bg-white shadow-sm rounded-[20px] border border-slate-100 p-6">
+              <h4 class="text-[15px] font-bold text-slate-800 mb-4">Nouvelle intervention</h4>
+              <div [formGroup]="interventionForm" class="space-y-4">
+                <div class="space-y-1.5 min-w-0">
+                  <label for="diagnostic" class="text-[13px] font-bold text-slate-700 ml-1">Diagnostic *</label>
+                  <textarea id="diagnostic" formControlName="diagnostic" rows="2" class="w-full rounded-xl border-slate-200 p-3 text-[14px] font-medium transition-all focus:ring-2 focus:ring-primary/20 resize-none"></textarea>
+                </div>
+                <div class="space-y-1.5 min-w-0">
+                  <label for="actionsRealisees" class="text-[13px] font-bold text-slate-700 ml-1">Actions réalisées *</label>
+                  <textarea id="actionsRealisees" formControlName="actionsRealisees" rows="2" class="w-full rounded-xl border-slate-200 p-3 text-[14px] font-medium transition-all focus:ring-2 focus:ring-primary/20 resize-none"></textarea>
+                </div>
+                <div class="space-y-1.5 min-w-0">
+                  <label for="observations" class="text-[13px] font-bold text-slate-700 ml-1">Observations</label>
+                  <input id="observations" formControlName="observations" type="text" class="w-full h-11 px-4 rounded-xl border-slate-200 text-[14px] font-medium transition-all focus:ring-2 focus:ring-primary/20" />
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="space-y-1.5 min-w-0">
+                    <label for="tempsPasseHeures" class="text-[13px] font-bold text-slate-700 ml-1">Temps (heures)</label>
+                    <input id="tempsPasseHeures" formControlName="tempsPasseHeures" type="number" step="0.5" min="0" class="w-full h-11 px-4 rounded-xl border-slate-200 text-[14px] font-medium transition-all focus:ring-2 focus:ring-primary/20" />
+                  </div>
+                  <div class="space-y-1.5 min-w-0">
+                    <label for="resultat" class="text-[13px] font-bold text-slate-700 ml-1">Résultat *</label>
+                    <select id="resultat" formControlName="resultat" class="w-full h-11 px-4 rounded-xl border-slate-200 text-[14px] font-medium bg-white transition-all focus:ring-2 focus:ring-primary/20">
+                      <option value="EN_COURS">En cours</option>
+                      <option value="REPARE">Réparé</option>
+                      <option value="IRREPARABLE">Irréparable</option>
+                    </select>
+                  </div>
+                </div>
+                <button class="w-full h-12 rounded-xl bg-primary text-white font-bold text-[14px] mt-2 transition-all shadow-lg shadow-primary/20 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50" (click)="addIntervention()" [disabled]="savingIntervention()">
+                  @if (savingIntervention()) { Enregistrement… } @else { Ajouter cette intervention }
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

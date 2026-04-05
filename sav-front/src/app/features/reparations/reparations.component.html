@@ -1,0 +1,140 @@
+<div class="space-y-6">
+  <!-- En-tête -->
+  <div>
+    <h2 class="text-2xl font-bold tracking-tight text-slate-800">
+      {{ authService.getRole() === 'ADMIN' ? 'Gestion des Réparations' : 'Mes Réparations' }}
+    </h2>
+    <p class="text-[14px] text-slate-400 font-medium mt-1">
+      {{ authService.getRole() === 'ADMIN' ? 'Suivi global de toutes les interventions' : 'Liste de vos interventions en cours' }}
+    </p>
+  </div>
+
+  <app-filter-bar
+    [hasSearch]="true"
+    [hasFilters]="false"
+    [hasReset]="false"
+    searchPlaceholder="Rechercher (N°, client, marque...)"
+    [searchValue]="searchTerm()"
+    (searchChange)="searchTerm.set($event)">
+  </app-filter-bar>
+
+  @if (loading()) {
+    <div class="py-20 text-center flex flex-col items-center text-slate-400 space-y-4">
+      <div class="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+      <p class="text-[13px] font-medium">Chargement des interventions…</p>
+    </div>
+  } @else if (tickets().length === 0) {
+    <app-card>
+      <div class="p-20 text-center text-slate-400 flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
+          <ng-icon name="lucideWrench" class="w-8 h-8 text-slate-300"></ng-icon>
+        </div>
+        <p class="text-[15px] font-bold text-slate-600">Aucune intervention assignée</p>
+        <p class="text-[13px] max-w-sm mx-auto mt-1">Contactez votre responsable pour recevoir des assignations.</p>
+      </div>
+    </app-card>
+  } @else {
+
+    <!-- Tickets en cours -->
+    @if (ticketsEnCours.length > 0) {
+      <div>
+        <h3 class="text-[12px] font-extrabold text-slate-400 uppercase tracking-widest pl-1 mb-3">
+          En cours ({{ ticketsEnCours.length }})
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (ticket of ticketsEnCours; track ticket.id) {
+            <app-card class="cursor-pointer group hover:border-primary/30 transition-all active:scale-[0.98]">
+              <div (click)="openDetail(ticket)" 
+                   (keydown.enter)="openDetail(ticket)" 
+                   tabindex="0" 
+                   class="p-5 cursor-pointer outline-none focus:ring-2 focus:ring-primary/20 rounded-[20px]">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-2">
+                      <span class="font-mono text-[13px] font-bold text-slate-700">{{ ticket.numero }}</span>
+                      <span hlmBadge [class]="statutColors[ticket.statut] + ' px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wide uppercase'">
+                        {{ statutLabels[ticket.statut] }}
+                      </span>
+                      @if (ticket.sousGarantie) {
+                        <span class="bg-primary/10 text-primary px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wide uppercase">Gar</span>
+                      }
+                    </div>
+                    <p class="text-[14px] font-semibold text-slate-800">{{ ticket.clientNom }}</p>
+                    <p class="text-[12px] font-medium text-slate-400 mt-0.5 truncate">
+                      {{ typeLabels[ticket.typeAppareil] }} — {{ ticket.marqueModele }}
+                    </p>
+                    <p class="text-[13px] font-medium text-slate-500 mt-3 line-clamp-2">{{ ticket.descriptionPanne }}</p>
+                  </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center text-[12px]">
+                  <p class="text-slate-400 font-medium">{{ formatDate(ticket.createdAt) }} • {{ ticket.siteNom }}</p>
+                  @if (ticket.interventions.length > 0) {
+                    <p class="text-primary font-bold">{{ ticket.interventions.length }} ajout(s)</p>
+                  } @else {
+                    <p class="text-slate-400 font-medium flex items-center group-hover:text-primary">Ouvrir <ng-icon name="lucideChevronRight" class="ml-1 w-4 h-4"></ng-icon></p>
+                  }
+                </div>
+              </div>
+            </app-card>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Tickets terminés -->
+    @if (ticketsTermines.length > 0) {
+      <div class="mt-8">
+        <h3 class="text-[12px] font-extrabold text-slate-400 uppercase tracking-widest pl-1 mb-3">
+          Terminés / Clôturés ({{ ticketsTermines.length }})
+        </h3>
+        <app-card class="overflow-hidden">
+          <div class="overflow-x-auto">
+            <table hlmTable class="w-full text-sm">
+              <thead class="bg-slate-50/50 border-b border-slate-100">
+                <tr hlmTrow>
+                  <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pl-6">Numéro</th>
+                  <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Client</th>
+                  <th hlmTh class="text-center hidden sm:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Appareil</th>
+                  <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Statut</th>
+                  <th hlmTh class="text-center hidden md:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Créé le</th>
+                </tr>
+              </thead>
+              <tbody hlmTbody>
+                @for (ticket of ticketsTermines; track ticket.id) {
+                  <tr hlmTrow 
+                    class="group hover:bg-slate-50/80 transition-colors border-b border-slate-50 last:border-none cursor-pointer" 
+                    (click)="openDetail(ticket)"
+                    (keydown.enter)="openDetail(ticket)"
+                    tabindex="0">
+                    <td hlmTd class="text-center pl-6 py-4">
+                      <span class="font-mono text-[13px] font-bold text-slate-600">{{ ticket.numero }}</span>
+                    </td>
+                    <td hlmTd class="text-center py-4 font-semibold text-slate-700 text-[14px]">{{ ticket.clientNom }}</td>
+                    <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-500 hidden sm:table-cell">
+                      {{ typeLabels[ticket.typeAppareil] }}
+                    </td>
+                    <td hlmTd class="text-center py-4">
+                      <span hlmBadge [class]="statutColors[ticket.statut] + ' px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wide uppercase'">
+                        {{ statutLabels[ticket.statut] }}
+                      </span>
+                    </td>
+                    <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-400 hidden md:table-cell">{{ formatDate(ticket.updatedAt) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+      </div>
+    }
+  }
+</div>
+
+<!-- Dialog détail -->
+@if (selectedTicket()) {
+  <app-ticket-detail-dialog
+    [ticket]="selectedTicket()!"
+    viewMode="technical"
+    (updated)="onTicketUpdated($event)"
+    (closed)="closeDetail()" />
+}

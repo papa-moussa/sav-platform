@@ -1,0 +1,211 @@
+<div class="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto px-4 md:px-0">
+  
+  <!-- Header Section -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div>
+      <h1 class="text-4xl font-semibold text-slate-800 tracking-tight">Bonjour,</h1>
+      <h2 class="text-4xl text-slate-500 font-light mt-1">{{ authService.currentNom() }}.</h2>
+    </div>
+    
+    <!-- Date & Clock Badge -->
+    <div class="flex items-center gap-3">
+      <div class="flex flex-col items-end bg-white border border-slate-100 rounded-2xl px-5 py-3 shadow-sm">
+        <div class="flex items-center gap-2 text-primary">
+          <ng-icon name="lucideCalendar" class="w-4 h-4"></ng-icon>
+          <span class="text-[13px] font-extrabold uppercase tracking-widest">{{ currentTime() | date:'EEEE d MMMM':'':'fr' }}</span>
+        </div>
+        <div class="flex items-center gap-2 mt-1">
+          <ng-icon name="lucideClock" class="w-4 h-4 text-slate-300"></ng-icon>
+          <span class="text-xl font-bold text-slate-700 tabular-nums">{{ currentTime() | date:'HH:mm:ss' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="w-full h-px bg-slate-200/60"></div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Tickets Ouverts -->
+    <app-card class="p-5 border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+          <ng-icon name="lucideActivity" class="w-6 h-6"></ng-icon>
+        </div>
+        @if (stats().actifs > 10) {
+          <span hlmBadge variant="destructive" class="text-[10px] px-2 py-0">Urgent</span>
+        }
+      </div>
+      <div class="mt-4">
+        <p class="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Tickets Ouverts</p>
+        <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats().actifs }}</h3>
+      </div>
+    </app-card>
+
+    <!-- En Réparation -->
+    <app-card class="p-5 border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500">
+          <ng-icon name="lucideTrendingUp" class="w-6 h-6"></ng-icon>
+        </div>
+      </div>
+      <div class="mt-4">
+        <p class="text-[13px] font-bold text-slate-400 uppercase tracking-wider">En Réparation</p>
+        <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats().enCours }}</h3>
+      </div>
+    </app-card>
+
+    <!-- Alerte Stock -->
+    <app-card class="p-5 border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-500">
+          <ng-icon name="lucidePackage2" class="w-6 h-6"></ng-icon>
+        </div>
+      </div>
+      <div class="mt-4">
+        <p class="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Alerte Stock</p>
+        <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats().stockAlerte }}</h3>
+      </div>
+    </app-card>
+
+    <!-- Réparations Terminées -->
+    <app-card class="p-5 border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600">
+          <ng-icon name="lucideCheckCircle" class="w-6 h-6"></ng-icon>
+        </div>
+      </div>
+      <div class="mt-4">
+        <p class="text-[13px] font-bold text-slate-400 uppercase tracking-wider">Points de Succès</p>
+        <h3 class="text-3xl font-bold text-slate-800 mt-1">{{ stats().repares }}</h3>
+      </div>
+    </app-card>
+  </div>
+
+  <!-- Charts Section -->
+  <app-card class="p-6 border-slate-100 shadow-sm">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h3 class="text-lg font-extrabold text-slate-800 tracking-tight">Activité Hebdomadaire</h3>
+        <p class="text-[13px] text-slate-400 font-medium">Volume des tickets créés vs clôturés (7 derniers jours)</p>
+      </div>
+      <div class="flex items-center gap-4 text-[12px] font-bold text-slate-500">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-blue-500"></span> Créations
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Clôtures
+        </div>
+      </div>
+    </div>
+    
+    @if (loading()) {
+      <div class="h-[350px] flex items-center justify-center bg-slate-50 rounded-2xl animate-pulse">
+        <span class="text-slate-400 text-sm">Calcul des données...</span>
+      </div>
+    } @else {
+      <apx-chart
+        [series]="chartOptions.series!"
+        [chart]="chartOptions.chart!"
+        [xaxis]="chartOptions.xaxis!"
+        [stroke]="chartOptions.stroke!"
+        [dataLabels]="chartOptions.dataLabels!"
+        [markers]="chartOptions.markers!"
+        [tooltip]="chartOptions.tooltip!"
+        [yaxis]="chartOptions.yaxis!"
+        [grid]="chartOptions.grid!"
+        [fill]="chartOptions.fill!"
+        [legend]="{ show: false }"
+        [colors]="chartOptions.colors!"
+      ></apx-chart>
+    }
+  </app-card>
+
+  <!-- Smart Lists Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Urgences / Retards -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+          Urgences & Retards
+          <span hlmBadge class="bg-red-50 text-red-600 border-none">{{ urgentTickets().length }}</span>
+        </h3>
+        <a routerLink="/tickets" class="text-[13px] font-bold text-primary hover:underline">Voir tout</a>
+      </div>
+      
+      <div class="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden min-h-[300px]">
+        @if (loading()) {
+          <div class="p-8 text-center text-slate-400">Analyse...</div>
+        } @else if (urgentTickets().length === 0) {
+          <div class="flex flex-col items-center justify-center py-20 text-slate-400 space-y-3">
+             <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                <ng-icon name="lucideCheckCircle" class="w-6 h-6"></ng-icon>
+             </div>
+             <p class="text-sm font-bold text-slate-600">Tout est à jour !</p>
+          </div>
+        } @else {
+          <div class="divide-y divide-slate-50">
+             @for (ticket of urgentTickets(); track ticket.id) {
+               <div class="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between group cursor-pointer">
+                  <div class="flex items-center gap-4">
+                     <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center text-red-500 font-bold text-[11px]">
+                        {{ ticket.numero.split('-').pop() }}
+                     </div>
+                     <div>
+                        <p class="text-[14px] font-bold text-slate-700 leading-tight">
+                          {{ typeLabels[ticket.typeAppareil] }} — {{ ticket.marqueModele }}
+                        </p>
+                        <p class="text-[12px] font-medium text-red-400/80 mt-0.5">En retard ({{ formatDate(ticket.createdAt) }})</p>
+                     </div>
+                  </div>
+                  <ng-icon name="lucideChevronRight" class="w-4 h-4 text-slate-300 group-hover:text-primary transition-colors"></ng-icon>
+               </div>
+             }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Stock Critique -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+          Pièces Critique
+          <span hlmBadge class="bg-orange-50 text-orange-600 border-none">{{ alertPieces().length }}</span>
+        </h3>
+        <a routerLink="/stock" class="text-[13px] font-bold text-primary hover:underline">Aller au Stock</a>
+      </div>
+
+      <div class="bg-white rounded-[24px] shadow-sm border border-slate-100 overflow-hidden min-h-[300px]">
+        @if (loading()) {
+          <div class="p-8 text-center text-slate-400">Inventaire...</div>
+        } @else if (alertPieces().length === 0) {
+          <div class="flex flex-col items-center justify-center py-20 text-slate-400 space-y-3">
+             <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                <ng-icon name="lucidePackage2" class="w-6 h-6"></ng-icon>
+             </div>
+             <p class="text-sm font-bold text-slate-600">Stock optimal</p>
+          </div>
+        } @else {
+          <div class="divide-y divide-slate-50">
+             @for (piece of alertPieces(); track piece.id) {
+               <div class="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                     <div class="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 font-bold text-[11px]">
+                        {{ piece.quantite }}
+                     </div>
+                     <div>
+                        <p class="text-[14px] font-bold text-slate-700 leading-tight">{{ piece.designation }}</p>
+                        <p class="text-[12px] font-medium text-slate-400 mt-0.5">Seuil: {{ piece.seuilAlerte }} | Réf: {{ piece.reference }}</p>
+                     </div>
+                  </div>
+                  <div hlmBadge variant="secondary" class="text-[10px] font-extrabold uppercase py-0 px-2 tracking-tighter">Réappro.</div>
+               </div>
+             }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+</div>

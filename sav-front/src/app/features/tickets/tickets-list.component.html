@@ -1,0 +1,161 @@
+<div class="space-y-10">
+  <!-- En-tête -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+    <h2 class="text-2xl font-bold tracking-tight text-slate-800">Tickets SAV</h2>
+    @if (isAdminOrReception()) {
+      <app-button (click)="openCreate()">
+        <ng-icon name="lucidePlus" class="w-4 h-4 mr-2"></ng-icon> Nouveau ticket
+      </app-button>
+    }
+  </div>
+
+  <!-- Filtres -->
+  <app-filter-bar
+    [hasSearch]="true"
+    [hasFilters]="true"
+    [hasReset]="true"
+    searchPlaceholder="Numéro, client, appareil…"
+    [searchValue]="filters.value.search ?? ''"
+    [quickFilters]="quickStatusFilters"
+    [activeQuickFilter]="filters.value.statut"
+    (searchChange)="onSearchChange($event)"
+    (quickFilterChange)="onQuickFilterChange($event)"
+    (resetFilters)="resetFilters()">
+    
+    <!-- Filtres avancés (Collapsible) -->
+    <ng-container [formGroup]="filters">
+      <!-- Site -->
+      <div class="flex flex-col gap-1.5">
+        <label for="filter-site" class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Site</label>
+        <select id="filter-site" hlmSelect formControlName="siteId" class="w-full h-11 px-4 bg-white border-slate-200 rounded-xl text-sm transition-all focus:ring-4 focus:ring-primary/10">
+          <option [ngValue]="null">Tous les sites</option>
+          @for (site of sites(); track site.id) {
+            <option [value]="site.id">{{ site.nom }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Technicien -->
+      @if (isAdminOrReception()) {
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-technicien" class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Technicien</label>
+          <select id="filter-technicien" hlmSelect formControlName="technicienId" class="w-full h-11 px-4 bg-white border-slate-200 rounded-xl text-sm transition-all focus:ring-4 focus:ring-primary/10">
+            <option [ngValue]="null">Tous les techniciens</option>
+            @for (t of techniciens(); track t.id) {
+              <option [value]="t.id">{{ t.nom }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Période -->
+      <div class="flex flex-col gap-1.5 lg:col-span-2">
+        <span class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Période de création</span>
+        <div class="flex items-center gap-2">
+          <app-datepicker formControlName="dateDebut" [limitToToday]="true" placeholder="Du" class="flex-1"></app-datepicker>
+          <span class="text-slate-300 font-medium">à</span>
+          <app-datepicker formControlName="dateFin" [limitToToday]="true" placeholder="Au" class="flex-1"></app-datepicker>
+        </div>
+      </div>
+    </ng-container>
+  </app-filter-bar>
+
+  <!-- Tableau -->
+  <app-card class="overflow-hidden">
+    @if (loading()) {
+      <div class="py-20 text-center flex flex-col items-center text-slate-400 space-y-4">
+        <div class="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p class="text-[13px] font-medium">Chargement des tickets…</p>
+      </div>
+    } @else if (tickets().length === 0) {
+      <div class="py-20 text-center text-slate-400 flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
+          <ng-icon name="lucideTicket" class="w-8 h-8 text-slate-300"></ng-icon>
+        </div>
+        <p class="text-[15px] font-bold text-slate-600">Aucun ticket trouvé</p>
+        <p class="text-[13px] max-w-sm mx-auto mt-1">Modifiez vos filtres ou créez un nouveau ticket.</p>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table hlmTable class="w-full text-sm">
+          <thead>
+            <tr hlmTrow class="bg-slate-50/50 border-b border-slate-100">
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pl-6">Numéro</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Client</th>
+              <th hlmTh class="text-center hidden sm:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Appareil</th>
+              <th hlmTh class="text-center hidden md:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Technicien</th>
+              <th hlmTh class="text-center hidden lg:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Site</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Statut</th>
+              <th hlmTh class="text-center hidden md:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Créé le</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pr-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ticket of tickets(); track ticket.id) {
+              <tr hlmTrow class="group hover:bg-slate-50/80 cursor-pointer transition-colors border-b border-slate-50 last:border-none"
+                [class.bg-red-50/30]="isUrgent(ticket)"
+                (click)="openDetail(ticket)">
+                <td hlmTd class="text-center pl-6 py-4">
+                  <div class="flex items-center justify-center gap-2">
+                    <span class="font-mono text-[13px] font-bold text-slate-700">{{ ticket.numero }}</span>
+                    @if (isUrgent(ticket)) {
+                      <ng-icon name="lucideAlertTriangle" class="text-red-500 w-4 h-4"></ng-icon>
+                    }
+                    @if (ticket.sousGarantie) {
+                      <span class="bg-primary/10 text-primary px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold tracking-wide uppercase">Gar</span>
+                    }
+                  </div>
+                </td>
+                <td hlmTd class="text-center py-4 font-semibold text-slate-800 text-[14px]">{{ ticket.clientNom }}</td>
+                <td hlmTd class="text-center hidden sm:table-cell py-4">
+                  <div class="font-medium text-slate-700 text-[13px]">{{ typeLabels[ticket.typeAppareil] }}</div>
+                  <div class="text-[11px] font-medium text-slate-400">{{ ticket.marqueModele }}</div>
+                </td>
+                <td hlmTd class="text-center hidden md:table-cell text-[13px] font-medium text-slate-500 py-4">
+                  {{ ticket.technicienNom ?? '—' }}
+                </td>
+                <td hlmTd class="text-center hidden lg:table-cell text-[13px] font-medium text-slate-500 py-4">{{ ticket.siteNom }}</td>
+                <td hlmTd class="text-center py-4">
+                  <span hlmBadge [class]="statutColors[ticket.statut] + ' rounded-[6px] px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase'">
+                    {{ statutLabels[ticket.statut] }}
+                  </span>
+                </td>
+                <td hlmTd class="text-center hidden md:table-cell text-[13px] font-medium text-slate-500 py-4">{{ formatDate(ticket.createdAt) }}</td>
+                <td hlmTd class="text-center pr-6 py-4">
+                  <button class="w-8 h-8 rounded-full hover:bg-slate-200 inline-flex items-center justify-center text-slate-300 group-hover:text-primary transition-colors">
+                    <ng-icon name="lucideChevronRight" class="w-[18px] h-[18px]"></ng-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <app-pagination
+        [page]="currentPage()"
+        [totalPages]="totalPages()"
+        [totalElements]="totalElements()"
+        [size]="pageSize()"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  </app-card>
+</div>
+
+<!-- Dialog création -->
+@if (showCreateDialog()) {
+  <app-ticket-create-dialog
+    [sites]="sites()"
+    [techniciens]="techniciens()"
+    (created)="onTicketCreated($event)"
+    (closed)="showCreateDialog.set(false)" />
+}
+
+<!-- Dialog détail -->
+@if (selectedTicket()) {
+  <app-ticket-detail-dialog
+    [ticket]="selectedTicket()!"
+    (updated)="onTicketUpdated($event)"
+    (closed)="closeDetail()" />
+}

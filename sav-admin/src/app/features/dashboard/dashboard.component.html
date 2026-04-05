@@ -1,0 +1,183 @@
+<div class="space-y-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Tableau de bord</h1>
+      <p class="text-sm text-slate-500 mt-1">Vue globale de la plateforme SAV</p>
+    </div>
+    <button
+      (click)="loadStats()"
+      [disabled]="loading()"
+      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all shadow-sm disabled:opacity-50">
+      <ng-icon name="lucideRefreshCw" class="w-4 h-4" [class.animate-spin]="loading()"></ng-icon>
+      Actualiser
+    </button>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700">
+      <ng-icon name="lucideCircleAlert" class="w-5 h-5 shrink-0"></ng-icon>
+      <span class="text-sm font-medium">{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Loading skeleton -->
+  @if (loading()) {
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="bg-white rounded-2xl border border-slate-100 p-6 animate-pulse">
+          <div class="w-10 h-10 bg-slate-100 rounded-xl mb-4"></div>
+          <div class="h-7 bg-slate-100 rounded-lg w-16 mb-2"></div>
+          <div class="h-4 bg-slate-100 rounded w-24"></div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading() && stats()) {
+    <!-- Stats cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Companies -->
+      <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
+          <ng-icon name="lucideBuilding2" class="w-5 h-5 text-blue-600"></ng-icon>
+        </div>
+        <p class="text-2xl font-extrabold text-slate-800">{{ stats()!.totalCompanies }}</p>
+        <p class="text-sm text-slate-500 mt-1">Entreprises</p>
+        <div class="flex items-center gap-3 mt-3 pt-3 border-t border-slate-50">
+          <span class="flex items-center gap-1 text-xs font-semibold text-emerald-600">
+            <ng-icon name="lucideCircleCheck" class="w-3.5 h-3.5"></ng-icon>
+            {{ stats()!.activeCompanies }} actives
+          </span>
+          <span class="flex items-center gap-1 text-xs font-semibold text-amber-600">
+            <ng-icon name="lucideCirclePause" class="w-3.5 h-3.5"></ng-icon>
+            {{ stats()!.suspendedCompanies }} suspendues
+          </span>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+          <ng-icon name="lucideUsers" class="w-5 h-5 text-violet-600"></ng-icon>
+        </div>
+        <p class="text-2xl font-extrabold text-slate-800">{{ stats()!.totalUsers }}</p>
+        <p class="text-sm text-slate-500 mt-1">Utilisateurs</p>
+        <div class="mt-3 pt-3 border-t border-slate-50">
+          <a routerLink="/users" class="text-xs font-semibold text-violet-600 hover:underline">Gérer les utilisateurs →</a>
+        </div>
+      </div>
+
+      <!-- Tickets -->
+      <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center mb-4">
+          <ng-icon name="lucideTicket" class="w-5 h-5 text-amber-600"></ng-icon>
+        </div>
+        <p class="text-2xl font-extrabold text-slate-800">{{ stats()!.totalTickets }}</p>
+        <p class="text-sm text-slate-500 mt-1">Tickets SAV</p>
+        <div class="mt-3 pt-3 border-t border-slate-50">
+          <span class="text-xs font-semibold text-slate-400">Tous sites confondus</span>
+        </div>
+      </div>
+
+      <!-- Feedbacks + Rating -->
+      <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow">
+        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
+          <ng-icon name="lucideStar" class="w-5 h-5 text-emerald-600"></ng-icon>
+        </div>
+        <p class="text-2xl font-extrabold text-slate-800">{{ stats()!.totalFeedbacks }}</p>
+        <p class="text-sm text-slate-500 mt-1">Feedbacks</p>
+        <div class="mt-3 pt-3 border-t border-slate-50">
+          <span class="text-xs font-semibold text-emerald-600">⭐ {{ formatRating(stats()!.averageRating) }} / 5 moyenne</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity feed + Companies summary -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Recent activity -->
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm">
+        <div class="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <ng-icon name="lucideActivity" class="w-5 h-5 text-slate-500"></ng-icon>
+            <h2 class="text-[15px] font-bold text-slate-800">Activité récente</h2>
+          </div>
+        </div>
+        <div class="divide-y divide-slate-50">
+          @if (stats()!.recentActivity.length === 0) {
+            <div class="px-6 py-10 text-center text-sm text-slate-400">Aucune activité récente</div>
+          }
+          @for (item of stats()!.recentActivity; track item.timestamp) {
+            <div class="flex items-start gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5" [ngClass]="activityColor(item.type)">
+                <ng-icon [name]="activityIcon(item.type)" class="w-4 h-4"></ng-icon>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-[14px] text-slate-700 font-medium leading-snug">{{ item.description }}</p>
+                <p class="text-[12px] text-slate-400 mt-0.5">{{ formatDate(item.timestamp) }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Quick stats panel -->
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
+        <div class="px-6 py-5 border-b border-slate-50">
+          <h2 class="text-[15px] font-bold text-slate-800">Résumé</h2>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-slate-500">Taux d'activité</span>
+            <span class="text-sm font-bold text-slate-800">
+              {{ stats()!.totalCompanies > 0 ? ((stats()!.activeCompanies / stats()!.totalCompanies) * 100 | number:'1.0-0') : 0 }}%
+            </span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-2">
+            <div class="bg-emerald-500 h-2 rounded-full transition-all"
+              [style.width.%]="stats()!.totalCompanies > 0 ? (stats()!.activeCompanies / stats()!.totalCompanies) * 100 : 0">
+            </div>
+          </div>
+
+          <div class="pt-4 space-y-3">
+            <div class="flex items-center justify-between py-2 border-b border-slate-50">
+              <span class="text-sm text-slate-500">Moy. utilisateurs / company</span>
+              <span class="text-sm font-bold text-slate-800">
+                {{ stats()!.totalCompanies > 0 ? (stats()!.totalUsers / stats()!.totalCompanies | number:'1.1-1') : 0 }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-50">
+              <span class="text-sm text-slate-500">Tickets / company</span>
+              <span class="text-sm font-bold text-slate-800">
+                {{ stats()!.totalCompanies > 0 ? (stats()!.totalTickets / stats()!.totalCompanies | number:'1.1-1') : 0 }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between py-2">
+              <span class="text-sm text-slate-500">Note globale</span>
+              <span class="text-sm font-bold text-emerald-600">{{ formatRating(stats()!.averageRating) }} ⭐</span>
+            </div>
+          </div>
+
+          <div class="pt-4 space-y-2">
+            <a routerLink="/companies"
+              class="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors text-sm font-semibold text-blue-700">
+              <span>Gérer les entreprises</span>
+              <ng-icon name="lucideBuilding2" class="w-4 h-4"></ng-icon>
+            </a>
+            <a routerLink="/users"
+              class="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-violet-50 hover:bg-violet-100 transition-colors text-sm font-semibold text-violet-700">
+              <span>Gérer les utilisateurs</span>
+              <ng-icon name="lucideUsers" class="w-4 h-4"></ng-icon>
+            </a>
+            <a routerLink="/notifications"
+              class="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 transition-colors text-sm font-semibold text-amber-700">
+              <span>Envoyer une notification</span>
+              <ng-icon name="lucideMessageSquare" class="w-4 h-4"></ng-icon>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

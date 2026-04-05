@@ -1,0 +1,65 @@
+<app-modal
+  title="Sortie de stock"
+  [description]="'Retirer des unités pour : ' + piece.designation"
+  [isOpen]="true"
+  [hasFooter]="true"
+  (closed)="cancelled.emit()"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    @if (error()) {
+      <div class="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">{{ error() }}</div>
+    }
+
+    <!-- Info pièce -->
+    <div class="p-3 rounded-lg bg-muted/50 border border-border text-sm space-y-1">
+      <div class="flex justify-between">
+        <span class="text-muted-foreground">Référence</span>
+        <span class="font-mono font-semibold text-foreground">{{ piece.reference }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-muted-foreground">Stock disponible</span>
+        <span class="font-semibold" [class.text-destructive]="piece.enAlerteStock" [class.text-emerald-600]="!piece.enAlerteStock">
+          {{ piece.quantite }} unité(s)
+        </span>
+      </div>
+    </div>
+
+    @if (piece.quantite === 0) {
+      <div class="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium">
+        Attention : stock épuisé. Impossible de faire une sortie.
+      </div>
+    }
+
+    <!-- Quantité -->
+    <app-input
+      formControlName="quantite"
+      label="Quantité à sortir *"
+      type="number"
+      [placeholder]="'Max : ' + piece.quantite"
+      errorMessage="La quantité doit être supérieure à 0"
+    ></app-input>
+
+    <!-- Motif -->
+    <div class="flex flex-col gap-1.5">
+      <label hlmLabel>Motif (optionnel)</label>
+      <textarea
+        formControlName="motif"
+        rows="2"
+        placeholder="Utilisation intervention, casse..."
+        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+      ></textarea>
+    </div>
+  </form>
+
+  <div modal-footer class="flex gap-3 justify-end w-full">
+    <app-button variant="outline" (click)="cancelled.emit()">Annuler</app-button>
+    <app-button
+      variant="destructive"
+      [loading]="saving()"
+      [disabled]="piece.quantite === 0"
+      (click)="submit()"
+    >
+      Confirmer la sortie
+    </app-button>
+  </div>
+</app-modal>

@@ -1,0 +1,109 @@
+<div class="min-h-screen flex items-center justify-center bg-[#f8fafc] p-4 font-sans select-none overflow-hidden relative">
+  <!-- Background decorations -->
+  <div class="absolute -top-24 -left-24 w-96 h-96 bg-primary-500/5 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+  <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-indigo-400/5 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+
+  <div class="w-full max-w-[420px] bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/60 overflow-hidden animate-in fade-in zoom-in">
+
+    <!-- Header -->
+    <div class="px-8 pt-10 pb-6 text-center border-b border-slate-100">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-indigo-600 shadow-lg shadow-primary-500/30 mb-5">
+        <ng-icon name="lucideBuilding2" class="text-white w-8 h-8"></ng-icon>
+      </div>
+      <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">SAV Admin</h1>
+      <p class="text-sm text-slate-500 mt-1 font-medium">Portail Super Administrateur</p>
+    </div>
+
+    <!-- Form -->
+    <div class="px-8 py-7">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
+
+        <!-- Email -->
+        <div class="space-y-1.5">
+          <label for="email" class="block text-sm font-semibold text-slate-700">Adresse email</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+              <ng-icon name="lucideMail" class="w-4 h-4 text-slate-400"></ng-icon>
+            </div>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="admin@example.com"
+              autocomplete="email"
+              class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 transition-all duration-200"
+              [class.border-red-300]="form.get('email')?.invalid && form.get('email')?.touched"
+              [class.focus:ring-red-200]="form.get('email')?.invalid && form.get('email')?.touched"
+            />
+          </div>
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <p class="text-xs text-red-500 font-medium">Veuillez saisir un email valide.</p>
+          }
+        </div>
+
+        <!-- Password -->
+        <div class="space-y-1.5">
+          <label for="password" class="block text-sm font-semibold text-slate-700">Mot de passe</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+              <ng-icon name="lucideLock" class="w-4 h-4 text-slate-400"></ng-icon>
+            </div>
+            <input
+              id="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              class="w-full pl-10 pr-11 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 transition-all duration-200"
+              [class.border-red-300]="form.get('password')?.invalid && form.get('password')?.touched"
+            />
+            <button
+              type="button"
+              (click)="togglePassword()"
+              class="absolute inset-y-0 right-3 flex items-center justify-center w-8 text-slate-400 hover:text-primary-500 transition-colors"
+              tabindex="-1"
+            >
+              <ng-icon [name]="showPassword() ? 'lucideEyeOff' : 'lucideEye'" class="w-4 h-4"></ng-icon>
+            </button>
+          </div>
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <p class="text-xs text-red-500 font-medium">Le mot de passe est obligatoire.</p>
+          }
+        </div>
+
+        <!-- Error alert -->
+        @if (error()) {
+          <div class="flex items-center gap-3 p-3.5 bg-red-50 border border-red-100 rounded-xl animate-in fade-in">
+            <div class="flex-shrink-0 w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm border border-red-100">
+              <ng-icon name="lucideCircleAlert" class="text-red-500 w-4 h-4"></ng-icon>
+            </div>
+            <p class="text-sm font-semibold text-red-600">{{ error() }}</p>
+          </div>
+        }
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          [disabled]="form.invalid || loading()"
+          class="w-full h-12 flex items-center justify-center gap-2 bg-gradient-to-r from-primary-500 to-indigo-600 text-white text-[15px] font-bold rounded-xl shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+        >
+          @if (loading()) {
+            <ng-icon name="lucideLoader" class="w-5 h-5 animate-spin"></ng-icon>
+            Authentification...
+          } @else {
+            Se connecter
+          }
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-8 pb-8 text-center">
+      <p class="text-xs text-slate-400 font-medium">
+        Accès réservé aux <span class="font-bold text-primary-500">Super Administrateurs</span>
+      </p>
+    </div>
+
+  </div>
+</div>

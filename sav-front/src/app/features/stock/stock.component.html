@@ -1,0 +1,308 @@
+<div class="space-y-10">
+
+  <!-- En-tête -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+    <div class="flex items-center gap-3">
+      <h2 class="text-2xl font-bold tracking-tight text-slate-800">Stock & Pièces détachées</h2>
+      @if (alertesCount() > 0) {
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase bg-red-100 text-red-700 border border-red-200 animate-pulse">
+          <ng-icon name="lucideAlertTriangle" class="w-3.5 h-3.5"></ng-icon>
+          {{ alertesCount() }} alerte{{ alertesCount() > 1 ? 's' : '' }}
+        </span>
+      }
+    </div>
+    @if (isAdmin()) {
+      <app-button (click)="openCreate()">
+        <ng-icon name="lucidePlus" class="w-4 h-4 mr-2"></ng-icon>
+        Nouvelle pièce
+      </app-button>
+    }
+  </div>
+
+  <!-- Barre de recherche et filtres -->
+  <app-filter-bar
+    [hasSearch]="true"
+    [hasFilters]="true"
+    [hasReset]="true"
+    searchPlaceholder="Référence, désignation..."
+    [searchValue]="searchTerm()"
+    [quickFilters]="quickStockFilters"
+    [activeQuickFilter]="filterAlerteOnly() ? 'ALERTE' : 'ALL'"
+    (searchChange)="onSearchChange($event)"
+    (quickFilterChange)="onQuickFilterChange($event)"
+    (resetFilters)="resetFilters()">
+    
+    <!-- Filtres avancés (Collapsible) -->
+    <div class="flex flex-col gap-1.5">
+      <label for="filter-categorie" class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Catégorie d'appareil</label>
+      <select id="filter-categorie" hlmSelect [value]="filterCategorie()" (change)="onCategorieChange($event)" class="w-full h-11 px-4 bg-white border-slate-200 rounded-xl text-sm transition-all focus:ring-4 focus:ring-primary/10">
+        <option value="">Toutes les catégories</option>
+        @for (cat of categories; track cat) {
+          <option [value]="cat">{{ categorieLabels[cat] }}</option>
+        }
+      </select>
+    </div>
+  </app-filter-bar>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
+    <app-card>
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <p class="text-[13px] text-slate-400 font-bold tracking-widest uppercase">Total références</p>
+          <p class="text-2xl font-bold text-slate-800 mt-1">{{ pieces().length }}</p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <ng-icon name="lucidePackage" class="w-6 h-6 text-primary"></ng-icon>
+        </div>
+      </div>
+    </app-card>
+
+    <app-card>
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <p class="text-[13px] text-slate-400 font-bold tracking-widest uppercase">En alerte stock</p>
+          <p class="text-2xl font-bold mt-1" [class.text-red-500]="piecesEnAlerte() > 0" [class.text-slate-800]="piecesEnAlerte() === 0">
+            {{ piecesEnAlerte() }}
+          </p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center"
+          [class.bg-red-50]="piecesEnAlerte() > 0"
+          [class.bg-slate-50]="piecesEnAlerte() === 0"
+        >
+          <ng-icon name="lucideAlertTriangle" class="w-6 h-6"
+            [class.text-red-500]="piecesEnAlerte() > 0"
+            [class.text-slate-400]="piecesEnAlerte() === 0"
+          ></ng-icon>
+        </div>
+      </div>
+    </app-card>
+
+    <app-card>
+      <div class="flex items-center justify-between p-4">
+        <div>
+          <p class="text-[13px] text-slate-400 font-bold tracking-widest uppercase">Valeur stock estimée</p>
+          <p class="text-xl font-bold text-slate-800 mt-1">{{ formatValeurTotale() }}</p>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center">
+          <ng-icon name="lucidePackage" class="w-6 h-6 text-emerald-600"></ng-icon>
+        </div>
+      </div>
+    </app-card>
+  </div>
+
+  <!-- Tableau -->
+  <div>
+    <app-card class="overflow-hidden">
+    @if (loading()) {
+      <div class="py-20 text-center flex flex-col items-center text-slate-400 space-y-4">
+        <div class="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+        <p class="text-[13px] font-medium">Chargement du stock...</p>
+      </div>
+    } @else if (pieces().length === 0) {
+      <div class="py-20 text-center text-slate-400 flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
+          <ng-icon name="lucidePackage" class="w-8 h-8 text-slate-300"></ng-icon>
+        </div>
+        <p class="text-[15px] font-bold text-slate-600">Aucune pièce trouvée</p>
+        <p class="text-[13px] max-w-sm mx-auto mt-1">
+          @if (searchTerm() || filterCategorie() || filterAlerteOnly()) {
+            Modifiez vos filtres pour afficher plus de résultats.
+          } @else {
+            Commencez par ajouter une pièce détachée au stock.
+          }
+        </p>
+        @if (isAdmin() && !searchTerm() && !filterCategorie() && !filterAlerteOnly()) {
+          <app-button class="mt-4" (click)="openCreate()">
+            <ng-icon name="lucidePlus" class="w-4 h-4 mr-2"></ng-icon>
+            Ajouter une pièce
+          </app-button>
+        }
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table hlmTable class="w-full text-sm">
+          <thead hlmThead>
+            <tr hlmTrow class="bg-slate-50/50 border-b border-slate-100">
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pl-6">Référence</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Désignation</th>
+              <th hlmTh class="text-center hidden md:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Catégorie</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Stock</th>
+              <th hlmTh class="text-center hidden sm:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Seuil</th>
+              <th hlmTh class="text-center hidden lg:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Prix unit.</th>
+              <th hlmTh class="text-center hidden xl:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest font-bold text-slate-600">Total ligne</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pr-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody hlmTbody>
+            @for (piece of pieces(); track piece.id) {
+              <tr hlmTrow class="group hover:bg-slate-50/80 transition-colors border-b border-slate-50 last:border-none"
+                [class.bg-red-50/40]="piece.enAlerteStock">
+                <!-- Référence -->
+                <td hlmTd class="text-center pl-6 py-4">
+                  <span class="font-mono text-[13px] font-bold text-slate-700">{{ piece.reference }}</span>
+                </td>
+
+                <!-- Désignation -->
+                <td hlmTd class="text-center py-4">
+                  <div class="flex flex-col">
+                    <span class="font-semibold text-slate-800 text-[14px]">{{ piece.designation }}</span>
+                    <span class="text-[11px] text-slate-400">{{ piece.marqueCompatible ?? 'Marque non spécifiée' }}</span>
+                  </div>
+                </td>
+
+                <!-- Catégorie -->
+                <td hlmTd class="text-center hidden md:table-cell text-[12px] font-bold text-slate-500 py-4">
+                   <span class="px-2 py-1 bg-slate-100 rounded-md text-[10px] uppercase tracking-wide">
+                     {{ categorieLabels[piece.categorieAppareil] }}
+                   </span>
+                </td>
+
+                <!-- Stock -->
+                <td hlmTd class="text-center py-4">
+                  <div class="flex flex-col items-center gap-1">
+                    <div class="flex items-center gap-2">
+                       <!-- Boutons d'ajustement Admin -->
+                       @if (isAdmin()) {
+                        <button (click)="$event.stopPropagation(); quickSortie(piece)" 
+                          [disabled]="piece.quantite <= 0"
+                          class="w-6 h-6 flex items-center justify-center rounded-full border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 disabled:opacity-30 transition-all transition-transform active:scale-90">
+                          <ng-icon name="lucideMinus" class="w-3.5 h-3.5"></ng-icon>
+                        </button>
+                      }
+
+                      <!-- Badge de stock -->
+                      <span class="inline-flex items-center justify-center min-w-[3rem] px-2.5 py-1 rounded-[10px] text-[14px] font-black shadow-sm"
+                        [ngClass]="{
+                          'bg-red-500 text-white shadow-red-200 animate-pulse': piece.enAlerteStock,
+                          'bg-amber-100 text-amber-700': !piece.enAlerteStock && piece.quantite <= piece.seuilAlerte + 5,
+                          'bg-emerald-50 text-emerald-700': !piece.enAlerteStock && piece.quantite > piece.seuilAlerte + 5
+                        }">
+                        @if (piece.enAlerteStock) {
+                          <ng-icon name="lucideAlertTriangle" class="w-3.5 h-3.5 mr-1"></ng-icon>
+                        }
+                        {{ piece.quantite }}
+                      </span>
+
+                      @if (isAdmin()) {
+                        <button (click)="$event.stopPropagation(); quickEntree(piece)" 
+                          class="w-6 h-6 flex items-center justify-center rounded-full border border-slate-200 text-slate-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 transition-all transition-transform active:scale-90">
+                          <ng-icon name="lucidePlus" class="w-3.5 h-3.5"></ng-icon>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Seuil -->
+                <td hlmTd class="text-center hidden sm:table-cell text-[13px] font-bold text-slate-400 py-4 italic">
+                  Seuil: {{ piece.seuilAlerte }}
+                </td>
+
+                <!-- Prix -->
+                <td hlmTd class="text-center hidden lg:table-cell text-[13px] font-medium text-slate-500 py-4">
+                  {{ formatPrice(piece.prixUnitaire) }}
+                </td>
+
+                <!-- Valeur Totale -->
+                <td hlmTd class="text-center hidden xl:table-cell text-[14px] font-black text-slate-900 py-4 bg-slate-50/30">
+                  {{ formatRowTotal(piece) }}
+                </td>
+
+                <!-- Actions -->
+                <td hlmTd class="text-center pr-6 py-4">
+                  <div class="flex items-center justify-center gap-2">
+                    <button
+                      (click)="openEntree(piece)"
+                      class="w-8 h-8 rounded-full border border-slate-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 inline-flex items-center justify-center transition-colors"
+                      title="Entrée stock"
+                    >
+                      <ng-icon name="lucideArrowUp" class="w-[18px] h-[18px]"></ng-icon>
+                    </button>
+                    <button
+                      (click)="openSortie(piece)"
+                      class="w-8 h-8 rounded-full border border-slate-200 text-red-500 hover:bg-red-50 hover:border-red-200 inline-flex items-center justify-center transition-colors"
+                      title="Sortie stock"
+                    >
+                      <ng-icon name="lucideArrowDown" class="w-[18px] h-[18px]"></ng-icon>
+                    </button>
+
+                    <button
+                      (click)="openDetail(piece)"
+                      class="w-8 h-8 rounded-full hover:bg-slate-200 inline-flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors"
+                      title="Voir le détail"
+                    >
+                      <ng-icon name="lucideEye" class="w-4 h-4"></ng-icon>
+                    </button>
+
+                    @if (isAdmin()) {
+                      <button
+                        (click)="openEdit(piece)"
+                        class="w-8 h-8 rounded-full hover:bg-slate-200 inline-flex items-center justify-center text-slate-400 group-hover:text-amber-600 transition-colors"
+                        title="Modifier la pièce"
+                      >
+                        <ng-icon name="lucidePencil" class="w-4 h-4"></ng-icon>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination -->
+      <app-pagination
+        [page]="currentPage()"
+        [totalPages]="totalPages()"
+        [totalElements]="totalElements()"
+        [size]="pageSize()"
+        (pageChange)="goToPage($event)"
+      />
+    }
+  </app-card>
+</div>
+
+<!-- Modal création -->
+@if (showCreateModal()) {
+  <app-piece-form-modal
+    [piece]="null"
+    (saved)="onPieceSaved()"
+    (cancelled)="closeAllModals()"
+  />
+}
+
+<!-- Modal édition -->
+@if (showEditModal() && selectedPiece()) {
+  <app-piece-form-modal
+    [piece]="selectedPiece()"
+    (saved)="onPieceSaved()"
+    (cancelled)="closeAllModals()"
+  />
+}
+
+<!-- Modal entrée stock -->
+@if (showEntreeModal() && selectedPiece()) {
+  <app-entree-stock-modal
+    [piece]="selectedPiece()!"
+    (done)="onMouvementDone()"
+    (cancelled)="closeAllModals()"
+  />
+}
+
+<!-- Modal sortie stock -->
+@if (showSortieModal() && selectedPiece()) {
+  <app-sortie-stock-modal
+    [piece]="selectedPiece()!"
+    (done)="onMouvementDone()"
+    (cancelled)="closeAllModals()"
+  />
+}
+
+<!-- Modal détail -->
+@if (showDetailModal() && selectedPiece()) {
+  <app-piece-detail-modal
+    [piece]="selectedPiece()!"
+    (closed)="closeAllModals()"
+  />
+}
