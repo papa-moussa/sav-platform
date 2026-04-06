@@ -56,6 +56,8 @@
           </elementProp>
         </collectionProp>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG1 — Tests Fonctionnels">
@@ -465,18 +467,18 @@
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-9 POST /api/reparations" enabled="true">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-9 POST /api/tickets/${f_ticketId}/interventions" enabled="true">
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
-            <stringProp name="HTTPSampler.path">/api/reparations</stringProp>
+            <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}/interventions</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;ticketId&quot;:${f_ticketId},&quot;notes&quot;:&quot;Remplacement ecran OLED effectue&quot;}</stringProp>
+                  <stringProp name="Argument.value">{&quot;diagnostic&quot;:&quot;Ecran OLED defaillant - test JMeter&quot;,&quot;actionsRealisees&quot;:&quot;Remplacement ecran OLED effectue&quot;,&quot;resultat&quot;:&quot;RESOLU&quot;,&quot;tempsPasseHeures&quot;:1.5}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
