@@ -491,8 +491,8 @@
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <responseCode>true</responseCode>
-              <responseMessage>true</responseMessage>
+              <code>true</code>
+              <message>true</message>
               <encoding>false</encoding>
               <requestHeaders>true</requestHeaders>
               <responseHeaders>true</responseHeaders>
@@ -624,7 +624,7 @@
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <responseCode>true</responseCode>
+              <code>true</code>
               <assertions>true</assertions>
             </value>
           </objProp>
@@ -750,7 +750,7 @@
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <responseCode>true</responseCode>
+              <code>true</code>
               <assertions>true</assertions>
             </value>
           </objProp>
@@ -873,7 +873,7 @@
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <responseCode>true</responseCode>
+              <code>true</code>
               <assertions>true</assertions>
             </value>
           </objProp>
@@ -888,7 +888,7 @@
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <responseCode>true</responseCode>
+              <code>true</code>
               <responseData>true</responseData>
             </value>
           </objProp>
