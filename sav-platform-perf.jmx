@@ -95,11 +95,14 @@
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract token_sa" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">token_sa</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">TOKEN_SA_NOT_FOUND</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract token_sa" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">token_sa</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">TOKEN_SA_NOT_FOUND</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
               <collectionProp name="Asserion.test_strings">
@@ -128,11 +131,14 @@
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract token_admin" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">token_admin</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">TOKEN_ADMIN_NOT_FOUND</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract token_admin" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">token_admin</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">TOKEN_ADMIN_NOT_FOUND</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
               <collectionProp name="Asserion.test_strings">
@@ -238,11 +244,14 @@
             <stringProp name="HTTPSampler.method">GET</stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract f_siteId" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">f_siteId</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$[0].id</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">1</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_siteId" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">f_siteId</stringProp>
+              <stringProp name="RegexExtractor.regex">"id"\s*:\s*(\d+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">1</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
               <collectionProp name="Asserion.test_strings">
@@ -271,11 +280,14 @@
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract f_clientId" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">f_clientId</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$.id</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">1</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_clientId" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">f_clientId</stringProp>
+              <stringProp name="RegexExtractor.regex">"id"\s*:\s*(\d+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">1</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200 or 201" enabled="true">
               <collectionProp name="Asserion.test_strings">
@@ -305,17 +317,23 @@
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract f_ticketId" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">f_ticketId</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$.id</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">1</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_ticketId" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">f_ticketId</stringProp>
+              <stringProp name="RegexExtractor.regex">"id"\s*:\s*(\d+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">1</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract f_feedbackToken" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">f_feedbackToken</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$.feedbackToken</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">NO_TOKEN</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_feedbackToken" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">f_feedbackToken</stringProp>
+              <stringProp name="RegexExtractor.regex">"feedbackToken"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">NO_TOKEN</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 201" enabled="true">
               <collectionProp name="Asserion.test_strings">
@@ -534,11 +552,14 @@
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract token" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">auth_token</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">NO_TOKEN</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract auth_token" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">auth_token</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">NO_TOKEN</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
           </hashTree>
         </hashTree>
@@ -657,11 +678,14 @@
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract token" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">auth_token</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">NO_TOKEN</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract auth_token" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">auth_token</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">NO_TOKEN</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
           </hashTree>
         </hashTree>
@@ -780,11 +804,14 @@
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <JSONPathExtractor guiclass="JSONPathExtractorGui" testclass="JSONPathExtractor" testname="Extract token" enabled="true">
-              <stringProp name="JSONPostProcessor.referenceNames">auth_token</stringProp>
-              <stringProp name="JSONPostProcessor.jsonPathExprs">$.token</stringProp>
-              <stringProp name="JSONPostProcessor.defaultValues">NO_TOKEN</stringProp>
-            </JSONPathExtractor>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract auth_token" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">auth_token</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">NO_TOKEN</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
             <hashTree/>
           </hashTree>
         </hashTree>
