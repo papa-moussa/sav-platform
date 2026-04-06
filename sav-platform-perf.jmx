@@ -1,73 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="SAV Platform — Tests Complets">
-      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="SAV Platform — Tests Complets" enabled="true">
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
         <collectionProp name="Arguments.arguments">
           <elementProp name="HOST" elementType="Argument">
             <stringProp name="Argument.name">HOST</stringProp>
             <stringProp name="Argument.value">localhost</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="PORT" elementType="Argument">
             <stringProp name="Argument.name">PORT</stringProp>
             <stringProp name="Argument.value">8080</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="PROTOCOL" elementType="Argument">
             <stringProp name="Argument.name">PROTOCOL</stringProp>
             <stringProp name="Argument.value">http</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="SUPER_ADMIN_EMAIL" elementType="Argument">
             <stringProp name="Argument.name">SUPER_ADMIN_EMAIL</stringProp>
             <stringProp name="Argument.value">pamodiallo@gmail.com</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="SUPER_ADMIN_PASSWORD" elementType="Argument">
             <stringProp name="Argument.name">SUPER_ADMIN_PASSWORD</stringProp>
             <stringProp name="Argument.value">passer123</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="COMPANY_ADMIN_EMAIL" elementType="Argument">
             <stringProp name="Argument.name">COMPANY_ADMIN_EMAIL</stringProp>
             <stringProp name="Argument.value">electronicorp@yopmail.com</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="COMPANY_ADMIN_PASSWORD" elementType="Argument">
             <stringProp name="Argument.name">COMPANY_ADMIN_PASSWORD</stringProp>
             <stringProp name="Argument.value">x9GVLZ9dUfwh</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="LOAD_CLIENT_ID" elementType="Argument">
             <stringProp name="Argument.name">LOAD_CLIENT_ID</stringProp>
             <stringProp name="Argument.value">1</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="LOAD_SITE_ID" elementType="Argument">
             <stringProp name="Argument.name">LOAD_SITE_ID</stringProp>
             <stringProp name="Argument.value">1</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="LOAD_TICKET_ID" elementType="Argument">
             <stringProp name="Argument.name">LOAD_TICKET_ID</stringProp>
             <stringProp name="Argument.value">1</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
       </elementProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG1 — Tests Fonctionnels">
+
+      <!-- ═══ TG1 — TESTS FONCTIONNELS ═══ -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG1 — Tests Fonctionnels" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">stoptest</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController">
-          <stringProp name="LoopController.loops">1</stringProp>
-          <boolProp name="LoopController.continue_forever">false</boolProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
+          <intProp name="LoopController.loops">1</intProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
@@ -84,21 +75,21 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
+
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="F-0 Authentifications (once)" enabled="true"/>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-0a POST /api/auth/login (SUPER_ADMIN)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/auth/login</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"email":"${SUPER_ADMIN_EMAIL}","password":"${SUPER_ADMIN_PASSWORD}"}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;email&quot;:&quot;${SUPER_ADMIN_EMAIL}&quot;,&quot;password&quot;:&quot;${SUPER_ADMIN_PASSWORD}&quot;}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -107,12 +98,10 @@
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract token_sa" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">token_sa</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;token&quot;\s*:\s*&quot;([^&quot;]+)&quot;</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
               <stringProp name="RegexExtractor.default">TOKEN_SA_NOT_FOUND</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
@@ -121,24 +110,22 @@
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-0b POST /api/auth/login (Company ADMIN)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/auth/login</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"email":"${COMPANY_ADMIN_EMAIL}","password":"${COMPANY_ADMIN_PASSWORD}"}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;email&quot;:&quot;${COMPANY_ADMIN_EMAIL}&quot;,&quot;password&quot;:&quot;${COMPANY_ADMIN_PASSWORD}&quot;}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -147,12 +134,10 @@
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract token_admin" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">token_admin</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;token&quot;\s*:\s*&quot;([^&quot;]+)&quot;</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
               <stringProp name="RegexExtractor.default">TOKEN_ADMIN_NOT_FOUND</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
@@ -161,15 +146,14 @@
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
         </hashTree>
+
+        <!-- SECTION A : SUPER_ADMIN (token_sa) -->
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SECTION A — Super Admin (token_sa)" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
-          <boolProp name="TransactionController.includeTimers">true</boolProp>
         </TransactionController>
         <hashTree>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth — Bearer token_sa" enabled="true">
@@ -181,16 +165,13 @@
             </collectionProp>
           </HeaderManager>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-1 GET /api/admin/stats" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/admin/stats</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
@@ -199,21 +180,16 @@
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-2 GET /api/admin/companies" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/admin/companies</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
@@ -222,21 +198,16 @@
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-2b GET /api/admin/users" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/admin/users</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
@@ -245,15 +216,14 @@
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
         </hashTree>
+
+        <!-- SECTION B : Company ADMIN (token_admin) -->
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SECTION B — Company Admin (token_admin)" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
-          <boolProp name="TransactionController.includeTimers">true</boolProp>
         </TransactionController>
         <hashTree>
           <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth — Bearer token_admin" enabled="true">
@@ -265,53 +235,77 @@
             </collectionProp>
           </HeaderManager>
           <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-3 GET /api/sites" enabled="true">
+
+          <!-- F-2c: Create a site first (company has no sites by default) -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-2c POST /api/sites (create)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/sites</stringProp>
-            <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"nom":"Site JMeter Test","adresse":"123 rue du Test, Paris"}</stringProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                </elementProp>
+              </collectionProp>
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_siteId" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">f_siteId</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;id&quot;\s*:\s*(\d+)</stringProp>
+              <stringProp name="RegexExtractor.regex">"id"\s*:\s*(\d+)</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
-              <stringProp name="RegexExtractor.default">1</stringProp>
+              <stringProp name="RegexExtractor.default">SITE_ID_NOT_FOUND</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200 or 201" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+                <stringProp name="51516">201</stringProp>
+              </collectionProp>
+              <intProp name="Assertion.test_type">40</intProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+
+          <!-- F-3: Verify sites list -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-3 GET /api/sites (verify)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">${PORT}</stringProp>
+            <stringProp name="HTTPSampler.path">/api/sites</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="49586">200</stringProp>
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
+          <!-- F-4: Create client -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-4 POST /api/clients" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/clients</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"nom":"Client JMeter Test","telephone":"0600000099","email":"jmeter.test@test.com"}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;nom&quot;:&quot;Client JMeter Test&quot;,&quot;telephone&quot;:&quot;0600000099&quot;,&quot;email&quot;:&quot;jmeter.test@test.com&quot;}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -320,39 +314,36 @@
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_clientId" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">f_clientId</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;id&quot;\s*:\s*(\d+)</stringProp>
+              <stringProp name="RegexExtractor.regex">"id"\s*:\s*(\d+)</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
-              <stringProp name="RegexExtractor.default">1</stringProp>
+              <stringProp name="RegexExtractor.default">CLIENT_ID_NOT_FOUND</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200 or 201" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="49586">200</stringProp>
-                <stringProp name="49587">201</stringProp>
+                <stringProp name="51516">201</stringProp>
               </collectionProp>
               <intProp name="Assertion.test_type">40</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
+          <!-- F-5: Create ticket -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-5 POST /api/tickets" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"clientId":${f_clientId},"siteId":${f_siteId},"typeAppareil":"REFRIGERATEUR","marqueModele":"Samsung Galaxy Test","descriptionPanne":"Test fonctionnel JMeter - ecran HS","sousGarantie":false}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;clientId&quot;:${f_clientId},&quot;siteId&quot;:${f_siteId},&quot;typeAppareil&quot;:&quot;REFRIGERATEUR&quot;,&quot;marqueModele&quot;:&quot;Samsung Galaxy S21&quot;,&quot;descriptionPanne&quot;:&quot;Test fonctionnel JMeter - ecran HS&quot;,&quot;sousGarantie&quot;:false}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -361,67 +352,58 @@
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_ticketId" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">f_ticketId</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;id&quot;\s*:\s*(\d+)</stringProp>
+              <stringProp name="RegexExtractor.regex">"id"\s*:\s*(\d+)</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
-              <stringProp name="RegexExtractor.default">1</stringProp>
+              <stringProp name="RegexExtractor.default">TICKET_ID_NOT_FOUND</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_feedbackToken" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">f_feedbackToken</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;feedbackToken&quot;\s*:\s*&quot;([^&quot;]+)&quot;</stringProp>
+              <stringProp name="RegexExtractor.regex">"feedbackToken"\s*:\s*"([^"]+)"</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
-              <stringProp name="RegexExtractor.default">NO_TOKEN</stringProp>
+              <stringProp name="RegexExtractor.default">NO_FEEDBACK_TOKEN</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 201" enabled="true">
               <collectionProp name="Asserion.test_strings">
-                <stringProp name="49587">201</stringProp>
+                <stringProp name="49586">201</stringProp>
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
+          <!-- F-6: Verify ticket is OUVERT -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-6 GET /api/tickets/${f_ticketId} (assert OUVERT)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert statut OUVERT" enabled="true">
               <collectionProp name="Asserion.test_strings">
-                <stringProp name="-1952134121">OUVERT</stringProp>
+                <stringProp name="1">OUVERT</stringProp>
               </collectionProp>
               <intProp name="Assertion.test_type">2</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
+          <!-- F-7: Change status to EN_COURS -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-7 PATCH statut EN_COURS" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}/statut</stringProp>
             <stringProp name="HTTPSampler.method">PATCH</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="statut" elementType="HTTPArgument">
                   <stringProp name="Argument.name">statut</stringProp>
@@ -439,47 +421,42 @@
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
+          <!-- F-8: Confirm EN_COURS -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-8 GET /api/tickets/${f_ticketId} (confirm EN_COURS)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert statut EN_COURS" enabled="true">
               <collectionProp name="Asserion.test_strings">
-                <stringProp name="-1010245036">EN_COURS</stringProp>
+                <stringProp name="1">EN_COURS</stringProp>
               </collectionProp>
               <intProp name="Assertion.test_type">2</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
+          <!-- F-9: Create intervention (NOT /api/reparations) -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-9 POST /api/tickets/${f_ticketId}/interventions" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}/interventions</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"diagnostic":"Ecran OLED defaillant","actionsRealisees":"Remplacement ecran OLED effectue","resultat":"REPARE","tempsPasseHeures":1.5}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;diagnostic&quot;:&quot;Ecran OLED defaillant - test JMeter&quot;,&quot;actionsRealisees&quot;:&quot;Remplacement ecran OLED effectue&quot;,&quot;resultat&quot;:&quot;RESOLU&quot;,&quot;tempsPasseHeures&quot;:1.5}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -488,25 +465,21 @@
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200 or 201" enabled="true">
               <collectionProp name="Asserion.test_strings">
                 <stringProp name="49586">200</stringProp>
-                <stringProp name="49587">201</stringProp>
+                <stringProp name="51516">201</stringProp>
               </collectionProp>
               <intProp name="Assertion.test_type">40</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
+          <!-- F-10: QR scan feedback init -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-10 GET /api/feedback/${f_feedbackToken}/init (QR scan)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/feedback/${f_feedbackToken}/init</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
@@ -515,19 +488,18 @@
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
+
+          <!-- F-11: Resolve ticket -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-11 PATCH statut RESOLU" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}/statut</stringProp>
             <stringProp name="HTTPSampler.method">PATCH</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="statut" elementType="HTTPArgument">
                   <stringProp name="Argument.name">statut</stringProp>
@@ -545,54 +517,43 @@
               </collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-              <stringProp name="Assertion.custom_message"></stringProp>
-              <boolProp name="Assertion.assume_success">false</boolProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
         </hashTree>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree — TG1">
+
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree — TG1" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <timestamp>false</timestamp>
-              <success>false</success>
-              <label>false</label>
               <code>true</code>
               <message>true</message>
-              <threadName>false</threadName>
-              <dataType>false</dataType>
               <encoding>false</encoding>
-              <assertions>true</assertions>
-              <subresults>true</subresults>
+              <requestHeaders>true</requestHeaders>
+              <responseHeaders>true</responseHeaders>
               <responseData>true</responseData>
               <samplerData>true</samplerData>
-              <xml>false</xml>
-              <fieldNames>false</fieldNames>
-              <responseHeaders>true</responseHeaders>
-              <requestHeaders>true</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
             </value>
           </objProp>
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
+
+      <!-- ═══ TG2 — PERF : 100 Techniciens ═══ -->
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG2 — Perf : 100 Techniciens" enabled="false">
         <intProp name="ThreadGroup.num_threads">100</intProp>
         <intProp name="ThreadGroup.ramp_time">60</intProp>
-        <longProp name="ThreadGroup.duration">300</longProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">300</stringProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController">
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
           <intProp name="LoopController.loops">-1</intProp>
-          <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
@@ -609,21 +570,21 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
+
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Login once" enabled="true"/>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login Company ADMIN" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/auth/login</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"email":"${COMPANY_ADMIN_EMAIL}","password":"${COMPANY_ADMIN_PASSWORD}"}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;email&quot;:&quot;${COMPANY_ADMIN_EMAIL}&quot;,&quot;password&quot;:&quot;${COMPANY_ADMIN_PASSWORD}&quot;}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -632,16 +593,15 @@
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract auth_token" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">auth_token</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;token&quot;\s*:\s*&quot;([^&quot;]+)&quot;</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
               <stringProp name="RegexExtractor.default">NO_TOKEN</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
           </hashTree>
         </hashTree>
+
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth Header" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
@@ -651,100 +611,75 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
+
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Scenario Technicien" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
-          <boolProp name="TransactionController.includeTimers">true</boolProp>
         </TransactionController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/tickets" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Think Time 1-3s" enabled="true">
             <stringProp name="ConstantTimer.delay">1000</stringProp>
             <stringProp name="RandomTimer.range">2000</stringProp>
           </GaussianRandomTimer>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/tickets/${LOAD_TICKET_ID}" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets/${LOAD_TICKET_ID}</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Think Time 0.5-2s" enabled="true">
             <stringProp name="ConstantTimer.delay">500</stringProp>
             <stringProp name="RandomTimer.range">1500</stringProp>
           </GaussianRandomTimer>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/sites" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/sites</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
         </hashTree>
+
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report — TG2" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <timestamp>false</timestamp>
-              <success>false</success>
-              <label>false</label>
               <code>true</code>
-              <message>false</message>
-              <threadName>false</threadName>
-              <dataType>false</dataType>
-              <encoding>false</encoding>
               <assertions>true</assertions>
-              <subresults>false</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>false</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
             </value>
           </objProp>
           <stringProp name="filename">tg2-perf-results.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
+
+      <!-- ═══ TG3 — PERF : 50 Super-Admins ═══ -->
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG3 — Perf : 50 Super-Admins" enabled="false">
         <intProp name="ThreadGroup.num_threads">50</intProp>
         <intProp name="ThreadGroup.ramp_time">30</intProp>
-        <longProp name="ThreadGroup.duration">300</longProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">300</stringProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController">
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
           <intProp name="LoopController.loops">-1</intProp>
-          <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
@@ -761,21 +696,21 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
+
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Login SUPER_ADMIN once" enabled="true"/>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login SUPER_ADMIN" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/auth/login</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"email":"${SUPER_ADMIN_EMAIL}","password":"${SUPER_ADMIN_PASSWORD}"}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;email&quot;:&quot;${SUPER_ADMIN_EMAIL}&quot;,&quot;password&quot;:&quot;${SUPER_ADMIN_PASSWORD}&quot;}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -784,16 +719,15 @@
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract auth_token" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">auth_token</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;token&quot;\s*:\s*&quot;([^&quot;]+)&quot;</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
               <stringProp name="RegexExtractor.default">NO_TOKEN</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
           </hashTree>
         </hashTree>
+
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth Header SUPER_ADMIN" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
@@ -803,100 +737,75 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
+
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Scenario Super Admin Dashboard" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
-          <boolProp name="TransactionController.includeTimers">true</boolProp>
         </TransactionController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/admin/stats" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/admin/stats</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Think Time 1-2s" enabled="true">
             <stringProp name="ConstantTimer.delay">1000</stringProp>
             <stringProp name="RandomTimer.range">1000</stringProp>
           </GaussianRandomTimer>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/admin/companies" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/admin/companies</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Think Time 0.5-1.5s" enabled="true">
             <stringProp name="ConstantTimer.delay">500</stringProp>
             <stringProp name="RandomTimer.range">1000</stringProp>
           </GaussianRandomTimer>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/admin/users" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/admin/users</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
         </hashTree>
+
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report — TG3" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <timestamp>false</timestamp>
-              <success>false</success>
-              <label>false</label>
               <code>true</code>
-              <message>false</message>
-              <threadName>false</threadName>
-              <dataType>false</dataType>
-              <encoding>false</encoding>
               <assertions>true</assertions>
-              <subresults>false</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>false</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
             </value>
           </objProp>
           <stringProp name="filename">tg3-perf-results.csv</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
+
+      <!-- ═══ TG4 — STRESS : 500 Users ═══ -->
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG4 — Stress : 500 Users" enabled="false">
         <intProp name="ThreadGroup.num_threads">500</intProp>
         <intProp name="ThreadGroup.ramp_time">30</intProp>
-        <longProp name="ThreadGroup.duration">180</longProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">180</stringProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
-        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController">
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController">
           <intProp name="LoopController.loops">-1</intProp>
-          <boolProp name="LoopController.continue_forever">false</boolProp>
         </elementProp>
       </ThreadGroup>
       <hashTree>
@@ -913,21 +822,21 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
+
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Login once" enabled="true"/>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Login Company ADMIN" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/auth/login</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"email":"${COMPANY_ADMIN_EMAIL}","password":"${COMPANY_ADMIN_PASSWORD}"}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;email&quot;:&quot;${COMPANY_ADMIN_EMAIL}&quot;,&quot;password&quot;:&quot;${COMPANY_ADMIN_PASSWORD}&quot;}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
@@ -936,16 +845,15 @@
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract auth_token" enabled="true">
               <stringProp name="RegexExtractor.useHeaders">false</stringProp>
               <stringProp name="RegexExtractor.refname">auth_token</stringProp>
-              <stringProp name="RegexExtractor.regex">&quot;token&quot;\s*:\s*&quot;([^&quot;]+)&quot;</stringProp>
+              <stringProp name="RegexExtractor.regex">"token"\s*:\s*"([^"]+)"</stringProp>
               <stringProp name="RegexExtractor.template">$1$</stringProp>
               <stringProp name="RegexExtractor.default">NO_TOKEN</stringProp>
               <stringProp name="RegexExtractor.match_no">1</stringProp>
-              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
-              <stringProp name="RegexExtractor.match_number"></stringProp>
             </RegexExtractor>
             <hashTree/>
           </hashTree>
         </hashTree>
+
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Auth Header" enabled="true">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
@@ -955,85 +863,62 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
+
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Scenario Stress" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
-          <boolProp name="TransactionController.includeTimers">true</boolProp>
         </TransactionController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/tickets (stress)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /api/tickets/${LOAD_TICKET_ID} (stress)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets/${LOAD_TICKET_ID}</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
-            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
-            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
-              <collectionProp name="Arguments.arguments"/>
-            </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
+
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /api/tickets (stress create)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.path">/api/tickets</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
+                  <stringProp name="Argument.value">{"clientId":${LOAD_CLIENT_ID},"siteId":${LOAD_SITE_ID},"typeAppareil":"REFRIGERATEUR","marqueModele":"Apple iPhone - Thread ${__threadNum}","descriptionPanne":"Test de charge JMeter","sousGarantie":false}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;clientId&quot;:${LOAD_CLIENT_ID},&quot;siteId&quot;:${LOAD_SITE_ID},&quot;typeAppareil&quot;:&quot;REFRIGERATEUR&quot;,&quot;marqueModele&quot;:&quot;Apple iPhone 14 - Thread ${__threadNum}&quot;,&quot;descriptionPanne&quot;:&quot;Test de charge JMeter&quot;,&quot;sousGarantie&quot;:false}</stringProp>
-                  <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree/>
         </hashTree>
+
         <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report — TG4 Stress" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <timestamp>false</timestamp>
-              <success>false</success>
-              <label>false</label>
               <code>true</code>
-              <message>false</message>
-              <threadName>false</threadName>
-              <dataType>false</dataType>
-              <encoding>false</encoding>
               <assertions>true</assertions>
-              <subresults>false</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>false</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
             </value>
           </objProp>
           <stringProp name="filename">tg4-stress-results.csv</stringProp>
         </ResultCollector>
         <hashTree/>
+
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree — TG4 errors only" enabled="true">
           <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
@@ -1041,31 +926,15 @@
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
-              <timestamp>false</timestamp>
-              <success>false</success>
-              <label>false</label>
               <code>true</code>
-              <message>false</message>
-              <threadName>false</threadName>
-              <dataType>false</dataType>
-              <encoding>false</encoding>
-              <assertions>false</assertions>
-              <subresults>false</subresults>
               <responseData>true</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>false</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
             </value>
           </objProp>
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
+
     </hashTree>
   </hashTree>
 </jmeterTestPlan>
