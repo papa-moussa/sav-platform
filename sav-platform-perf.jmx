@@ -51,7 +51,11 @@
     </TestPlan>
     <hashTree>
 
-      <!-- ═══ TG1 — TESTS FONCTIONNELS ═══ -->
+      <!-- ═══════════════════════════════════════════════════ -->
+      <!-- TG1 — TESTS FONCTIONNELS (1 user, 1 iteration)     -->
+      <!-- Ticket lifecycle: RECU→EN_DIAGNOSTIC→EN_REPARATION  -->
+      <!--   →REPARE→EN_ATTENTE_FEEDBACK→CLOTURE              -->
+      <!-- ═══════════════════════════════════════════════════ -->
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="TG1 — Tests Fonctionnels" enabled="true">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
@@ -76,6 +80,7 @@
         </HeaderManager>
         <hashTree/>
 
+        <!-- F-0 : Login both accounts (once per thread) -->
         <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="F-0 Authentifications (once)" enabled="true"/>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-0a POST /api/auth/login (SUPER_ADMIN)" enabled="true">
@@ -105,9 +110,7 @@
             </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
@@ -141,9 +144,7 @@
             </RegexExtractor>
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
@@ -151,7 +152,7 @@
           </hashTree>
         </hashTree>
 
-        <!-- SECTION A : SUPER_ADMIN (token_sa) -->
+        <!-- SECTION A : SUPER_ADMIN endpoints -->
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SECTION A — Super Admin (token_sa)" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
         </TransactionController>
@@ -175,9 +176,7 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
@@ -193,9 +192,7 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
@@ -211,9 +208,7 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
@@ -221,7 +216,7 @@
           </hashTree>
         </hashTree>
 
-        <!-- SECTION B : Company ADMIN (token_admin) -->
+        <!-- SECTION B : Company ADMIN endpoints -->
         <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="SECTION B — Company Admin (token_admin)" enabled="true">
           <boolProp name="TransactionController.parent">true</boolProp>
         </TransactionController>
@@ -236,7 +231,7 @@
           </HeaderManager>
           <hashTree/>
 
-          <!-- F-2c: Create a site first (company has no sites by default) -->
+          <!-- F-2c: Create site (company starts empty) -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-2c POST /api/sites (create)" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -284,9 +279,7 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
@@ -304,7 +297,7 @@
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
-                  <stringProp name="Argument.value">{"nom":"Client JMeter Test","telephone":"0600000099","email":"jmeter.test@test.com"}</stringProp>
+                  <stringProp name="Argument.value">{"nom":"Client JMeter Test","telephone":"0600000099","email":"jmeter.client@test.com"}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
@@ -331,7 +324,7 @@
             <hashTree/>
           </hashTree>
 
-          <!-- F-5: Create ticket -->
+          <!-- F-5: Create ticket → initial status: RECU -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-5 POST /api/tickets" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -358,27 +351,16 @@
               <stringProp name="RegexExtractor.match_no">1</stringProp>
             </RegexExtractor>
             <hashTree/>
-            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_feedbackToken" enabled="true">
-              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
-              <stringProp name="RegexExtractor.refname">f_feedbackToken</stringProp>
-              <stringProp name="RegexExtractor.regex">"feedbackToken"\s*:\s*"([^"]+)"</stringProp>
-              <stringProp name="RegexExtractor.template">$1$</stringProp>
-              <stringProp name="RegexExtractor.default">NO_FEEDBACK_TOKEN</stringProp>
-              <stringProp name="RegexExtractor.match_no">1</stringProp>
-            </RegexExtractor>
-            <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 201" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">201</stringProp>
-              </collectionProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">201</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
 
-          <!-- F-6: Verify ticket is OUVERT -->
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-6 GET /api/tickets/${f_ticketId} (assert OUVERT)" enabled="true">
+          <!-- F-6: GET ticket — assert status = RECU (initial status) -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-6 GET /api/tickets/${f_ticketId} (assert RECU)" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
@@ -386,18 +368,16 @@
             <stringProp name="HTTPSampler.method">GET</stringProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert statut OUVERT" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="1">OUVERT</stringProp>
-              </collectionProp>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert statut RECU" enabled="true">
+              <collectionProp name="Asserion.test_strings"><stringProp name="1">RECU</stringProp></collectionProp>
               <intProp name="Assertion.test_type">2</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
 
-          <!-- F-7: Change status to EN_COURS -->
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-7 PATCH statut EN_COURS" enabled="true">
+          <!-- F-7: RECU → EN_DIAGNOSTIC -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-7 PATCH statut EN_DIAGNOSTIC" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
@@ -407,7 +387,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="statut" elementType="HTTPArgument">
                   <stringProp name="Argument.name">statut</stringProp>
-                  <stringProp name="Argument.value">EN_COURS</stringProp>
+                  <stringProp name="Argument.value">EN_DIAGNOSTIC</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
@@ -416,35 +396,41 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
 
-          <!-- F-8: Confirm EN_COURS -->
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-8 GET /api/tickets/${f_ticketId} (confirm EN_COURS)" enabled="true">
+          <!-- F-8: EN_DIAGNOSTIC → EN_REPARATION -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-8 PATCH statut EN_REPARATION" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}</stringProp>
-            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}/statut</stringProp>
+            <stringProp name="HTTPSampler.method">PATCH</stringProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="statut" elementType="HTTPArgument">
+                  <stringProp name="Argument.name">statut</stringProp>
+                  <stringProp name="Argument.value">EN_REPARATION</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert statut EN_COURS" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="1">EN_COURS</stringProp>
-              </collectionProp>
-              <intProp name="Assertion.test_type">2</intProp>
-              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <intProp name="Assertion.test_type">8</intProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
             <hashTree/>
           </hashTree>
 
-          <!-- F-9: Create intervention (NOT /api/reparations) -->
+          <!-- F-9: POST intervention (technicien logs work done) -->
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-9 POST /api/tickets/${f_ticketId}/interventions" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
@@ -455,7 +441,7 @@
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
-                  <stringProp name="Argument.value">{"diagnostic":"Ecran OLED defaillant","actionsRealisees":"Remplacement ecran OLED effectue","resultat":"REPARE","tempsPasseHeures":1.5}</stringProp>
+                  <stringProp name="Argument.value">{"diagnostic":"Ecran OLED defaillant confirme","actionsRealisees":"Remplacement ecran OLED effectue avec succes","resultat":"REPARE","tempsPasseHeures":2.0}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
@@ -473,27 +459,8 @@
             <hashTree/>
           </hashTree>
 
-          <!-- F-10: QR scan feedback init -->
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-10 GET /api/feedback/${f_feedbackToken}/init (QR scan)" enabled="true">
-            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
-            <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
-            <stringProp name="HTTPSampler.port">${PORT}</stringProp>
-            <stringProp name="HTTPSampler.path">/api/feedback/${f_feedbackToken}/init</stringProp>
-            <stringProp name="HTTPSampler.method">GET</stringProp>
-          </HTTPSamplerProxy>
-          <hashTree>
-            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
-              </collectionProp>
-              <intProp name="Assertion.test_type">8</intProp>
-              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
-            </ResponseAssertion>
-            <hashTree/>
-          </hashTree>
-
-          <!-- F-11: Resolve ticket -->
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-11 PATCH statut RESOLU" enabled="true">
+          <!-- F-10: EN_REPARATION → REPARE -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-10 PATCH statut REPARE" enabled="true">
             <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
             <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
             <stringProp name="HTTPSampler.port">${PORT}</stringProp>
@@ -503,7 +470,7 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="statut" elementType="HTTPArgument">
                   <stringProp name="Argument.name">statut</stringProp>
-                  <stringProp name="Argument.value">RESOLU</stringProp>
+                  <stringProp name="Argument.value">REPARE</stringProp>
                   <boolProp name="HTTPArgument.use_equals">true</boolProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
@@ -512,9 +479,114 @@
           </HTTPSamplerProxy>
           <hashTree>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
-              <collectionProp name="Asserion.test_strings">
-                <stringProp name="49586">200</stringProp>
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <intProp name="Assertion.test_type">8</intProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+
+          <!-- F-11: REPARE → EN_ATTENTE_FEEDBACK (generates qrToken) -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-11 PATCH statut EN_ATTENTE_FEEDBACK" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">${PORT}</stringProp>
+            <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}/statut</stringProp>
+            <stringProp name="HTTPSampler.method">PATCH</stringProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="statut" elementType="HTTPArgument">
+                  <stringProp name="Argument.name">statut</stringProp>
+                  <stringProp name="Argument.value">EN_ATTENTE_FEEDBACK</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                </elementProp>
               </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <intProp name="Assertion.test_type">8</intProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+
+          <!-- F-12: GET ticket to extract qrToken (generated at EN_ATTENTE_FEEDBACK) -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-12 GET /api/tickets/${f_ticketId} (extract qrToken)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">${PORT}</stringProp>
+            <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract f_qrToken" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">f_qrToken</stringProp>
+              <stringProp name="RegexExtractor.regex">"qrToken"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">QR_TOKEN_NOT_FOUND</stringProp>
+              <stringProp name="RegexExtractor.match_no">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert statut EN_ATTENTE_FEEDBACK" enabled="true">
+              <collectionProp name="Asserion.test_strings"><stringProp name="1">EN_ATTENTE_FEEDBACK</stringProp></collectionProp>
+              <intProp name="Assertion.test_type">2</intProp>
+              <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+
+          <!-- F-13: GET /public/feedback?token={qrToken} (simulates QR scan by client) -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-13 GET /public/feedback?token=${f_qrToken} (QR scan)" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">${PORT}</stringProp>
+            <stringProp name="HTTPSampler.path">/public/feedback</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="token" elementType="HTTPArgument">
+                  <stringProp name="Argument.name">token</stringProp>
+                  <stringProp name="Argument.value">${f_qrToken}</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
+              <intProp name="Assertion.test_type">8</intProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+          </hashTree>
+
+          <!-- F-14: EN_ATTENTE_FEEDBACK → CLOTURE (admin closes ticket) -->
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="F-14 PATCH statut CLOTURE" enabled="true">
+            <stringProp name="HTTPSampler.protocol">${PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.domain">${HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">${PORT}</stringProp>
+            <stringProp name="HTTPSampler.path">/api/tickets/${f_ticketId}/statut</stringProp>
+            <stringProp name="HTTPSampler.method">PATCH</stringProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="statut" elementType="HTTPArgument">
+                  <stringProp name="Argument.name">statut</stringProp>
+                  <stringProp name="Argument.value">CLOTURE</stringProp>
+                  <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert 200" enabled="true">
+              <collectionProp name="Asserion.test_strings"><stringProp name="49586">200</stringProp></collectionProp>
               <intProp name="Assertion.test_type">8</intProp>
               <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
             </ResponseAssertion>
@@ -896,7 +968,7 @@
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
-                  <stringProp name="Argument.value">{"clientId":${LOAD_CLIENT_ID},"siteId":${LOAD_SITE_ID},"typeAppareil":"REFRIGERATEUR","marqueModele":"Apple iPhone - Thread ${__threadNum}","descriptionPanne":"Test de charge JMeter","sousGarantie":false}</stringProp>
+                  <stringProp name="Argument.value">{"clientId":${LOAD_CLIENT_ID},"siteId":${LOAD_SITE_ID},"typeAppareil":"REFRIGERATEUR","marqueModele":"Stress Test Thread ${__threadNum}","descriptionPanne":"Test de charge JMeter","sousGarantie":false}</stringProp>
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
                 </elementProp>
               </collectionProp>
