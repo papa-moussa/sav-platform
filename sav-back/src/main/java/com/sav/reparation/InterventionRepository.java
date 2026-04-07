@@ -18,4 +18,6 @@ public interface InterventionRepository extends JpaRepository<InterventionEntity
             ORDER BY i.createdAt ASC
             """)
     List<InterventionEntity> findByTicketIdOrderByCreatedAtAsc(@Param("ticketId") Long ticketId);
+    
+    long countByTicketId(Long ticketId);
 }

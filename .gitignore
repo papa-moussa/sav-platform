@@ -34,3 +34,5 @@ application-prod.properties
 tmp/
 # Claude local settings
 .claude/
+
+.angular

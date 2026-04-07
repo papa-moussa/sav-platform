@@ -134,13 +134,29 @@ public class TicketService {
         }
 
         // Clôture sans feedback → override ADMIN uniquement
+        UserEntity caller = null;
         if (newStatut == TicketStatut.CLOTURE && !ticket.isFeedbackSoumis()) {
-            UserEntity caller = userRepository.findByEmail(callerEmail)
+            caller = userRepository.findByEmail(callerEmail)
                     .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé : " + callerEmail));
             if (caller.getRole() != Role.ADMIN) {
                 throw new IllegalStateException(
                         "Ce ticket ne peut être clôturé sans feedback client. " +
                         "Le client doit scanner le QR Code, ou un administrateur peut clôturer manuellement.");
+            }
+        }
+
+        // REPARE / IRREPARABLE exige une intervention (sauf ADMIN)
+        if (newStatut == TicketStatut.REPARE || newStatut == TicketStatut.IRREPARABLE) {
+            long count = interventionRepository.countByTicketId(id);
+            if (count == 0) {
+                if (caller == null) {
+                    caller = userRepository.findByEmail(callerEmail)
+                            .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé : " + callerEmail));
+                }
+                if (caller.getRole() != Role.ADMIN) {
+                    throw new IllegalStateException(
+                            "Un rapport d'intervention est requis pour marquer ce ticket comme " + newStatut.name().toLowerCase() + ".");
+                }
             }
         }
 
@@ -169,6 +185,11 @@ public class TicketService {
     @Transactional
     public InterventionResponse addIntervention(Long ticketId, InterventionRequest request, String userEmail) {
         TicketEntity ticket = getOrThrow(ticketId);
+        
+        if (ticket.getStatut() == TicketStatut.CLOTURE) {
+            throw new IllegalStateException("Impossible d'ajouter une intervention sur un ticket clôturé.");
+        }
+
         UserEntity technicien = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé : " + userEmail));
 

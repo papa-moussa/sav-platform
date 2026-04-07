@@ -80,7 +80,12 @@ export class TicketDetailDialogComponent implements OnInit {
 
   get canAddIntervention(): boolean {
     const r = this.authService.currentRole();
-    return r === 'ADMIN' || r === 'TECHNICIEN';
+    const isClosed = this.ticket.statut === 'CLOTURE';
+    return (r === 'ADMIN' || r === 'TECHNICIEN') && !isClosed;
+  }
+
+  get hasInterventions(): boolean {
+    return this.ticket.interventions.length > 0;
   }
 
   ngOnInit(): void {
@@ -120,6 +125,17 @@ export class TicketDetailDialogComponent implements OnInit {
   }
 
   private executeChangeStatut(newStatut: TicketStatut): void {
+    // Vérification de sécurité frontend : intervention requise pour REPARE/IRREPARABLE
+    if ((newStatut === 'REPARE' || newStatut === 'IRREPARABLE') && !this.hasInterventions) {
+      if (this.authService.currentRole() !== 'ADMIN') {
+        this.error.set(`Un rapport d'intervention est requis pour marquer ce ticket comme ${this.statutLabels[newStatut].toLowerCase()}.`);
+        this.statusConfirmState.set({ status: null, confirm: false });
+        // Scroll to tab interventions to help user
+        this.setTab('interventions');
+        return;
+      }
+    }
+
     this.savingStatut.set(true);
     this.error.set(null);
     this.statusConfirmState.set({ status: null, confirm: false });
@@ -128,9 +144,8 @@ export class TicketDetailDialogComponent implements OnInit {
       next: (t) => {
         this.savingStatut.set(false);
         this.successMsg.set(`Statut mis à jour : ${this.statutLabels[newStatut]}`);
-        this.updated.emit({ ...this.ticket, statut: t.statut, updatedAt: t.updatedAt });
-        this.ticket = { ...this.ticket, statut: t.statut };
-        // Reset success msg after a while
+        this.ticket = { ...this.ticket, statut: t.statut, updatedAt: t.updatedAt };
+        this.updated.emit(this.ticket);
         setTimeout(() => this.successMsg.set(null), 5000);
       },
       error: (err) => {
@@ -159,13 +174,16 @@ export class TicketDetailDialogComponent implements OnInit {
   addIntervention(): void {
     if (this.interventionForm.invalid) { this.error.set('Remplissez les champs obligatoires.'); return; }
     const v = this.interventionForm.value;
+    const requestedResult = (v.resultat as ResultatIntervention) || 'EN_COURS';
+
     const request: InterventionRequest = {
       diagnostic: v.diagnostic ?? '',
       actionsRealisees: v.actionsRealisees ?? '',
       observations: v.observations || undefined,
       tempsPasseHeures: v.tempsPasseHeures ?? undefined,
-      resultat: (v.resultat as ResultatIntervention) || 'EN_COURS',
+      resultat: requestedResult,
     };
+
     this.savingIntervention.set(true);
     this.error.set(null);
     this.ticketService.addIntervention(this.ticket.id, request).subscribe({
@@ -173,9 +191,17 @@ export class TicketDetailDialogComponent implements OnInit {
         this.savingIntervention.set(false);
         this.successMsg.set('Intervention enregistrée.');
         this.interventionForm.reset({ resultat: 'EN_COURS' });
-        const updatedTicket = { ...this.ticket, interventions: [...this.ticket.interventions, interv] };
-        this.ticket = updatedTicket;
-        this.updated.emit(updatedTicket);
+        
+        // Mise à jour locale immédiate de la liste d'interventions
+        this.ticket = { ...this.ticket, interventions: [...this.ticket.interventions, interv] };
+        this.updated.emit(this.ticket);
+
+        // --- ACTION COMBINÉE : Mise à jour automatique du statut ---
+        if (requestedResult === 'REPARE' || requestedResult === 'IRREPARABLE') {
+          const targetStatut: TicketStatut = requestedResult === 'REPARE' ? 'REPARE' : 'IRREPARABLE';
+          // On évite la confirmation pour l'action combinée car elle est explicite par le résultat du formulaire
+          this.executeChangeStatut(targetStatut);
+        }
       },
       error: (err) => {
         this.error.set(err.error?.message ?? 'Erreur lors de l\'enregistrement.');

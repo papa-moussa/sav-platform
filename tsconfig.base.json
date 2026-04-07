@@ -71,6 +71,9 @@
       ],
       "@spartan-ng/helm/field": [
         "libs/ui/field/src/index.ts"
+      ],
+      "@spartan-ng/helm/sonner": [
+        "libs/ui/sonner/src/index.ts"
       ]
     }
   },
