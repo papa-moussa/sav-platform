@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  Propriétés globales                                          -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <property name="LOG_DIR"  value="logs"/>
+  <property name="APP_NAME" value="sav-back"/>
+
+  <!-- Raccourcies couleurs ANSI -->
+  <property name="GREY"    value="\033[0;90m"/>
+  <property name="CYAN"    value="\033[0;36m"/>
+  <property name="RESET"   value="\033[0m"/>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  APPENDER 1 — Console colorée (dev)                          -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <!--
+        Heure → discret gris
+        Niveau → coloré automatiquement (highlight)
+        Thread → gris, entre crochets
+        Logger → cyan, tronqué à 35 chars
+        Message → normal
+      -->
+      <pattern>%clr(%d{HH:mm:ss.SSS}){faint} %highlight(%-5level) %clr([%15.15t]){faint} %clr(%-35.35logger{35}){cyan} : %msg%n%rootException</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  APPENDER 2 — Fichier rotatif (app.log)                      -->
+  <!--  Tous les niveaux · rotation journalière · 30 jours / 500 MB -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <appender name="FILE_ALL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/${APP_NAME}.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/${APP_NAME}-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+      <maxHistory>30</maxHistory>
+      <totalSizeCap>500MB</totalSizeCap>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%15.15t] %-40.40logger{40} : %msg%n%rootException</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  APPENDER 3 — Fichier erreurs seules (error.log)             -->
+  <!--  WARN + ERROR uniquement · 90 jours / 200 MB                 -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/${APP_NAME}-error.log</file>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/${APP_NAME}-error-%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+      <maxHistory>90</maxHistory>
+      <totalSizeCap>200MB</totalSizeCap>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%15.15t] %-40.40logger{40} : %msg%n%rootException</pattern>
+      <charset>UTF-8</charset>
+    </encoder>
+  </appender>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  APPENDER ASYNC — Enveloppe FILE_ALL en non-bloquant          -->
+  <!--  Critique pour la perf sous charge (100+ users JMeter)        -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>512</queueSize>
+    <discardingThreshold>0</discardingThreshold><!-- 0 = ne jamais perdre de logs -->
+    <includeCallerData>false</includeCallerData>
+    <appender-ref ref="FILE_ALL"/>
+  </appender>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  PROFIL DEV — Console bavarde + fichiers                      -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <springProfile name="default,dev">
+
+    <!-- SQL Hibernate : visible en dev (formaté) -->
+    <logger name="org.hibernate.SQL"                    level="DEBUG" additivity="false">
+      <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="org.hibernate.orm.jdbc.bind"          level="TRACE" additivity="false">
+      <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- HikariCP : juste les infos de pool -->
+    <logger name="com.zaxxer.hikari"                    level="INFO"  additivity="false">
+      <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- OTP dev mode : toujours visible pour voir le code en console -->
+    <logger name="com.sav.feedback"                     level="DEBUG" additivity="false">
+      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
+    <!-- Sécurité / JWT -->
+    <logger name="com.sav.config"                       level="DEBUG" additivity="false">
+      <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Loggers métier SAV -->
+    <logger name="com.sav"                              level="DEBUG" additivity="false">
+      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
+    <!-- Frameworks : INFO minimum -->
+    <logger name="org.springframework"                  level="INFO"/>
+    <logger name="org.springframework.security"         level="INFO"/>
+
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="ASYNC_FILE"/>
+      <appender-ref ref="FILE_ERROR"/>
+    </root>
+  </springProfile>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  PROFIL PROD — Pas de SQL · Fichiers seulement               -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <springProfile name="prod">
+
+    <!-- SQL off en prod -->
+    <logger name="org.hibernate.SQL"                    level="WARN"/>
+    <logger name="org.hibernate.orm.jdbc.bind"          level="WARN"/>
+
+    <!-- HikariCP : warn uniquement -->
+    <logger name="com.zaxxer.hikari"                    level="WARN"/>
+
+    <!-- Métier SAV : INFO en prod -->
+    <logger name="com.sav"                              level="INFO" additivity="false">
+      <appender-ref ref="ASYNC_FILE"/>
+      <appender-ref ref="FILE_ERROR"/>
+    </logger>
+
+    <!-- Feedback / OTP : INFO (pas les traces) -->
+    <logger name="com.sav.feedback"                     level="INFO" additivity="false">
+      <appender-ref ref="ASYNC_FILE"/>
+      <appender-ref ref="FILE_ERROR"/>
+    </logger>
+
+    <root level="WARN">
+      <appender-ref ref="ASYNC_FILE"/>
+      <appender-ref ref="FILE_ERROR"/>
+    </root>
+  </springProfile>
+
+</configuration>
