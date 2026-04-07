@@ -2,6 +2,16 @@
 <configuration>
 
   <!-- ══════════════════════════════════════════════════════════════ -->
+  <!--  Converters Spring Boot (requis dans un fichier custom)       -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <conversionRule conversionWord="clr"
+      converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+  <conversionRule conversionWord="wex"
+      converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+  <conversionRule conversionWord="wEx"
+      converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+  <!-- ══════════════════════════════════════════════════════════════ -->
   <!--  Propriétés globales                                          -->
   <!-- ══════════════════════════════════════════════════════════════ -->
   <property name="LOG_DIR"  value="logs"/>
