@@ -37,6 +37,7 @@ public class TicketService {
     private final SiteRepository    siteRepository;
     private final UserRepository    userRepository;
     private final CompanyRepository companyRepository;
+    private final TicketSequenceRepository sequenceRepository;
 
     // ─── Liste avec filtres ───────────────────────────────────────────────────
 
@@ -199,13 +200,21 @@ public class TicketService {
         }
     }
 
-    /** Génère le prochain numéro de ticket au format TKT-YYYY-NNNNN. */
-    private synchronized String generateNumero() {
-        String year = String.valueOf(Year.now().getValue());
-        int nextSeq = ticketRepository.findMaxSequenceByYear(year)
-                .map(max -> max + 1)
-                .orElse(1);
-        return String.format("TKT-%s-%05d", year, nextSeq);
+    /** Génère le prochain numéro de ticket au format TKT-YYYY-NNNNN de manière atomique. */
+    private String generateNumero() {
+        String yearStr = String.valueOf(Year.now().getValue());
+
+        // Récupère la séquence avec verrouillage pessimiste
+        TicketSequenceEntity sequence = sequenceRepository.findByYearWithLock(yearStr)
+                .orElseGet(() -> TicketSequenceEntity.builder()
+                        .year(yearStr)
+                        .currentValue(0L)
+                        .build());
+
+        sequence.increment();
+        sequenceRepository.saveAndFlush(sequence);
+
+        return String.format("TKT-%s-%05d", yearStr, sequence.getCurrentValue());
     }
 
     private TicketResponse toResponse(TicketEntity t, List<InterventionEntity> interventions) {
@@ -229,7 +238,8 @@ public class TicketService {
                 t.getUpdatedAt(),
                 interventions.stream().map(this::toInterventionResponse).toList(),
                 t.isFeedbackSoumis(),
-                t.getQrToken() != null
+                t.getQrToken() != null,
+                t.getQrToken()
         );
     }
 

@@ -34,12 +34,16 @@ export class TicketDetailDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   techniciens = signal<User[]>([]);
-  activeTab = signal<'info' | 'interventions' | 'actions'>('info');
+  activeTab = signal<'info' | 'interventions'>('info');
   savingStatut = signal(false);
   savingAssign = signal(false);
   savingIntervention = signal(false);
   error = signal<string | null>(null);
   successMsg = signal<string | null>(null);
+
+  // ─── Statut Confirmation UX ──────────────────────────────────────────────
+  statusConfirmState = signal<{status: TicketStatut | null, confirm: boolean}>({status: null, confirm: false});
+  private transitionTimeout: ReturnType<typeof setTimeout> | undefined;
 
   // ─── QR Code ──────────────────────────────────────────────────────────────
   qrCode = signal<QrCodeResponse | null>(null);
@@ -97,27 +101,40 @@ export class TicketDetailDialogComponent implements OnInit {
     }
   }
 
-  setTab(tab: 'info' | 'interventions' | 'actions'): void {
+  setTab(tab: 'info' | 'interventions'): void {
     this.activeTab.set(tab);
     this.error.set(null);
     this.successMsg.set(null);
   }
 
-  changeStatut(): void {
-    const newStatut = this.selectedStatut();
-    if (!newStatut) return;
+  requestStatusConfirm(nouveauStatut: TicketStatut): void {
+    if (this.statusConfirmState().status === nouveauStatut && this.statusConfirmState().confirm) {
+      this.executeChangeStatut(nouveauStatut);
+    } else {
+      this.statusConfirmState.set({ status: nouveauStatut, confirm: true });
+      clearTimeout(this.transitionTimeout);
+      this.transitionTimeout = setTimeout(() => {
+        this.statusConfirmState.set({ status: null, confirm: false });
+      }, 3000);
+    }
+  }
+
+  private executeChangeStatut(newStatut: TicketStatut): void {
     this.savingStatut.set(true);
     this.error.set(null);
+    this.statusConfirmState.set({ status: null, confirm: false });
+
     this.ticketService.changeStatut(this.ticket.id, newStatut).subscribe({
       next: (t) => {
         this.savingStatut.set(false);
-        this.successMsg.set(`Statut changé : ${this.statutLabels[newStatut]}`);
-        this.selectedStatut.set(null);
+        this.successMsg.set(`Statut mis à jour : ${this.statutLabels[newStatut]}`);
         this.updated.emit({ ...this.ticket, statut: t.statut, updatedAt: t.updatedAt });
         this.ticket = { ...this.ticket, statut: t.statut };
+        // Reset success msg after a while
+        setTimeout(() => this.successMsg.set(null), 5000);
       },
       error: (err) => {
-        this.error.set(err.error?.message ?? 'Transition invalide.');
+        this.error.set(err.error?.message ?? 'Échec du changement de statut.');
         this.savingStatut.set(false);
       },
     });

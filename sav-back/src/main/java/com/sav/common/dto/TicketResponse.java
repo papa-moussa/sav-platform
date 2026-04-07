@@ -27,5 +27,6 @@ public record TicketResponse(
         LocalDateTime updatedAt,
         List<InterventionResponse> interventions,
         boolean feedbackSoumis,
-        boolean qrTokenDisponible
+        boolean qrTokenDisponible,
+        String qrToken
 ) {}

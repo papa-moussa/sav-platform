@@ -50,14 +50,6 @@ public interface TicketRepository extends JpaRepository<TicketEntity, Long>,
             """)
     Optional<TicketEntity> findByQrTokenWithRelations(@Param("qrToken") String qrToken);
 
-    /**
-     * Retourne le numéro de séquence maximal pour une année donnée.
-     * Le numéro est au format TKT-YYYY-NNNNN → on extrait les 5 derniers chiffres.
-     */
-    @Query("SELECT MAX(CAST(SUBSTRING(t.numero, 10) AS integer)) FROM TicketEntity t " +
-           "WHERE SUBSTRING(t.numero, 5, 4) = :year")
-    Optional<Integer> findMaxSequenceByYear(@Param("year") String year);
-
     @Query("SELECT t FROM TicketEntity t LEFT JOIN FETCH t.client LEFT JOIN FETCH t.technicien LEFT JOIN FETCH t.site WHERE t.id = :id")
     Optional<TicketEntity> findByIdWithRelations(@Param("id") Long id);
 
