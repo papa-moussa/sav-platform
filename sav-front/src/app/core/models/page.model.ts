@@ -1,8 +1,2 @@
-export interface PageResponse<T> {
-  content: T[];
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-  last: boolean;
-}
+// Re-export depuis la lib partagée du monorepo
+export type { PageResponse } from '@sav/shared-models';

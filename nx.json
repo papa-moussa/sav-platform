@@ -7,13 +7,8 @@
   "targetDefaults": {
     "build": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     },
     "lint": {
       "cache": true,
@@ -26,21 +21,12 @@
     },
     "test": {
       "cache": true,
-      "inputs": [
-        "default",
-        "^default",
-        "{workspaceRoot}/jest.preset.js"
-      ]
+      "inputs": ["default", "^default", "{workspaceRoot}/jest.preset.js"]
     },
     "@nx/angular:ng-packagr-lite": {
       "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     },
     "@nx/eslint:lint": {
       "cache": true,
@@ -50,13 +36,15 @@
         "{workspaceRoot}/.eslintignore",
         "{workspaceRoot}/eslint.config.mjs"
       ]
+    },
+    "@angular/build:application": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "namedInputs": {
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
       "default",
       "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
@@ -77,6 +65,12 @@
     },
     "@nx/angular:component": {
       "style": "css"
+    },
+    "@nx/angular:application": {
+      "e2eTestRunner": "none",
+      "linter": "eslint",
+      "style": "css",
+      "unitTestRunner": "none"
     }
   }
 }
