@@ -1,0 +1,362 @@
+<ion-header class="ion-no-border glass">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/tickets" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ ticket?.numero ?? 'Détails' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon name="ellipsis-horizontal-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <app-offline-banner />
+
+  @if (store.loading()) {
+    <div class="loader-container">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+  } @else if (!ticket) {
+    <div class="empty-state">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <h3>Ticket introuvable</h3>
+      <p>Le ticket que vous recherchez n'existe plus ou n'est pas accessible.</p>
+    </div>
+  } @else {
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <app-statut-badge [statut]="ticket.statut"></app-statut-badge>
+        <h1>{{ ticket.clientNom }}</h1>
+        <p class="device-summary">
+          <ion-icon name="construct-outline"></ion-icon>
+          {{ TYPE_APPAREIL_LABELS[ticket.typeAppareil] }} • {{ ticket.marqueModele }}
+        </p>
+      </div>
+    </div>
+
+    <div class="detail-container">
+      <!-- Info Cards -->
+      <section class="info-group">
+        <div class="detail-card">
+          <div class="card-header">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <h2>Informations Générales</h2>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Site</span>
+              <span class="value">{{ ticket.siteNom }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">N° de série</span>
+              <span class="value">{{ ticket.numeroSerie || '—' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Technicien</span>
+              <span class="value">{{ ticket.technicienNom || 'Non assigné' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Garantie</span>
+              <span class="value" [class.highlight]="ticket.sousGarantie">
+                {{ ticket.sousGarantie ? 'Sous garantie' : 'Hors garantie' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <div class="card-header">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <h2>Description de la panne</h2>
+          </div>
+          <p class="description-text">{{ ticket.descriptionPanne }}</p>
+        </div>
+
+        <div class="detail-card">
+          <div class="card-header">
+            <ion-icon name="time-outline"></ion-icon>
+            <h2>Historique ({{ ticket.interventions.length }})</h2>
+          </div>
+          
+          <div class="timeline">
+            @if (ticket.interventions.length === 0) {
+              <div class="empty-timeline">
+                <p>Aucune intervention enregistrée.</p>
+              </div>
+            } @else {
+              @for (interv of ticket.interventions; track interv.id) {
+                <div class="timeline-item">
+                  <div class="timeline-marker"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header">
+                      <span class="interv-tech">{{ interv.technicienNom }}</span>
+                      <span class="interv-date">{{ formatDateTime(interv.createdAt) }}</span>
+                    </div>
+                    <p class="interv-diag"><strong>Diagnostic :</strong> {{ interv.diagnostic }}</p>
+                    <p class="interv-actions">{{ interv.actionsRealisees }}</p>
+                    @if (interv.resultat) {
+                      <div class="interv-result">
+                        <span class="result-badge">{{ interv.resultat }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+  }
+</ion-content>
+
+@if (ticket && !store.loading()) {
+  <ion-footer class="ion-no-border">
+    <div class="action-bar glass">
+      <ion-button 
+        fill="clear" 
+        class="secondary-btn"
+        id="open-status-action-sheet"
+        [disabled]="allowedTransitions.length === 0"
+        (click)="setupStatusActionSheet()">
+        <ion-icon name="swap-horizontal-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      
+      <ion-button 
+        expand="block" 
+        class="primary-cta"
+        (click)="openAddIntervention()"
+        [disabled]="!canAddIntervention">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Ajouter Intervention
+      </ion-button>
+    </div>
+    
+    <ion-action-sheet 
+      trigger="open-status-action-sheet" 
+      header="Changer le statut" 
+      [buttons]="statusActionSheetButtons">
+    </ion-action-sheet>
+  </ion-footer>
+}
+
+<style>
+  .loader-container {
+    padding: 100px 0;
+    text-align: center;
+  }
+
+  .hero-section {
+    padding: 32px 24px 24px;
+    background: linear-gradient(180deg, var(--ion-color-step-50) 0%, var(--ion-background-color) 100%);
+    border-bottom: 1px solid var(--ion-color-step-100);
+  }
+
+  .hero-content h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 16px 0 8px;
+    letter-spacing: -0.04em;
+    color: var(--ion-text-color);
+  }
+
+  .device-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--ion-color-step-500);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .device-summary ion-icon {
+    font-size: 1.2rem;
+    color: var(--ion-color-primary);
+  }
+
+  .detail-container {
+    padding: 16px;
+  }
+
+  .info-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .detail-card {
+    background: var(--ion-item-background);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid var(--ion-color-step-100);
+    box-shadow: var(--card-shadow);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: var(--ion-color-primary);
+  }
+
+  .card-header h2 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ion-color-step-600);
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .info-item .label {
+    font-size: 0.75rem;
+    color: var(--ion-color-step-400);
+    font-weight: 500;
+  }
+
+  .info-item .value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ion-text-color);
+  }
+
+  .info-item .value.highlight {
+    color: var(--ion-color-success);
+  }
+
+  .description-text {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ion-color-step-700);
+    white-space: pre-wrap;
+  }
+
+  .timeline {
+    margin-top: 8px;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-left: 24px;
+    padding-bottom: 24px;
+  }
+
+  .timeline-item:last-child {
+    padding-bottom: 0;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 20px;
+    bottom: 0;
+    width: 2px;
+    background: var(--ion-color-step-100);
+  }
+
+  .timeline-item:last-child::before {
+    display: none;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ion-color-primary);
+    border: 2px solid var(--ion-item-background);
+    z-index: 1;
+    box-shadow: 0 0 0 2px var(--ion-color-primary-tint);
+  }
+
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .interv-tech {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--ion-text-color);
+  }
+
+  .interv-date {
+    font-size: 0.75rem;
+    color: var(--ion-color-step-400);
+  }
+
+  .interv-diag {
+    font-size: 0.9rem;
+    margin: 0 0 4px;
+    color: var(--ion-color-step-800);
+  }
+
+  .interv-actions {
+    font-size: 0.85rem;
+    margin: 0;
+    color: var(--ion-color-step-600);
+  }
+
+  .interv-result {
+    margin-top: 8px;
+  }
+
+  .result-badge {
+    background: var(--ion-color-secondary-tint);
+    color: var(--ion-color-secondary-contrast);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .action-bar {
+    padding: 12px 20px 32px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .primary-cta {
+    flex: 1;
+    --height: 54px;
+    --border-radius: 16px;
+    font-weight: 700;
+    margin: 0;
+    box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.3);
+  }
+
+  .secondary-btn {
+    --height: 54px;
+    --border-radius: 16px;
+    --background: var(--ion-color-step-100);
+    --color: var(--ion-color-step-700);
+    margin: 0;
+    width: 60px;
+  }
+</style>

@@ -1,0 +1,51 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">Annuler</ion-button>
+    </ion-buttons>
+    <ion-title>Sortie de stock</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="submit()" [disabled]="form.invalid || loading()">
+        @if (loading()) { <ion-spinner name="crescent" /> }
+        @else { Valider }
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-item lines="none">
+    <ion-label>
+      <h2>{{ piece.designation }}</h2>
+      <p>{{ piece.reference }} — Stock disponible : <b>{{ piece.quantite }}</b></p>
+    </ion-label>
+  </ion-item>
+
+  <form [formGroup]="form" class="ion-margin-top">
+    <ion-item>
+      <ion-input
+        label="Quantité *"
+        labelPlacement="floating"
+        type="number"
+        formControlName="quantite"
+        [min]="1"
+        [max]="piece.quantite"
+      />
+    </ion-item>
+
+    <ion-item class="ion-margin-top">
+      <ion-input
+        label="Motif"
+        labelPlacement="floating"
+        formControlName="motif"
+        placeholder="Motif de sortie (optionnel)"
+      />
+    </ion-item>
+  </form>
+
+  @if (error()) {
+    <ion-text color="danger">
+      <p class="ion-padding-top">{{ error() }}</p>
+    </ion-text>
+  }
+</ion-content>

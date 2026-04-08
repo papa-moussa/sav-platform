@@ -1,0 +1,237 @@
+<ion-header class="ion-no-border glass">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()" color="medium">Annuler</ion-button>
+    </ion-buttons>
+    <ion-title>Nouvelle intervention</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="submit()" [disabled]="form.invalid || loading()" color="primary" class="fw-bold">
+        @if (loading()) { <ion-spinner name="crescent"></ion-spinner> } @else { Enregistrer }
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="form" class="premium-form">
+    
+    <div class="form-section">
+      <label class="section-label" for="diag-input">Diagnostic technique</label>
+      <div class="custom-textarea-container">
+        <ion-textarea
+          id="diag-input"
+          formControlName="diagnostic"
+          placeholder="Décrivez précisément le diagnostic effectué..."
+          [autoGrow]="true"
+          rows="3"
+        ></ion-textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <label class="section-label" for="actions-input">Actions réalisées</label>
+      <div class="custom-textarea-container">
+        <ion-textarea
+          id="actions-input"
+          formControlName="actionsRealisees"
+          placeholder="Détaillez les réparations et tests effectués..."
+          [autoGrow]="true"
+          rows="3"
+        ></ion-textarea>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-section half">
+        <label class="section-label" for="time-input">Temps passé (h)</label>
+        <div class="custom-input-container">
+          <ion-icon name="time-outline"></ion-icon>
+          <ion-input
+            id="time-input"
+            type="number"
+            formControlName="tempsPasseHeures"
+            placeholder="Ex: 1.5"
+            min="0"
+          ></ion-input>
+        </div>
+      </div>
+
+      <div class="form-section half">
+        <label class="section-label" for="obs-input">Observations</label>
+        <div class="custom-input-container">
+          <ion-input
+            id="obs-input"
+            formControlName="observations"
+            placeholder="Optionnel..."
+          ></ion-input>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <label class="section-label" id="result-label">Résultat final</label>
+      <ion-segment formControlName="resultat" class="premium-segment" mode="ios" aria-labelledby="result-label">
+        <ion-segment-button value="EN_COURS">
+          <ion-label>En cours</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="REPARE">
+          <ion-label>Réparé</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="IRREPARABLE">
+          <ion-label>Irréparable</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    @if (form.value.resultat === 'REPARE' || form.value.resultat === 'IRREPARABLE') {
+      <div class="linked-action-info animate-in">
+        <ion-icon name="sync-outline"></ion-icon>
+        <p>
+          Le ticket passera automatiquement en statut
+          <strong>{{ form.value.resultat === 'REPARE' ? 'Réparé' : 'Irréparable' }}</strong>.
+        </p>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="error-box">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ error() }}</span>
+      </div>
+    }
+  </form>
+</ion-content>
+
+<style>
+  .premium-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-top: 8px;
+  }
+
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .half {
+    flex: 1;
+  }
+
+  .section-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ion-color-step-600);
+    padding-left: 4px;
+  }
+
+  .custom-textarea-container, .custom-input-container {
+    background: var(--ion-color-step-50);
+    border: 1px solid var(--ion-color-step-200);
+    border-radius: 16px;
+    padding: 12px;
+    transition: var(--transition-smooth);
+  }
+
+  .custom-input-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 12px;
+    height: 48px;
+  }
+
+  .custom-textarea-container:focus-within, .custom-input-container:focus-within {
+    border-color: var(--ion-color-primary);
+    background: var(--ion-item-background);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  .custom-input-container ion-icon {
+    font-size: 1.2rem;
+    color: var(--ion-color-step-400);
+  }
+
+  ion-textarea {
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    font-size: 0.95rem;
+  }
+
+  ion-input {
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    font-size: 0.95rem;
+  }
+
+  .premium-segment {
+    --background: var(--ion-color-step-100);
+    border-radius: 12px;
+    padding: 4px;
+  }
+
+  .premium-segment ion-segment-button {
+    --indicator-height: 100%;
+    --indicator-color: var(--ion-item-background);
+    --indicator-box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    --color: var(--ion-color-step-500);
+    --color-checked: var(--ion-color-primary);
+    min-height: 40px;
+    font-weight: 600;
+  }
+
+  .linked-action-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(var(--ion-color-primary-rgb), 0.05);
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--ion-color-primary-shade);
+    font-size: 0.85rem;
+  }
+
+  .linked-action-info ion-icon {
+    font-size: 1.25rem;
+  }
+
+  .linked-action-info p {
+    margin: 0;
+  }
+
+  .error-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(var(--ion-color-danger-rgb), 0.1);
+    color: var(--ion-color-danger);
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .animate-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fw-bold {
+    font-weight: 700;
+  }
+</style>

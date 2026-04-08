@@ -1,0 +1,219 @@
+<ion-header class="ion-no-border glass">
+  <ion-toolbar>
+    <ion-title size="large">Stock & Pièces</ion-title>
+    <ion-buttons slot="end">
+      <ion-button class="filter-btn">
+        <ion-icon name="cube-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <div class="search-container">
+    <div class="pill-search">
+      <ion-icon name="search-outline"></ion-icon>
+      <input 
+        type="text" 
+        placeholder="Rechercher une pièce, référence..." 
+        (input)="onSearch($event)"
+      />
+    </div>
+  </div>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-outline" refreshingSpinner="crescent" />
+  </ion-refresher>
+
+  <app-offline-banner />
+
+  <div class="list-container">
+    @if (loading()) {
+      <div class="loader-container">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+    } @else if (pieces().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="cube-outline"></ion-icon>
+        </div>
+        <h3>Aucune pièce trouvée</h3>
+        <p>Ajustez votre recherche ou vérifiez votre connexion.</p>
+      </div>
+    } @else {
+      <div class="piece-list">
+        @for (piece of pieces(); track piece.id) {
+          <div 
+            class="piece-card" 
+            (click)="openSortie(piece)"
+            (keydown.enter)="openSortie(piece)"
+            tabindex="0"
+            role="button"
+            aria-label="Voir la pièce">
+            <div class="piece-header">
+              <div class="piece-info">
+                <h3>{{ piece.designation }}</h3>
+                <p>{{ piece.reference }} • {{ piece.siteNom }}</p>
+              </div>
+              <div class="piece-qty">
+                @if (piece.enAlerteStock) {
+                  <span class="qty-badge danger">⚠ {{ piece.quantite }}</span>
+                } @else {
+                  <span class="qty-badge success">{{ piece.quantite }}</span>
+                }
+              </div>
+            </div>
+            <div class="piece-footer">
+              <span class="action-hint">Sortie de stock</span>
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ion-content>
+
+<style>
+  .search-container {
+    padding: 0 16px 16px;
+  }
+
+  .pill-search {
+    background: var(--ion-color-step-100);
+    border-radius: var(--pill-radius);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: var(--transition-smooth);
+    border: 1px solid transparent;
+  }
+
+  .pill-search:focus-within {
+    background: var(--ion-item-background);
+    border-color: var(--ion-color-primary);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  .pill-search ion-icon {
+    font-size: 1.2rem;
+    color: var(--ion-color-step-400);
+  }
+
+  .pill-search input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    font-size: 0.95rem;
+    color: var(--ion-text-color);
+  }
+
+  .list-container {
+    padding-bottom: 24px;
+  }
+
+  .loader-container {
+    padding: 100px 0;
+    text-align: center;
+  }
+
+  .empty-state {
+    padding: 80px 40px;
+    text-align: center;
+    color: var(--ion-color-step-500);
+  }
+
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.2;
+  }
+
+  .piece-list {
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .piece-card {
+    background: var(--ion-item-background);
+    border-radius: var(--card-border-radius);
+    padding: 16px;
+    border: 1px solid var(--ion-color-step-50);
+    box-shadow: var(--card-shadow);
+    transition: var(--transition-smooth);
+  }
+
+  .piece-card:active {
+    transform: scale(0.98);
+    background: var(--ion-color-step-50);
+  }
+
+  .piece-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .piece-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ion-text-color);
+    letter-spacing: -0.02em;
+  }
+
+  .piece-info p {
+    margin: 4px 0 0;
+    font-size: 0.85rem;
+    color: var(--ion-color-step-500);
+    font-weight: 500;
+  }
+
+  .qty-badge {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
+  .qty-badge.success {
+    background: rgba(var(--ion-color-success-rgb), 0.1);
+    color: var(--ion-color-success);
+  }
+
+  .qty-badge.danger {
+    background: rgba(var(--ion-color-danger-rgb), 0.1);
+    color: var(--ion-color-danger);
+  }
+
+  .piece-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--ion-color-step-50);
+    color: var(--ion-color-primary);
+  }
+
+  .action-hint {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .piece-footer ion-icon {
+    font-size: 1.2rem;
+  }
+
+  .filter-btn {
+    --background: var(--ion-color-step-100);
+    --border-radius: 12px;
+    margin-right: 8px;
+  }
+</style>

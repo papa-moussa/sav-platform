@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">Annuler</ion-button>
+    </ion-buttons>
+    <ion-title>Changer le statut</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (loading()) {
+    <div class="ion-text-center ion-padding-top">
+      <ion-spinner name="crescent" color="primary" />
+    </div>
+  } @else {
+    <ion-text color="medium">
+      <p class="ion-padding-horizontal ion-padding-top" style="font-size: 0.85rem;">
+        Appuyez une fois pour sélectionner, deux fois pour confirmer.
+      </p>
+    </ion-text>
+
+    <ion-list>
+      @for (statut of allowedTransitions; track statut) {
+        <ion-item
+          button
+          [detail]="false"
+          (click)="onStatutTap(statut)"
+          [color]="selectedStatut() === statut ? STATUT_ION_COLORS[statut] : ''"
+        >
+          <ion-label>
+            <b>{{ STATUT_LABELS[statut] }}</b>
+            @if (selectedStatut() === statut) {
+              <p style="font-size: 0.8rem;">Appuyez à nouveau pour confirmer</p>
+            }
+          </ion-label>
+          @if (selectedStatut() === statut) {
+            <ion-icon name="checkmark-circle-outline" slot="end" />
+          }
+        </ion-item>
+      }
+    </ion-list>
+  }
+</ion-content>

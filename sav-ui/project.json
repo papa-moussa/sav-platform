@@ -1,0 +1,102 @@
+{
+  "name": "sav-ui",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "sav-ui/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/sav-ui",
+        "browser": "sav-ui/src/main.ts",
+        "tsConfig": "sav-ui/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "sav-ui/public"
+          }
+        ],
+        "styles": ["sav-ui/src/styles.css"]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "options": {
+        "port": 4500
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "sav-ui:build:production"
+        },
+        "development": {
+          "buildTarget": "sav-ui:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "cap-sync": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx cap sync android",
+        "cwd": "sav-ui"
+      }
+    },
+    "cap-open": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx cap open android",
+        "cwd": "sav-ui"
+      }
+    },
+    "cap-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx build sav-ui --configuration=production",
+          "cd sav-ui && npx cap sync android"
+        ],
+        "parallel": false
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "sav-ui:build",
+        "port": 4500,
+        "staticFilePath": "dist/sav-ui/browser",
+        "spa": true
+      }
+    }
+  }
+}

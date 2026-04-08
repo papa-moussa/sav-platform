@@ -10,75 +10,34 @@
     "importHelpers": true,
     "target": "es2022",
     "module": "preserve",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@spartan-ng/ui-button-helm": [
-        "libs/ui/ui-button-helm/src/index.ts"
-      ],
-      "@spartan-ng/ui-input-helm": [
-        "libs/ui/ui-input-helm/src/index.ts"
-      ],
-      "@spartan-ng/ui-label-helm": [
-        "libs/ui/ui-label-helm/src/index.ts"
-      ],
-      "@spartan-ng/ui-textarea-helm": [
-        "libs/ui/ui-textarea-helm/src/index.ts"
-      ],
-      "@spartan-ng/ui-select-helm": [
-        "libs/ui/ui-select-helm/src/index.ts"
-      ],
-      "@spartan-ng/ui-badge-helm": [
-        "libs/ui/ui-badge-helm/src/index.ts"
-      ],
-      "@spartan-ng/ui-card-helm": [
-        "libs/ui/ui-card-helm/src/index.ts"
-      ],
-      "@spartan-ng/ui-table-helm": [
-        "libs/ui/ui-table-helm/src/index.ts"
-      ],
+      "@spartan-ng/ui-button-helm": ["libs/ui/ui-button-helm/src/index.ts"],
+      "@spartan-ng/ui-input-helm": ["libs/ui/ui-input-helm/src/index.ts"],
+      "@spartan-ng/ui-label-helm": ["libs/ui/ui-label-helm/src/index.ts"],
+      "@spartan-ng/ui-textarea-helm": ["libs/ui/ui-textarea-helm/src/index.ts"],
+      "@spartan-ng/ui-select-helm": ["libs/ui/ui-select-helm/src/index.ts"],
+      "@spartan-ng/ui-badge-helm": ["libs/ui/ui-badge-helm/src/index.ts"],
+      "@spartan-ng/ui-card-helm": ["libs/ui/ui-card-helm/src/index.ts"],
+      "@spartan-ng/ui-table-helm": ["libs/ui/ui-table-helm/src/index.ts"],
       "@spartan-ng/ui-separator-helm": [
         "libs/ui/ui-separator-helm/src/index.ts"
       ],
-      "@spartan-ng/ui-checkbox-helm": [
-        "libs/ui/ui-checkbox-helm/src/index.ts"
-      ],
-      "@spartan-ng/helm/date-picker": [
-        "libs/ui/date-picker/src/index.ts"
-      ],
-      "@spartan-ng/helm/utils": [
-        "libs/ui/utils/src/index.ts"
-      ],
-      "@spartan-ng/helm/calendar": [
-        "libs/ui/calendar/src/index.ts"
-      ],
-      "@spartan-ng/helm/button": [
-        "libs/ui/button/src/index.ts"
-      ],
-      "@spartan-ng/helm/icon": [
-        "libs/ui/icon/src/index.ts"
-      ],
-      "@spartan-ng/helm/select": [
-        "libs/ui/select/src/index.ts"
-      ],
-      "@spartan-ng/helm/popover": [
-        "libs/ui/popover/src/index.ts"
-      ],
-      "@spartan-ng/helm/field": [
-        "libs/ui/field/src/index.ts"
-      ],
-      "@spartan-ng/helm/sonner": [
-        "libs/ui/sonner/src/index.ts"
-      ]
+      "@spartan-ng/ui-checkbox-helm": ["libs/ui/ui-checkbox-helm/src/index.ts"],
+      "@spartan-ng/helm/date-picker": ["libs/ui/date-picker/src/index.ts"],
+      "@spartan-ng/helm/utils": ["libs/ui/utils/src/index.ts"],
+      "@spartan-ng/helm/calendar": ["libs/ui/calendar/src/index.ts"],
+      "@spartan-ng/helm/button": ["libs/ui/button/src/index.ts"],
+      "@spartan-ng/helm/icon": ["libs/ui/icon/src/index.ts"],
+      "@spartan-ng/helm/select": ["libs/ui/select/src/index.ts"],
+      "@spartan-ng/helm/popover": ["libs/ui/popover/src/index.ts"],
+      "@spartan-ng/helm/field": ["libs/ui/field/src/index.ts"],
+      "@spartan-ng/helm/sonner": ["libs/ui/sonner/src/index.ts"],
+      "@sav/shared-models": ["libs/sav-shared-models/src/index.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

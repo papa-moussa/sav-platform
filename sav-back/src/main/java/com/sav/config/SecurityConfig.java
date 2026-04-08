@@ -52,10 +52,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // sav-front (port 4200) + sav-admin (port 4300)
+        // sav-front (port 4200) + sav-admin (port 4300) + sav-ui mobile (port 4400 + Capacitor)
         config.setAllowedOrigins(List.of(
                 "http://localhost:4200",
-                "http://localhost:4300"
+                "http://localhost:4300",
+                "http://localhost:4500",      // ionic serve dev
+                "capacitor://localhost",      // WebView Android/iOS production
+                "ionic://localhost",          // fallback Ionic scheme
+                "http://localhost"            // Android emulator Capacitor
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

@@ -1,0 +1,201 @@
+<ion-header class="ion-no-border glass">
+  <ion-toolbar>
+    <ion-title size="large">Mes Tickets</ion-title>
+    <ion-buttons slot="end">
+      <ion-button id="open-filter-modal" class="filter-btn">
+        <ion-icon name="options-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <div class="search-container">
+    <div class="pill-search">
+      <ion-icon name="search-outline"></ion-icon>
+      <input 
+        type="text" 
+        placeholder="Rechercher par N°, client, site..." 
+        (input)="onSearch($event)"
+      />
+    </div>
+  </div>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-outline" refreshingSpinner="crescent" />
+  </ion-refresher>
+
+  <app-offline-banner />
+
+  <div class="list-container">
+    @if (store.loading()) {
+      <div class="skeleton-list">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="skeleton-card">
+            <div class="skeleton-header">
+              <ion-skeleton-text animated style="width: 40%; height: 12px; border-radius: 4px;"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width: 60px; height: 20px; border-radius: 10px;"></ion-skeleton-text>
+            </div>
+            <ion-skeleton-text animated style="width: 80%; height: 20px; margin-top: 8px; border-radius: 4px;"></ion-skeleton-text>
+            <div class="skeleton-meta">
+              <ion-skeleton-text animated style="width: 100%; height: 12px; margin-top: 16px; border-radius: 4px;"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width: 70%; height: 12px; margin-top: 8px; border-radius: 4px;"></ion-skeleton-text>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (store.filteredTickets().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <ion-icon name="ticket-outline"></ion-icon>
+        </div>
+        <h3>Aucun ticket trouvé</h3>
+        <p>Ajustez vos filtres ou votre recherche pour voir plus de résultats.</p>
+      </div>
+    } @else {
+      <div class="ticket-list">
+        @for (ticket of store.filteredTickets(); track ticket.id) {
+          <div class="card-wrapper">
+             <app-ticket-card [ticket]="ticket" (clicked)="openTicket($event)" />
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Modal Bottom Sheet pour les filtres -->
+  <ion-modal trigger="open-filter-modal" [initialBreakpoint]="0.4" [breakpoints]="[0, 0.4, 0.6]" handleBehavior="cycle" class="filter-modal">
+    <ng-template>
+      <div class="modal-header">
+        <h2>Filtrer par statut</h2>
+        <div class="modal-handle"></div>
+      </div>
+      <ion-content class="ion-padding">
+        <div class="filter-grid">
+          <ion-radio-group [value]="store.filterStatut()" (ionChange)="onFilterChange($event)">
+            @for (f of filters; track f.value) {
+              <ion-item lines="none" class="filter-item">
+                <ion-label>{{ f.label }}</ion-label>
+                <ion-radio [value]="f.value" slot="end"></ion-radio>
+              </ion-item>
+            }
+          </ion-radio-group>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+
+<style>
+  .search-container {
+    padding: 0 16px 16px;
+  }
+
+  .pill-search {
+    background: var(--ion-color-step-100);
+    border-radius: var(--pill-radius);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: var(--transition-smooth);
+    border: 1px solid transparent;
+  }
+
+  .pill-search:focus-within {
+    background: var(--ion-item-background);
+    border-color: var(--ion-color-primary);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  .pill-search ion-icon {
+    font-size: 1.2rem;
+    color: var(--ion-color-step-400);
+  }
+
+  .pill-search input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    font-size: 0.95rem;
+    color: var(--ion-text-color);
+  }
+
+  .list-container {
+    padding-bottom: 24px;
+  }
+
+  .skeleton-list {
+    padding: 8px 0;
+  }
+
+  .skeleton-card {
+    background: var(--ion-item-background);
+    border-radius: var(--card-border-radius);
+    margin: 12px 16px;
+    padding: 16px;
+    border: 1px solid var(--ion-color-step-50);
+  }
+
+  .skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .empty-state {
+    padding: 80px 40px;
+    text-align: center;
+    color: var(--ion-color-step-500);
+  }
+
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.2;
+  }
+
+  .empty-state h3 {
+    margin: 0 0 8px;
+    color: var(--ion-text-color);
+    font-weight: 700;
+  }
+
+  .filter-btn {
+    --background: var(--ion-color-step-100);
+    --border-radius: 12px;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    margin-right: 8px;
+  }
+
+  .filter-modal {
+    --border-radius: 32px 32px 0 0;
+  }
+
+  .modal-header {
+    padding: 20px 24px 10px;
+    text-align: center;
+    position: relative;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--ion-color-step-200);
+    border-radius: 2px;
+    margin: 0 auto 12px;
+  }
+
+  .filter-item {
+    --background: var(--ion-color-step-50);
+    margin-bottom: 8px;
+    --border-radius: 12px;
+  }
+</style>

@@ -1,0 +1,177 @@
+/* Ionic Core CSS — required */
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+
+/* Ionic Optional CSS */
+@import "@ionic/angular/css/display.css";
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* -------------------------------------------------------------------------
+   SaaS PREMIUM DESIGN SYSTEM
+   Theme: Elegant Indigo & Modern Surfaces
+   Inspired by Stripe & Linear
+   ------------------------------------------------------------------------- */
+
+:root {
+  /** Global Font **/
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Roboto", sans-serif;
+
+  /** Primary Color Palette (Indigo) **/
+  --ion-color-primary: #4f46e5;
+  --ion-color-primary-rgb: 79, 70, 229;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #453dc9;
+  --ion-color-primary-tint: #6159e8;
+
+  /** Secondary (Soft Blue) **/
+  --ion-color-secondary: #0ea5e9;
+  --ion-color-secondary-rgb: 14, 165, 233;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-shade: #0d91cd;
+  --ion-color-secondary-tint: #26aef1;
+
+  /** Tertiary (Deep Purple) **/
+  --ion-color-tertiary: #8b5cf6;
+  --ion-color-tertiary-rgb: 139, 92, 246;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-shade: #7a51d8;
+  --ion-color-tertiary-tint: #976df7;
+
+  /** Success (Emerald) **/
+  --ion-color-success: #10b981;
+  --ion-color-success-rgb: 16, 185, 129;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-shade: #0ea372;
+  --ion-color-success-tint: #28c08e;
+
+  /** Warning (Amber) **/
+  --ion-color-warning: #f59e0b;
+  --ion-color-warning-rgb: 245, 158, 11;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-shade: #d88b0a;
+  --ion-color-warning-tint: #f6a823;
+
+  /** Danger (Rose/Red) **/
+  --ion-color-danger: #f43f5e;
+  --ion-color-danger-rgb: 244, 63, 94;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-shade: #d73753;
+  --ion-color-danger-tint: #f5526e;
+
+  /** Grays & Backgrounds (Light Mode) **/
+  --ion-color-light: #f9fafb;
+  --ion-background-color: #f9fafb;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-text-color: #111827;
+  --ion-color-step-50: #f9fafb;
+  --ion-color-step-100: #f3f4f6;
+  --ion-color-step-200: #e5e7eb;
+  --ion-color-step-300: #d1d5db;
+  --ion-color-step-400: #9ca3af;
+  --ion-color-step-500: #6b7280;
+  --ion-color-step-600: #4b5563;
+  --ion-color-step-700: #374151;
+  --ion-color-step-800: #1f2937;
+  --ion-color-step-900: #111827;
+
+  /** Custom Tokens **/
+  --card-border-radius: 16px;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --input-border-radius: 12px;
+  --pill-radius: 9999px;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* -------------------------------------------------------------------------
+   Dark Mode Adjustments
+   ------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ion-background-color: #0d0d0d;
+    --ion-item-background: #18181b;
+    --ion-card-background: #18181b;
+    --ion-text-color: #f3f4f6;
+    
+    --ion-color-step-50: #18181b;
+    --ion-color-step-100: #27272a;
+    --ion-color-step-200: #3f3f46;
+    --ion-color-step-300: #52525b;
+    --ion-color-step-400: #71717a;
+    --ion-color-step-500: #a1a1aa;
+    --ion-color-step-600: #d4d4d8;
+    --ion-color-step-700: #e4e4e7;
+    --ion-color-step-800: #f4f4f5;
+    --ion-color-step-900: #fafafa;
+
+    --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Global Global Layout & Component Overrides
+   ------------------------------------------------------------------------- */
+
+ion-toolbar {
+  --background: var(--ion-background-color);
+  --border-width: 0;
+}
+
+ion-title {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+ion-card {
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow) !important;
+  margin: 16px;
+  border: 1px solid var(--ion-color-step-100);
+}
+
+ion-button {
+  --border-radius: 12px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  --box-shadow: none;
+}
+
+ion-item {
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+  --border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+ion-input {
+  --padding-start: 12px !important;
+  --padding-end: 12px !important;
+}
+
+/* Premium Utilities */
+.glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(var(--ion-background-color-rgb), 0.8);
+}
+
+.text-gradient {
+  background: linear-gradient(to right, var(--ion-color-primary), var(--ion-color-tertiary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.card-hover {
+  transition: var(--transition-smooth);
+}
+
+.card-hover:active {
+  transform: scale(0.98);
+}
