@@ -10,5 +10,6 @@ public record UserRequest(
         @NotBlank @Email String email,
         @NotBlank String password,
         @NotNull Role role,
-        Long siteId
+        Long siteId,
+        String telephone
 ) {}

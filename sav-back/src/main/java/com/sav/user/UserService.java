@@ -57,6 +57,7 @@ public class UserService {
                 .actif(true)
                 .site(site)
                 .company(company)
+                .telephone(request.telephone())
                 .build();
 
         return toResponse(userRepository.save(user));
@@ -77,7 +78,8 @@ public class UserService {
                 u.getRole(),
                 u.isActif(),
                 u.getSite() != null ? u.getSite().getId() : null,
-                u.getSite() != null ? u.getSite().getNom() : null
+                u.getSite() != null ? u.getSite().getNom() : null,
+                u.getTelephone()
         );
     }
 }

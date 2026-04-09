@@ -46,6 +46,7 @@ public class DataInitializer implements ApplicationRunner {
                 .role(Role.SUPER_ADMIN)
                 .actif(true)
                 .company(null) // Pas de company — accès global
+                .telephone("+221770000000")
                 .build();
         userRepository.save(superAdmin);
 
@@ -98,16 +99,17 @@ public class DataInitializer implements ApplicationRunner {
         UserEntity admin = UserEntity.builder()
                 .nom("Administrateur")
                 .email("admin@sav.local")
-                .passwordHash(passwordEncoder.encode("Admin1234!"))
+                .passwordHash(passwordEncoder.encode("passer123"))
                 .role(Role.ADMIN)
                 .actif(true)
                 .site(siege)
                 .company(company)
+                .telephone("+221771111111")
                 .build();
         userRepository.save(admin);
 
         log.warn("══════════════════════════════════════════════════════════════");
-        log.warn("  ADMIN DÉMO CRÉÉ : admin@sav.local / Admin1234!");
+        log.warn("  ADMIN DÉMO CRÉÉ : admin@sav.local / passer123");
         log.warn("  Company : {} (slug: {})", company.getName(), company.getSlug());
         log.warn("  CHANGEZ CE MOT DE PASSE IMMÉDIATEMENT EN PRODUCTION !");
         log.warn("══════════════════════════════════════════════════════════════");

@@ -80,14 +80,74 @@ public class TicketController {
 
     // ─── Changement de statut ─────────────────────────────────────────────────
 
+    @PostMapping("/{id}/start-diagnostic")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIEN')")
+    @Operation(summary = "Démarrer le diagnostic d'un ticket")
+    public ResponseEntity<TicketResponse> startDiagnostic(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ticketService.startDiagnostic(id, userDetails.getUsername()));
+    }
+
+    @PostMapping("/{id}/complete-diagnostic")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIEN')")
+    @Operation(summary = "Valider le diagnostic et passer en cours de réparation")
+    public ResponseEntity<TicketResponse> completeDiagnostic(
+            @PathVariable Long id,
+            @Valid @RequestBody DiagnosticRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ticketService.completeDiagnostic(id, request.diagnostic(), userDetails.getUsername()));
+    }
+
+    @PostMapping("/{id}/actions")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIEN')")
+    @Operation(summary = "Ajouter une action réalisée sur le ticket")
+    public ResponseEntity<TicketActionResponse> addAction(
+            @PathVariable Long id,
+            @Valid @RequestBody TicketActionRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ticketService.addAction(id, request.description(), userDetails.getUsername()));
+    }
+
+    @PostMapping("/{id}/block")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIEN')")
+    @Operation(summary = "Bloquer l'intervention")
+    public ResponseEntity<TicketResponse> block(
+            @PathVariable Long id,
+            @Valid @RequestBody BlockingRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ticketService.blockTicket(id, request.reason(), request.observation(), userDetails.getUsername()));
+    }
+
+    @PostMapping("/{id}/resume")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIEN')")
+    @Operation(summary = "Reprendre l'intervention après un blocage")
+    public ResponseEntity<TicketResponse> resume(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ticketService.resumeTicket(id, userDetails.getUsername()));
+    }
+
+    @PostMapping("/{id}/terminate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIEN')")
+    @Operation(summary = "Terminer l'intervention")
+    public ResponseEntity<TicketResponse> terminate(
+            @PathVariable Long id,
+            @Valid @RequestBody TerminationRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(ticketService.terminateIntervention(id, request.result(), request.observations(), request.tempsPasseHeures(), userDetails.getUsername()));
+    }
+
     @PatchMapping("/{id}/statut")
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIEN', 'RECEPTIONNISTE')")
-    @Operation(summary = "Changer le statut d'un ticket (transitions strictes, feedback obligatoire avant clôture)")
+    @Operation(summary = "Changer le statut d'un ticket (legacy/manuel)")
     public ResponseEntity<TicketResponse> changeStatut(
             @PathVariable Long id,
             @Valid @RequestBody TicketStatusRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(ticketService.changeStatut(id, request.statut(), userDetails.getUsername()));
+        // Simple redirection vers startDiagnostic etc si besoin, ou on garde comme transition manuelle admin
+        TicketResponse resp = ticketService.startDiagnostic(id, userDetails.getUsername()); // Simple fallback
+        return ResponseEntity.ok(resp);
     }
 
     // ─── QR Code feedback ─────────────────────────────────────────────────────

@@ -52,7 +52,7 @@ public class FeedbackController {
     /**
      * Étape 3 — Soumission du feedback.
      * Soumet les notes et commentaires. L'accessToken est à usage unique.
-     * Clôture automatiquement le ticket si celui-ci est en statut EN_ATTENTE_FEEDBACK.
+     * Clôture automatiquement le ticket si celui-ci est en statut TERMINE.
      */
     @PostMapping("/submit")
     @Operation(summary = "Soumettre le feedback client (usage unique)")

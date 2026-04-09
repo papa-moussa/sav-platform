@@ -51,6 +51,9 @@ public class UserEntity implements UserDetails {
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
 
+    @Column(length = 20)
+    private String telephone;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 

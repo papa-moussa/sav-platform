@@ -21,30 +21,12 @@ public final class TicketStatutTransition {
                 EnumSet.of(TicketStatut.EN_DIAGNOSTIC));
 
         TRANSITIONS.put(TicketStatut.EN_DIAGNOSTIC,
-                EnumSet.of(TicketStatut.EN_REPARATION,
-                        TicketStatut.EN_ATTENTE_PIECES,
-                        TicketStatut.REPARE,
-                        TicketStatut.IRREPARABLE));
+                EnumSet.of(TicketStatut.EN_COURS));
 
-        TRANSITIONS.put(TicketStatut.EN_REPARATION,
-                EnumSet.of(TicketStatut.EN_ATTENTE_PIECES,
-                        TicketStatut.REPARE,
-                        TicketStatut.IRREPARABLE));
+        TRANSITIONS.put(TicketStatut.EN_COURS,
+                EnumSet.of(TicketStatut.TERMINE));
 
-        TRANSITIONS.put(TicketStatut.EN_ATTENTE_PIECES,
-                EnumSet.of(TicketStatut.EN_REPARATION,
-                        TicketStatut.REPARE,
-                        TicketStatut.IRREPARABLE));
-
-        // REPARE et IRREPARABLE → attente feedback obligatoire avant clôture
-        TRANSITIONS.put(TicketStatut.REPARE,
-                EnumSet.of(TicketStatut.EN_ATTENTE_FEEDBACK));
-
-        TRANSITIONS.put(TicketStatut.IRREPARABLE,
-                EnumSet.of(TicketStatut.EN_ATTENTE_FEEDBACK));
-
-        // Clôture autorisée après feedback (ou override admin via service)
-        TRANSITIONS.put(TicketStatut.EN_ATTENTE_FEEDBACK,
+        TRANSITIONS.put(TicketStatut.TERMINE,
                 EnumSet.of(TicketStatut.CLOTURE));
 
         TRANSITIONS.put(TicketStatut.CLOTURE,
@@ -61,10 +43,4 @@ public final class TicketStatutTransition {
         return allowed.contains(to);
     }
 
-    /**
-     * Retourne les transitions autorisées depuis un statut donné.
-     */
-    public static Set<TicketStatut> getAllowed(TicketStatut from) {
-        return TRANSITIONS.getOrDefault(from, EnumSet.noneOf(TicketStatut.class));
-    }
 }

@@ -219,7 +219,7 @@ public class FeedbackService {
 
         // Marquer le ticket comme évalué
         ticket.setFeedbackSoumis(true);
-        if (ticket.getStatut() == TicketStatut.EN_ATTENTE_FEEDBACK) {
+        if (ticket.getStatut() == TicketStatut.TERMINE) {
             ticket.setStatut(TicketStatut.CLOTURE);
         }
         ticketRepository.save(ticket);

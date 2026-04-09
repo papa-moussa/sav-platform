@@ -6,7 +6,6 @@ import com.sav.common.dto.*;
 import com.sav.common.tenant.TenantContext;
 import com.sav.company.CompanyEntity;
 import com.sav.company.CompanyRepository;
-import com.sav.common.enums.Role;
 import com.sav.common.enums.TicketStatut;
 import com.sav.reparation.InterventionEntity;
 import com.sav.reparation.InterventionRepository;
@@ -38,39 +37,36 @@ public class TicketService {
     private final UserRepository    userRepository;
     private final CompanyRepository companyRepository;
     private final TicketSequenceRepository sequenceRepository;
+    private final TicketActionRepository actionRepository;
+    private final TicketHistoryRepository historyRepository;
 
-    // ─── Liste avec filtres ───────────────────────────────────────────────────
-
+    @Transactional(readOnly = true)
     public PageResponse<TicketResponse> findAll(TicketStatut statut, Long siteId, Long technicienId,
                                                 Long clientId, String search, Pageable pageable) {
         Specification<TicketEntity> spec = buildSpec(statut, siteId, technicienId, clientId, search);
         Page<TicketEntity> page = ticketRepository.findAll(spec, pageable);
-        return PageResponse.from(page.map(t -> toResponse(t, List.of())));
+        return PageResponse.from(page.map(this::toResponse));
     }
 
+    @Transactional(readOnly = true)
     public List<TicketResponse> findByTechnicien(Long technicienId) {
         return ticketRepository.findByTechnicienIdOrderByCreatedAtDesc(technicienId).stream()
-                .map(t -> toResponse(t, List.of()))
+                .map(this::toResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<TicketResponse> findMesTickets(String email) {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé : " + email));
         return findByTechnicien(user.getId());
     }
 
-    // ─── Détail complet ───────────────────────────────────────────────────────
-
     @Transactional(readOnly = true)
     public TicketResponse findById(Long id) {
         TicketEntity ticket = getOrThrow(id);
-        List<InterventionEntity> interventions =
-                interventionRepository.findByTicketIdOrderByCreatedAtAsc(id);
-        return toResponse(ticket, interventions);
+        return toResponse(ticket);
     }
-
-    // ─── Création ─────────────────────────────────────────────────────────────
 
     @Transactional
     public TicketResponse create(TicketRequest request, String userEmail) {
@@ -85,12 +81,11 @@ public class TicketService {
                     .orElseThrow(() -> new EntityNotFoundException("Technicien non trouvé : " + request.technicienId()));
         }
 
-        // Résolution de la company courante
         CompanyEntity company = null;
         Long companyId = TenantContext.get();
         if (companyId != null) {
             company = companyRepository.findById(companyId)
-                    .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Company non trouvée : " + companyId));
+                    .orElseThrow(() -> new EntityNotFoundException("Company non trouvée : " + companyId));
         }
 
         TicketEntity ticket = TicketEntity.builder()
@@ -108,91 +103,86 @@ public class TicketService {
                 .statut(TicketStatut.RECU)
                 .build();
 
-        return toResponse(ticketRepository.save(ticket), List.of());
+        return toResponse(ticketRepository.save(ticket));
     }
 
-    // ─── Changement de statut ─────────────────────────────────────────────────
-
-    /**
-     * Change le statut d'un ticket.
-     *
-     * <p>Règles métier :
-     * <ul>
-     *   <li>REPARE / IRREPARABLE → EN_ATTENTE_FEEDBACK : génère automatiquement le token QR.</li>
-     *   <li>EN_ATTENTE_FEEDBACK → CLOTURE : autorisé si feedback soumis OU si l'appelant est ADMIN.</li>
-     * </ul>
-     */
     @Transactional
-    public TicketResponse changeStatut(Long id, TicketStatut newStatut, String callerEmail) {
+    public TicketResponse startDiagnostic(Long id, String callerEmail) {
         TicketEntity ticket = getOrThrow(id);
-        TicketStatut current = ticket.getStatut();
-
-        if (!TicketStatutTransition.isAllowed(current, newStatut)) {
-            throw new IllegalArgumentException(
-                    "Transition invalide : " + current + " → " + newStatut
-                    + ". Transitions autorisées : " + TicketStatutTransition.getAllowed(current));
-        }
-
-        // Clôture sans feedback → override ADMIN uniquement
-        UserEntity caller = null;
-        if (newStatut == TicketStatut.CLOTURE && !ticket.isFeedbackSoumis()) {
-            caller = userRepository.findByEmail(callerEmail)
-                    .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé : " + callerEmail));
-            if (caller.getRole() != Role.ADMIN) {
-                throw new IllegalStateException(
-                        "Ce ticket ne peut être clôturé sans feedback client. " +
-                        "Le client doit scanner le QR Code, ou un administrateur peut clôturer manuellement.");
-            }
-        }
-
-        // REPARE / IRREPARABLE exige une intervention (sauf ADMIN)
-        if (newStatut == TicketStatut.REPARE || newStatut == TicketStatut.IRREPARABLE) {
-            long count = interventionRepository.countByTicketId(id);
-            if (count == 0) {
-                if (caller == null) {
-                    caller = userRepository.findByEmail(callerEmail)
-                            .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé : " + callerEmail));
-                }
-                if (caller.getRole() != Role.ADMIN) {
-                    throw new IllegalStateException(
-                            "Un rapport d'intervention est requis pour marquer ce ticket comme " + newStatut.name().toLowerCase() + ".");
-                }
-            }
-        }
-
-        // Génération automatique du QR token lors du passage EN_ATTENTE_FEEDBACK
-        if (newStatut == TicketStatut.EN_ATTENTE_FEEDBACK) {
-            ensureQrToken(ticket);
-        }
-
-        ticket.setStatut(newStatut);
-        return toResponse(ticketRepository.save(ticket), List.of());
+        transitionStatut(ticket, TicketStatut.EN_DIAGNOSTIC, callerEmail);
+        addHistory(ticket, "CHANGE_STATUT", "Démarrage du diagnostic", callerEmail);
+        return toResponse(ticketRepository.save(ticket));
     }
 
-    // ─── Assignation technicien ───────────────────────────────────────────────
+    @Transactional
+    public TicketResponse completeDiagnostic(Long id, String diagnostic, String callerEmail) {
+        TicketEntity ticket = getOrThrow(id);
+        addHistory(ticket, "DIAGNOSTIC", diagnostic, callerEmail);
+        transitionStatut(ticket, TicketStatut.EN_COURS, callerEmail);
+        return toResponse(ticketRepository.save(ticket));
+    }
+
+    @Transactional
+    public TicketActionResponse addAction(Long id, String description, String userEmail) {
+        TicketEntity ticket = getOrThrow(id);
+        UserEntity user = getUserByEmail(userEmail);
+
+        TicketActionEntity action = TicketActionEntity.builder()
+                .ticket(ticket)
+                .utilisateur(user)
+                .description(description)
+                .build();
+        
+        actionRepository.save(action);
+        addHistory(ticket, "ACTION", description, userEmail);
+        return toActionResponse(action);
+    }
+
+    @Transactional
+    public TicketResponse blockTicket(Long id, com.sav.common.enums.BlockingReason reason, String observation, String userEmail) {
+        TicketEntity ticket = getOrThrow(id);
+        ticket.setBlockingReason(reason);
+        ticket.setBlockingObservation(observation);
+        addHistory(ticket, "BLOCAGE", "Sujet: " + reason + " - Obs: " + observation, userEmail);
+        return toResponse(ticketRepository.save(ticket));
+    }
+
+    @Transactional
+    public TicketResponse resumeTicket(Long id, String userEmail) {
+        TicketEntity ticket = getOrThrow(id);
+        ticket.setBlockingReason(null);
+        ticket.setBlockingObservation(null);
+        addHistory(ticket, "REPRISE", "Blocage levé", userEmail);
+        return toResponse(ticketRepository.save(ticket));
+    }
+
+    @Transactional
+    public TicketResponse terminateIntervention(Long id, com.sav.common.enums.ResultatIntervention result, String observations, Double temps, String userEmail) {
+        TicketEntity ticket = getOrThrow(id);
+        ticket.setResult(result);
+        ticket.setStatut(TicketStatut.TERMINE);
+        ensureQrToken(ticket);
+        
+        addHistory(ticket, "TERMINAISON", "Résultat: " + result + " - Obs: " + observations, userEmail);
+        return toResponse(ticketRepository.save(ticket));
+    }
 
     @Transactional
     public TicketResponse assigner(Long id, Long technicienId) {
-        TicketEntity ticket = getOrThrow(id);
-        UserEntity technicien = userRepository.findById(technicienId)
-                .orElseThrow(() -> new EntityNotFoundException("Technicien non trouvé : " + technicienId));
-        ticket.setTechnicien(technicien);
-        return toResponse(ticketRepository.save(ticket), List.of());
+         TicketEntity ticket = getOrThrow(id);
+         UserEntity tech = userRepository.findById(technicienId)
+                 .orElseThrow(() -> new EntityNotFoundException("Technicien non trouvé"));
+         ticket.setTechnicien(tech);
+         return toResponse(ticketRepository.save(ticket));
     }
-
-    // ─── Ajout d'intervention ─────────────────────────────────────────────────
 
     @Transactional
     public InterventionResponse addIntervention(Long ticketId, InterventionRequest request, String userEmail) {
         TicketEntity ticket = getOrThrow(ticketId);
-        
         if (ticket.getStatut() == TicketStatut.CLOTURE) {
             throw new IllegalStateException("Impossible d'ajouter une intervention sur un ticket clôturé.");
         }
-
-        UserEntity technicien = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé : " + userEmail));
-
+        UserEntity technicien = getUserByEmail(userEmail);
         InterventionEntity intervention = InterventionEntity.builder()
                 .ticket(ticket)
                 .technicien(technicien)
@@ -202,18 +192,38 @@ public class TicketService {
                 .tempsPasseHeures(request.tempsPasseHeures())
                 .resultat(request.resultat())
                 .build();
-
         return toInterventionResponse(interventionRepository.save(intervention));
     }
 
-    // ─── Helpers privés ───────────────────────────────────────────────────────
+    private void transitionStatut(TicketEntity ticket, TicketStatut newStatut, String callerEmail) {
+        TicketStatut current = ticket.getStatut();
+        if (!TicketStatutTransition.isAllowed(current, newStatut)) {
+            throw new IllegalArgumentException("Transition invalide : " + current + " -> " + newStatut);
+        }
+        ticket.setStatut(newStatut);
+    }
+
+    private void addHistory(TicketEntity ticket, String type, String details, String userEmail) {
+        UserEntity user = getUserByEmail(userEmail);
+        TicketHistoryEntity history = TicketHistoryEntity.builder()
+                .ticket(ticket)
+                .utilisateur(user)
+                .typeAction(type)
+                .details(details)
+                .build();
+        historyRepository.save(history);
+    }
+
+    private UserEntity getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé : " + email));
+    }
 
     private TicketEntity getOrThrow(Long id) {
-        return ticketRepository.findByIdWithRelations(id)
+        return ticketRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ticket non trouvé : " + id));
     }
 
-    /** Attribue un token QR unique si le ticket n'en a pas encore. */
     private void ensureQrToken(TicketEntity ticket) {
         if (ticket.getQrToken() == null) {
             ticket.setQrToken(UUID.randomUUID().toString());
@@ -221,74 +231,69 @@ public class TicketService {
         }
     }
 
-    /** Génère le prochain numéro de ticket au format TKT-YYYY-NNNNN de manière atomique. */
     private String generateNumero() {
         String yearStr = String.valueOf(Year.now().getValue());
-
-        // Récupère la séquence avec verrouillage pessimiste
         TicketSequenceEntity sequence = sequenceRepository.findByYearWithLock(yearStr)
-                .orElseGet(() -> TicketSequenceEntity.builder()
-                        .year(yearStr)
-                        .currentValue(0L)
-                        .build());
-
+                .orElseGet(() -> TicketSequenceEntity.builder().year(yearStr).currentValue(0L).build());
         sequence.increment();
         sequenceRepository.saveAndFlush(sequence);
-
         return String.format("TKT-%s-%05d", yearStr, sequence.getCurrentValue());
     }
 
-    private TicketResponse toResponse(TicketEntity t, List<InterventionEntity> interventions) {
-        return new TicketResponse(
-                t.getId(),
-                t.getNumero(),
-                t.getClient().getId(),
-                t.getClient().getNom(),
-                t.getTechnicien() != null ? t.getTechnicien().getId() : null,
-                t.getTechnicien() != null ? t.getTechnicien().getNom() : null,
-                t.getSite().getId(),
-                t.getSite().getNom(),
-                t.getTypeAppareil(),
-                t.getMarqueModele(),
-                t.getNumeroSerie(),
-                t.getDescriptionPanne(),
-                t.getStatut(),
-                t.isSousGarantie(),
-                t.getDateAchat(),
-                t.getCreatedAt(),
-                t.getUpdatedAt(),
-                interventions.stream().map(this::toInterventionResponse).toList(),
-                t.isFeedbackSoumis(),
-                t.getQrToken() != null,
-                t.getQrToken()
-        );
+    private TicketResponse toResponse(TicketEntity t) {
+        return TicketResponse.builder()
+                .id(t.getId())
+                .numero(t.getNumero())
+                .clientId(t.getClient().getId())
+                .clientNom(t.getClient().getNom())
+                .technicienId(t.getTechnicien() != null ? t.getTechnicien().getId() : null)
+                .technicienNom(t.getTechnicien() != null ? t.getTechnicien().getNom() : null)
+                .siteId(t.getSite().getId())
+                .siteNom(t.getSite().getNom())
+                .typeAppareil(t.getTypeAppareil())
+                .marqueModele(t.getMarqueModele())
+                .numeroSerie(t.getNumeroSerie())
+                .descriptionPanne(t.getDescriptionPanne())
+                .statut(t.getStatut())
+                .sousGarantie(t.isSousGarantie())
+                .dateAchat(t.getDateAchat())
+                .createdAt(t.getCreatedAt())
+                .updatedAt(t.getUpdatedAt())
+                .feedbackSoumis(t.isFeedbackSoumis())
+                .feedbackStatus(t.getFeedbackStatus())
+                .blockingReason(t.getBlockingReason())
+                .blockingObservation(t.getBlockingObservation())
+                .result(t.getResult())
+                .interventions(t.getInterventions() != null 
+                    ? t.getInterventions().stream().map(this::toInterventionResponse).toList() 
+                    : List.of())
+                .actions(t.getActions() != null 
+                    ? t.getActions().stream().map(this::toActionResponse).toList() 
+                    : List.of())
+                .history(t.getHistory() != null 
+                    ? t.getHistory().stream().map(this::toHistoryResponse).toList() 
+                    : List.of())
+                .build();
+    }
+
+    private TicketActionResponse toActionResponse(TicketActionEntity a) {
+        return new TicketActionResponse(a.getId(), a.getUtilisateur().getNom(), a.getDescription(), a.getCreatedAt());
+    }
+
+    private TicketHistoryResponse toHistoryResponse(TicketHistoryEntity h) {
+        return new TicketHistoryResponse(h.getId(), h.getUtilisateur().getNom(), h.getTypeAction(), h.getDetails(), h.getTimestamp());
     }
 
     private InterventionResponse toInterventionResponse(InterventionEntity i) {
-        return new InterventionResponse(
-                i.getId(),
-                i.getTechnicien().getNom(),
-                i.getDiagnostic(),
-                i.getActionsRealisees(),
-                i.getObservations(),
-                i.getTempsPasseHeures(),
-                i.getResultat(),
-                i.getCreatedAt()
-        );
+        return new InterventionResponse(i.getId(), i.getTechnicien().getNom(), i.getDiagnostic(), i.getActionsRealisees(), i.getObservations(), i.getTempsPasseHeures(), i.getResultat(), i.getCreatedAt());
     }
 
     private Specification<TicketEntity> buildSpec(TicketStatut statut, Long siteId,
                                                    Long technicienId, Long clientId, String search) {
         return (root, query, cb) -> {
             var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
-
-            // ─── Filtre tenant ──────────────────────────────────────────────────
             Long companyId = TenantContext.get();
-            if (companyId != null) {
-                predicates.add(cb.equal(root.get("company").get("id"), companyId));
-            }
-            // ────────────────────────────────────────────────────────────────────
-
+            if (companyId != null) predicates.add(cb.equal(root.get("company").get("id"), companyId));
             if (statut != null) predicates.add(cb.equal(root.get("statut"), statut));
             if (siteId != null) predicates.add(cb.equal(root.get("site").get("id"), siteId));
             if (technicienId != null) predicates.add(cb.equal(root.get("technicien").get("id"), technicienId));
@@ -301,10 +306,7 @@ public class TicketService {
                         cb.like(cb.lower(root.get("marqueModele")), pattern)
                 ));
             }
-
-            if (!query.getResultType().equals(Long.class)) {
-                query.orderBy(cb.desc(root.get("createdAt")));
-            }
+            if (query.getResultType() != Long.class) query.orderBy(cb.desc(root.get("createdAt")));
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
     }

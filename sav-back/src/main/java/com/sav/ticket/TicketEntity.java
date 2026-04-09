@@ -1,9 +1,13 @@
 package com.sav.ticket;
 
 import com.sav.client.ClientEntity;
+import com.sav.common.enums.BlockingReason;
+import com.sav.common.enums.FeedbackStatus;
+import com.sav.common.enums.ResultatIntervention;
 import com.sav.common.enums.TicketStatut;
 import com.sav.common.enums.TypeAppareil;
 import com.sav.company.CompanyEntity;
+import com.sav.reparation.InterventionEntity;
 import com.sav.site.SiteEntity;
 import com.sav.user.UserEntity;
 import jakarta.persistence.*;
@@ -11,6 +15,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tickets", indexes = {
@@ -83,6 +89,30 @@ public class TicketEntity {
 
     @Builder.Default
     private boolean feedbackSoumis = false;
+
+    @Enumerated(EnumType.STRING)
+    private FeedbackStatus feedbackStatus;
+
+    @Enumerated(EnumType.STRING)
+    private BlockingReason blockingReason;
+
+    @Column(length = 1000)
+    private String blockingObservation;
+
+    @Enumerated(EnumType.STRING)
+    private ResultatIntervention result;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<InterventionEntity> interventions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<TicketActionEntity> actions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<TicketHistoryEntity> history = new ArrayList<>();
 
     // ─── Audit ────────────────────────────────────────────────────────────────
 

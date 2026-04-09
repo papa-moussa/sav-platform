@@ -22,7 +22,7 @@ public class ClientEntity {
     @Column(nullable = false)
     private String nom;
 
-    @Column(nullable = false)
+    @Column(name = "telephone")
     private String telephone;
 
     private String email;

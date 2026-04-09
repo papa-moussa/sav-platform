@@ -9,5 +9,6 @@ public record UserResponse(
         Role role,
         boolean actif,
         Long siteId,
-        String siteNom
+        String siteNom,
+        String telephone
 ) {}
