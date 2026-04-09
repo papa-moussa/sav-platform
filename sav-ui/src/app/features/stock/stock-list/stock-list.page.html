@@ -1,21 +1,23 @@
 <ion-header class="ion-no-border glass">
   <ion-toolbar>
-    <ion-title size="large">Stock & Pièces</ion-title>
+    <ion-title>Stock & Inventaire</ion-title>
     <ion-buttons slot="end">
-      <ion-button class="filter-btn">
-        <ion-icon name="cube-outline" slot="icon-only"></ion-icon>
+      <ion-button id="open-stock-filter" class="filter-btn-compact">
+        <ion-icon name="options-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 
-  <div class="search-container">
-    <div class="pill-search">
-      <ion-icon name="search-outline"></ion-icon>
-      <input 
-        type="text" 
-        placeholder="Rechercher une pièce, référence..." 
-        (input)="onSearch($event)"
-      />
+  <div class="header-content">
+    <div class="search-section">
+      <div class="pill-search">
+        <ion-icon name="search-outline"></ion-icon>
+        <input 
+          type="text" 
+          placeholder="Désignation, réf..." 
+          (input)="onSearch($event)"
+        />
+      </div>
     </div>
   </div>
 </ion-header>
@@ -27,78 +29,192 @@
 
   <app-offline-banner />
 
-  <div class="list-container">
+  <!-- Indicateur de filtres actifs -->
+  @if (filterLevel() !== 'ALL' || filterCategory() !== 'ALL') {
+    <div class="active-filters-bar animate-fade-in">
+      <span class="active-tag">
+        <ion-icon name="filter-outline"></ion-icon>
+        Filtres actifs
+      </span>
+      <ion-button fill="clear" size="small" (click)="setFilterLevel('ALL'); setFilterCategory('ALL')">
+        Réinitialiser
+      </ion-button>
+    </div>
+  }
+
+  <div class="list-wrapper">
     @if (loading()) {
-      <div class="loader-container">
-        <ion-spinner name="crescent"></ion-spinner>
+      <div class="skeleton-feed">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="skeleton-card">
+            <div class="sk-header">
+              <ion-skeleton-text animated style="width: 70%; height: 14px; border-radius: 4px;"></ion-skeleton-text>
+              <ion-skeleton-text animated style="width: 40px; height: 18px; border-radius: 8px;"></ion-skeleton-text>
+            </div>
+            <ion-skeleton-text animated style="width: 40%; height: 10px; margin-top: 10px; border-radius: 4px;"></ion-skeleton-text>
+            <div class="sk-footer">
+              <ion-skeleton-text animated style="width: 30%; height: 10px; border-radius: 4px;"></ion-skeleton-text>
+            </div>
+          </div>
+        }
       </div>
-    } @else if (pieces().length === 0) {
-      <div class="empty-state">
-        <div class="empty-icon">
+    } @else if (filteredPieces().length === 0) {
+      <div class="empty-state-v2">
+        <div class="empty-illustration">
           <ion-icon name="cube-outline"></ion-icon>
         </div>
-        <h3>Aucune pièce trouvée</h3>
-        <p>Ajustez votre recherche ou vérifiez votre connexion.</p>
+        <h3>Aucune pièce</h3>
+        <p>Ajustez vos filtres pour voir les résultats.</p>
+        <ion-button fill="clear" color="primary" (click)="setFilterCategory('ALL'); setFilterLevel('ALL')">
+          Réinitialiser les filtres
+        </ion-button>
       </div>
     } @else {
-      <div class="piece-list">
-        @for (piece of pieces(); track piece.id) {
+      <div class="premium-feed animate-in">
+        @for (piece of filteredPieces(); track piece.id) {
           <div 
-            class="piece-card" 
+            class="piece-card-v2 animate-in" 
             (click)="openSortie(piece)"
             (keydown.enter)="openSortie(piece)"
             tabindex="0"
             role="button"
-            aria-label="Voir la pièce">
-            <div class="piece-header">
-              <div class="piece-info">
-                <h3>{{ piece.designation }}</h3>
-                <p>{{ piece.reference }} • {{ piece.siteNom }}</p>
+          >
+            <div class="card-header">
+              <div class="category-tag">
+                <ion-icon name="business-outline"></ion-icon>
+                <span>{{ CATEGORIE_LABELS[piece.categorieAppareil] }}</span>
               </div>
-              <div class="piece-qty">
-                @if (piece.enAlerteStock) {
-                  <span class="qty-badge danger">⚠ {{ piece.quantite }}</span>
-                } @else {
-                  <span class="qty-badge success">{{ piece.quantite }}</span>
-                }
-              </div>
+              @if (piece.enAlerteStock) {
+                <div class="status-glow alert">
+                  <div class="dot"></div>
+                  <span class="status-text">Critique</span>
+                </div>
+              } @else {
+                <div class="status-glow success">
+                  <div class="dot"></div>
+                  <span class="status-text">Disponible</span>
+                </div>
+              }
             </div>
-            <div class="piece-footer">
-              <span class="action-hint">Sortie de stock</span>
-              <ion-icon name="chevron-forward-outline"></ion-icon>
+
+            <div class="card-body">
+              <h3 class="piece-title">{{ piece.designation }}</h3>
+              <p class="piece-ref">{{ piece.reference }}</p>
+            </div>
+            
+            <div class="card-footer">
+              <div class="qty-block" [class.danger]="piece.enAlerteStock">
+                <span class="qty-value">{{ piece.quantite }}</span>
+                <span class="qty-unit">en stock</span>
+              </div>
+              <div class="footer-divider"></div>
+              <div class="meta-item">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ piece.siteNom }}</span>
+              </div>
             </div>
           </div>
         }
       </div>
     }
   </div>
+
+  <!-- Modal filtres Stock -->
+  <ion-modal trigger="open-stock-filter" [initialBreakpoint]="0.5" [breakpoints]="[0, 0.5, 0.8]" class="premium-modal">
+    <ng-template>
+      <div class="modal-premium-header">
+        <div class="handle"></div>
+      </div>
+      <ion-content class="ion-padding">
+        <div class="modal-sections">
+          
+          <div class="modal-section">
+            <label>Niveau de stock</label>
+            <div class="filter-options-grid">
+              <div 
+                class="filter-option-item" 
+                [class.selected]="filterLevel() === 'ALL'"
+                (click)="setFilterLevel('ALL')"
+              >
+                <span>Tout</span>
+              </div>
+              <div 
+                class="filter-option-item" 
+                [class.selected]="filterLevel() === 'CRITIQUE'"
+                (click)="setFilterLevel('CRITIQUE')"
+              >
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <span>Critique</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-section">
+            <label>Catégorie d'appareil</label>
+            <div class="filter-options-list">
+              <div 
+                class="filter-option-item" 
+                [class.selected]="filterCategory() === 'ALL'"
+                (click)="setFilterCategory('ALL')"
+              >
+                <span>Toutes les catégories</span>
+                @if (filterCategory() === 'ALL') {
+                  <ion-icon name="checkmark-circle" color="primary"></ion-icon>
+                }
+              </div>
+              @for (cat of CATEGORIES; track cat) {
+                <div 
+                  class="filter-option-item" 
+                  [class.selected]="filterCategory() === cat"
+                  (click)="setFilterCategory(cat)"
+                >
+                  <span>{{ CATEGORIE_LABELS[cat] }}</span>
+                  @if (filterCategory() === cat) {
+                    <ion-icon name="checkmark-circle" color="primary"></ion-icon>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+          
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
 
 <style>
-  .search-container {
-    padding: 0 16px 16px;
+  .glass {
+    --background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    background: white;
+  }
+
+  .header-content {
+    background: white;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ion-color-step-100);
+  }
+
+  .search-section {
+    padding: 0 16px 12px;
   }
 
   .pill-search {
-    background: var(--ion-color-step-100);
-    border-radius: var(--pill-radius);
-    padding: 10px 16px;
+    background: var(--ion-color-step-50);
+    border-radius: 16px;
+    padding: 8px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: var(--transition-smooth);
-    border: 1px solid transparent;
+    border: 1px solid var(--ion-color-step-100);
+    transition: all 0.2s ease;
   }
 
   .pill-search:focus-within {
-    background: var(--ion-item-background);
     border-color: var(--ion-color-primary);
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-  }
-
-  .pill-search ion-icon {
-    font-size: 1.2rem;
-    color: var(--ion-color-step-400);
+    background: white;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
   }
 
   .pill-search input {
@@ -106,114 +222,312 @@
     background: transparent;
     width: 100%;
     outline: none;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--ion-text-color);
   }
 
-  .list-container {
-    padding-bottom: 24px;
-  }
-
-  .loader-container {
-    padding: 100px 0;
-    text-align: center;
-  }
-
-  .empty-state {
-    padding: 80px 40px;
-    text-align: center;
-    color: var(--ion-color-step-500);
-  }
-
-  .empty-icon {
-    font-size: 64px;
-    margin-bottom: 16px;
-    opacity: 0.2;
-  }
-
-  .piece-list {
-    padding: 8px 16px;
+  .filters-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
-  .piece-card {
-    background: var(--ion-item-background);
-    border-radius: var(--card-border-radius);
-    padding: 16px;
-    border: 1px solid var(--ion-color-step-50);
-    box-shadow: var(--card-shadow);
-    transition: var(--transition-smooth);
+  /* Filter Pills */
+  .filter-scroller {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 16px 4px;
+    scrollbar-width: none;
+  }
+  .filter-scroller::-webkit-scrollbar { display: none; }
+
+  .filter-pill {
+    white-space: nowrap;
+    padding: 6px 14px;
+    background: var(--ion-color-step-50);
+    border: 1px solid var(--ion-color-step-100);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ion-color-step-600);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
-  .piece-card:active {
-    transform: scale(0.98);
+  .filter-pill.active {
+    background: var(--ion-color-primary);
+    color: white;
+    border-color: var(--ion-color-primary);
+  }
+
+  .filter-pill.alert.active {
+    background: var(--ion-color-danger);
+    border-color: var(--ion-color-danger);
+  }
+
+  .filter-pill.sm { padding: 4px 10px; font-size: 0.75rem; }
+
+  /* Piece Cards v2 */
+  .premium-feed {
+    padding: 8px 0 24px;
+  }
+
+  .piece-card-v2 {
+    background: white;
+    border-radius: 22px;
+    padding: 20px;
+    margin: 12px 16px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 4px 12px -2px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .piece-card-v2:active {
+    transform: scale(0.975) translateY(2px);
     background: var(--ion-color-step-50);
   }
 
-  .piece-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-  }
-
-  .piece-info h3 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--ion-text-color);
-    letter-spacing: -0.02em;
-  }
-
-  .piece-info p {
-    margin: 4px 0 0;
-    font-size: 0.85rem;
-    color: var(--ion-color-step-500);
-    font-weight: 500;
-  }
-
-  .qty-badge {
-    padding: 4px 10px;
-    border-radius: 10px;
-    font-size: 0.85rem;
-    font-weight: 800;
-  }
-
-  .qty-badge.success {
-    background: rgba(var(--ion-color-success-rgb), 0.1);
-    color: var(--ion-color-success);
-  }
-
-  .qty-badge.danger {
-    background: rgba(var(--ion-color-danger-rgb), 0.1);
-    color: var(--ion-color-danger);
-  }
-
-  .piece-footer {
+  .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 12px;
-    border-top: 1px solid var(--ion-color-step-50);
-    color: var(--ion-color-primary);
   }
 
-  .action-hint {
-    font-size: 0.8rem;
-    font-weight: 700;
+  .category-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(var(--ion-color-step-200-rgb), 0.1);
+    border-radius: 12px;
+    color: var(--ion-color-step-600);
+    font-size: 0.7rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  .piece-footer ion-icon {
-    font-size: 1.2rem;
+  .category-tag ion-icon { font-size: 0.9rem; }
+
+  /* Status Glow Dots */
+  .status-glow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
   }
 
-  .filter-btn {
-    --background: var(--ion-color-step-100);
-    --border-radius: 12px;
-    margin-right: 8px;
+  .status-glow .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .status-text {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .status-glow.success .dot {
+    background: #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+  }
+  .status-glow.success .status-text { color: #10b981; }
+
+  .status-glow.alert .dot {
+    background: #ef4444;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+  }
+  .status-glow.alert .status-text { color: #ef4444; }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .piece-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--ion-text-color);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+
+  .piece-ref {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ion-color-step-400);
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0,0,0,0.04);
+  }
+
+  .footer-divider {
+    width: 4px;
+    height: 4px;
+    background: var(--ion-color-step-200);
+    border-radius: 50%;
+  }
+
+  .qty-block {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .qty-value {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--ion-text-color);
+  }
+
+  .qty-unit {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ion-color-step-400);
+  }
+
+  .qty-block.danger .qty-value { color: #ef4444; }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ion-color-step-500);
+  }
+
+  /* Skeleton Screen */
+  .skeleton-card {
+    background: white;
+    border-radius: 18px;
+    margin: 10px 16px;
+    padding: 16px;
+    border: 1px solid var(--ion-color-step-50);
+  }
+  .sk-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  /* Empty State v2 */
+  .empty-state-v2 {
+    padding: 80px 40px;
+    text-align: center;
+  }
+  .empty-illustration {
+    font-size: 64px;
+    color: var(--ion-color-primary);
+    background: rgba(var(--ion-color-primary-rgb), 0.05);
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 32px;
+    margin: 0 auto 20px;
+  }
+
+  .animate-in { animation: fadeIn slideUp 0.4s ease-out; }
+  @keyframes slideUp {
+    from { transform: translateY(15px); }
+    to { transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Active Filters Bar */
+  .active-filters-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: rgba(var(--ion-color-primary-rgb), 0.05);
+    border-bottom: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
+  }
+
+  .active-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ion-color-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Modal Sections */
+  .modal-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-bottom: 40px;
+  }
+
+  .modal-section label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ion-color-step-400);
+    margin-bottom: 12px;
+  }
+
+  .filter-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .filter-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filter-option-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--ion-color-step-50);
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .filter-option-item.selected {
+    background: rgba(var(--ion-color-primary-rgb), 0.05);
+    color: var(--ion-color-primary);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.2);
+  }
+
+  .filter-option-item ion-icon {
+    font-size: 1.2rem;
   }
 </style>

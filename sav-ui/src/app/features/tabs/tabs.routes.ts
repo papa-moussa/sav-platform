@@ -7,6 +7,11 @@ export const tabsRoutes: Route[] = [
     component: TabsPage,
     children: [
       {
+        path: 'home',
+        loadComponent: () =>
+          import('../dashboard/dashboard.page').then((m) => m.DashboardPage),
+      },
+      {
         path: 'tickets',
         loadComponent: () =>
           import('../tickets/ticket-list/ticket-list.page').then(
@@ -32,7 +37,7 @@ export const tabsRoutes: Route[] = [
         loadComponent: () =>
           import('../profile/profile.page').then((m) => m.ProfilePage),
       },
-      { path: '', redirectTo: 'tickets', pathMatch: 'full' },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
     ],
   },
 ];

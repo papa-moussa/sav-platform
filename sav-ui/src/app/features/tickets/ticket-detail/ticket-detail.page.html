@@ -11,18 +11,16 @@
     </ion-buttons>
   </ion-toolbar>
 
-  <ion-toolbar class="segment-toolbar">
-    <ion-segment [value]="activeSegment()" (ionChange)="activeSegment.set($any($event).detail.value)">
+  <div class="segment-container glass">
+    <ion-segment [value]="activeSegment()" (ionChange)="activeSegment.set($any($event).detail.value)" mode="ios">
       <ion-segment-button value="workflow">
         <ion-label>Intervention</ion-label>
-        <ion-icon name="wrench-outline"></ion-icon>
       </ion-segment-button>
       <ion-segment-button value="history">
         <ion-label>Journal</ion-label>
-        <ion-icon name="time-outline"></ion-icon>
       </ion-segment-button>
     </ion-segment>
-  </ion-toolbar>
+  </div>
 </ion-header>
 
 <ion-content [fullscreen]="true">
@@ -81,7 +79,7 @@
           @if (ticket.statut === 'RECU') {
             <div class="phase-card recu-card">
               <div class="card-icon">
-                <ion-icon name="wrench-outline"></ion-icon>
+                <ion-icon name="build-outline"></ion-icon>
               </div>
               <h2>Démarrer l'intervention</h2>
               <p>L'appareil a été reçu. Commencez le diagnostic pour identifier la panne.</p>
@@ -102,10 +100,10 @@
           @if (ticket.statut === 'EN_DIAGNOSTIC') {
             <div class="phase-card diagnostic-card">
               <div class="card-header">
-                <ion-icon name="chatbox-text-outline"></ion-icon>
-                <h2>Diagnostic</h2>
+                <ion-icon name="chatbox-outline"></ion-icon>
+                <h2>Diagnostic technique</h2>
               </div>
-              <p>Veuillez renseigner les résultats du diagnostic technique.</p>
+              <p>Veuillez renseigner les résultats du diagnostic effectué sur l'appareil.</p>
               
               <ion-button expand="block" fill="outline" class="form-btn" (click)="onCompleteDiagnostic()">
                 <ion-icon name="add-outline" slot="start"></ion-icon>
@@ -117,47 +115,54 @@
           <!-- PHASE : EN_COURS -->
           @if (ticket.statut === 'EN_COURS') {
             <div class="phase-group">
-              <div class="detail-card actions-card">
-                <div class="card-header">
-                  <ion-icon name="wrench-outline"></ion-icon>
-                  <h2>Actions réalisées ({{ ticket.actions.length }})</h2>
+              <div class="premium-list-card">
+                <div class="card-header-main">
+                  <div class="title-group">
+                    <ion-icon name="build-outline" class="icon-accent"></ion-icon>
+                    <h2>Actions réalisées</h2>
+                  </div>
+                  <span class="count-badge">{{ ticket.actions.length }}</span>
                 </div>
                 
-                <ion-list lines="none">
+                <div class="actions-feed">
                   @for (action of ticket.actions; track action.id) {
-                    <ion-item class="action-item">
-                      <div class="bullet"></div>
-                      <ion-label>
-                        <h3>{{ action.description }}</h3>
-                        <p>{{ action.createdAt | date:'HH:mm' }} • {{ action.technicienNom }}</p>
-                      </ion-label>
-                    </ion-item>
+                    <div class="action-feed-item">
+                      <div class="action-time">
+                        {{ action.createdAt | date:'HH:mm' }}
+                      </div>
+                      <div class="action-body">
+                        <p>{{ action.description }}</p>
+                        <span class="action-meta">Par {{ action.technicienNom }}</span>
+                      </div>
+                    </div>
                   } @empty {
                     <div class="empty-state-inner">
+                      <ion-icon name="document-text-outline"></ion-icon>
                       <p>Aucune action enregistrée.</p>
                     </div>
                   }
-                </ion-list>
+                </div>
 
-                <ion-button expand="block" fill="clear" class="add-action-btn" (click)="onAddAction()" [disabled]="!!ticket.blockingReason">
-                  <ion-icon name="add-outline" slot="start"></ion-icon>
-                  Ajouter une action
-                </ion-button>
+                <div class="card-footer-action">
+                  <ion-button expand="block" fill="clear" (click)="onAddAction()" [disabled]="!!ticket.blockingReason">
+                    <ion-icon name="add-outline" slot="start"></ion-icon>
+                    Nouvelle action
+                  </ion-button>
+                </div>
               </div>
 
-                @if (!ticket.blockingReason) {
-                  <div class="workflow-actions-grid">
-                    <ion-button expand="block" fill="outline" color="warning" class="secondary-cta" (click)="onBlock()">
-                      <ion-icon name="pause-circle-outline" slot="start"></ion-icon>
-                      Bloquer
-                    </ion-button>
-                    <ion-button expand="block" color="dark" class="primary-cta" (click)="onTerminate()">
-                      <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-                      Terminer
-                    </ion-button>
-                  </div>
-                }
-
+              @if (!ticket.blockingReason) {
+                <div class="workflow-actions-grid">
+                  <ion-button expand="block" fill="outline" color="warning" class="secondary-cta" (click)="onBlock()">
+                    <ion-icon name="pause-circle-outline" slot="start"></ion-icon>
+                    Bloquer
+                  </ion-button>
+                  <ion-button expand="block" color="dark" class="primary-cta" (click)="onTerminate()">
+                    <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+                    Terminer
+                  </ion-button>
+                </div>
+              }
             </div>
           }
 
@@ -200,7 +205,7 @@
             </div>
           }
 
-          <!-- Infos Générales (toujours visibles mais plus discrètes) -->
+          <!-- Infos Générales -->
           <div class="detail-card info-card">
             <div class="card-header">
               <ion-icon name="information-circle-outline"></ion-icon>
@@ -208,11 +213,11 @@
             </div>
             <div class="info-grid">
               <div class="info-item">
-                <span class="label">Site</span>
+                <span class="label">Site d'intervention</span>
                 <span class="value">{{ ticket.siteNom }}</span>
               </div>
               <div class="info-item">
-                <span class="label">Garantie</span>
+                <span class="label">Contrat / Garantie</span>
                 <span class="value" [class.highlight]="ticket.sousGarantie">
                   {{ ticket.sousGarantie ? 'Sous garantie' : 'Hors garantie' }}
                 </span>
@@ -226,31 +231,37 @@
 
     @if (activeSegment() === 'history') {
       <div class="history-container animate-fade-in">
-        <div class="detail-container">
-          <div class="detail-card">
-            <div class="card-header">
-              <ion-icon name="time-outline"></ion-icon>
-              <h2>Chronologie des évènements</h2>
-            </div>
-            
-            <div class="timeline">
-              @for (item of ticket.history; track item.id) {
-                <div class="timeline-item">
-                  <div class="timeline-marker"></div>
-                  <div class="timeline-content">
-                    <div class="timeline-header">
-                      <span class="interv-tech">{{ item.utilisateurNom }}</span>
-                      <span class="interv-date">{{ item.timestamp | date:'dd/MM HH:mm' }}</span>
-                    </div>
-                    <p class="interv-diag"><strong>{{ item.typeAction }} :</strong> {{ item.details }}</p>
+        <div class="event-feed">
+          <div class="feed-header">
+            <h2>Journal d'activité</h2>
+            <p>Historique complet des actions sur ce ticket</p>
+          </div>
+
+          <div class="events-list">
+            @for (item of ticket.history; track item.id; let first = $first; let last = $last) {
+              <div class="event-item" [class.is-first]="first" [class.is-last]="last">
+                <div class="event-line"></div>
+                <div class="event-icon-wrapper" [class]="getHistoryColor(item.typeAction)">
+                  <ion-icon [name]="getHistoryIcon(item.typeAction)"></ion-icon>
+                </div>
+                <div class="event-content-card">
+                  <div class="event-header">
+                    <span class="event-type" [class]="getHistoryColor(item.typeAction)">{{ item.typeAction }}</span>
+                    <span class="event-time">{{ item.timestamp | date:'dd/MM HH:mm' }}</span>
+                  </div>
+                  <p class="event-details">{{ item.details }}</p>
+                  <div class="event-footer">
+                    <ion-icon name="person-circle-outline"></ion-icon>
+                    <span>{{ item.utilisateurNom }}</span>
                   </div>
                 </div>
-              } @empty {
-                <div class="empty-timeline">
-                  <p>Aucun historique disponible.</p>
-                </div>
-              }
-            </div>
+              </div>
+            } @empty {
+              <div class="empty-feed">
+                <ion-icon name="receipt-outline"></ion-icon>
+                <p>Aucun historique enregistré pour le moment.</p>
+              </div>
+            }
           </div>
         </div>
       </div>
@@ -264,16 +275,18 @@
     backdrop-filter: blur(10px);
   }
 
-  .segment-toolbar {
-    --padding-start: 16px;
-    --padding-end: 16px;
-    --padding-bottom: 8px;
+  /* Premium Segment Styling */
+  .segment-container {
+    padding: 8px 16px 16px;
+    background: white;
+    border-bottom: 1px solid var(--ion-color-step-100);
   }
 
   ion-segment {
     --background: var(--ion-color-step-50);
-    border-radius: 12px;
-    padding: 2px;
+    border-radius: 14px;
+    padding: 4px;
+    height: 44px;
   }
 
   ion-segment-button {
@@ -281,11 +294,13 @@
     --color: var(--ion-color-step-500);
     --color-checked: var(--ion-color-primary);
     --indicator-color: white;
-    min-height: 40px;
+    --indicator-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin: 0;
+    min-height: 36px;
   }
 
   ion-segment-button ion-label {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 700;
   }
 
@@ -364,78 +379,324 @@
     gap: 16px;
   }
 
+  /* Intervention Cards Modernization */
   .phase-card {
     background: white;
     border-radius: 24px;
     padding: 24px;
     text-align: center;
-    box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
     border: 1px solid var(--ion-color-step-100);
   }
 
   .card-icon {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     background: var(--ion-color-primary);
     color: white;
-    border-radius: 18px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     margin: 0 auto 16px;
-    box-shadow: 0 8px 16px -4px var(--ion-color-primary-tint);
+    box-shadow: 0 10px 20px -5px rgba(var(--ion-color-primary-rgb), 0.4);
   }
 
   .phase-card h2 {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 800;
     margin: 0 0 8px;
+    letter-spacing: -0.02em;
   }
 
   .phase-card p {
     font-size: 0.95rem;
     color: var(--ion-color-step-500);
     margin: 0 0 20px;
-    line-height: 1.4;
+    line-height: 1.5;
   }
 
   .complaint-box {
     background: var(--ion-color-step-50);
-    border-radius: 16px;
-    padding: 16px;
+    border-radius: 18px;
+    padding: 18px;
     text-align: left;
     margin-bottom: 24px;
+    border: 1px solid var(--ion-color-step-100);
   }
 
   .complaint-box .label {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
     color: var(--ion-color-step-400);
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
   }
 
   .complaint-box p {
     margin: 0;
     color: var(--ion-text-color);
     font-style: italic;
-    font-size: 1rem;
+    font-size: 1.05rem;
+    font-weight: 500;
   }
 
-  .main-cta {
+  .main-cta, .form-btn {
     --border-radius: 16px;
-    --height: 54px;
-    font-weight: 700;
+    --height: 56px;
+    font-weight: 800;
     margin: 0;
   }
 
-  .form-btn {
-    --border-radius: 16px;
-    --height: 54px;
-    font-weight: 700;
+  /* Actions List Premium Card */
+  .premium-list-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid var(--ion-color-step-100);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+    overflow: hidden;
   }
+
+  .card-header-main {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--ion-color-step-50);
+  }
+
+  .title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .title-group h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--ion-text-color);
+  }
+
+  .icon-accent {
+    font-size: 1.3rem;
+    color: var(--ion-color-primary);
+  }
+
+  .count-badge {
+    background: var(--ion-color-step-100);
+    color: var(--ion-color-step-600);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  .actions-feed {
+    padding: 8px 20px;
+  }
+
+  .action-feed-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--ion-color-step-50);
+  }
+
+  .action-feed-item:last-child {
+    border-bottom: none;
+  }
+
+  .action-time {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ion-color-step-400);
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+
+  .action-body p {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ion-text-color);
+    line-height: 1.4;
+  }
+
+  .action-meta {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.8rem;
+    color: var(--ion-color-step-400);
+  }
+
+  .card-footer-action {
+    padding: 8px 12px;
+    background: var(--ion-color-step-50);
+  }
+
+  .empty-state-inner {
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--ion-color-step-300);
+  }
+
+  .empty-state-inner ion-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  .empty-state-inner p { margin: 0; font-weight: 600; font-size: 0.9rem; }
+
+  .workflow-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .workflow-actions-grid ion-button {
+    --height: 56px;
+    --border-radius: 18px;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  /* History Feed Premium Styling */
+  .history-container {
+    padding: 24px 20px;
+  }
+
+  .feed-header {
+    margin-bottom: 24px;
+  }
+
+  .feed-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+  }
+
+  .feed-header p {
+    margin: 4px 0 0;
+    font-size: 0.9rem;
+    color: var(--ion-color-step-500);
+  }
+
+  .events-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .event-item {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding-bottom: 32px;
+  }
+
+  .event-line {
+    position: absolute;
+    left: 17px;
+    top: 36px;
+    bottom: 0;
+    width: 2px;
+    background: var(--ion-color-step-100);
+  }
+
+  .event-item.is-last .event-line {
+    display: none;
+  }
+
+  .event-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    z-index: 2;
+    background: white;
+    border: 2px solid currentColor;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  .event-content-card {
+    flex: 1;
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid var(--ion-color-step-100);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  }
+
+  .event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .event-type {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .event-time {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ion-color-step-400);
+  }
+
+  .event-details {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ion-text-color);
+    line-height: 1.5;
+  }
+
+  .event-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ion-color-step-50);
+    color: var(--ion-color-step-500);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .event-footer ion-icon { font-size: 1rem; }
+
+  /* Event Colors */
+  .blue { color: #3b82f6; }
+  .indigo { color: #6366f1; }
+  .purple { color: #a855f7; }
+  .emerald { color: #10b981; }
+  .amber { color: #f59e0b; }
+  .green { color: #22c55e; }
+  .gray { color: #6b7280; }
+  .slate { color: #475569; }
+
+  .empty-feed {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ion-color-step-300);
+  }
+
+  .empty-feed ion-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; }
+  .empty-feed p { font-weight: 700; }
 
   .detail-card {
     background: white;
@@ -460,98 +721,11 @@
     letter-spacing: 0.05em;
   }
 
-  .action-item {
-    --padding-start: 0;
-    --inner-padding-end: 0;
-    margin-bottom: 12px;
-  }
+  .qr-loader { padding: 40px; text-align: center; }
 
-  .bullet {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--ion-color-primary);
-    margin-right: 12px;
-    flex-shrink: 0;
-  }
-
-  .action-item h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
-
-  .action-item p {
-    font-size: 0.8rem;
-    color: var(--ion-color-step-400);
-  }
-
-  .add-action-btn {
-    margin-top: 8px;
-    font-weight: 700;
-  }
-
-  .workflow-actions-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 16px;
-  }
-
-  .workflow-actions-grid ion-button {
-    --height: 54px;
-    --border-radius: 16px;
-    font-weight: 700;
-    margin: 0;
-  }
-
-  .feedback-card {
-    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-    color: white;
-    border: none;
-  }
-
-  .feedback-card h2, .feedback-card p { color: white; }
-  .feedback-card .qr-icon { background: white; color: var(--ion-color-primary); }
-
-  .qr-container {
-    background: white;
-    padding: 12px;
-    border-radius: 20px;
-    width: 200px;
-    height: 200px;
-    margin: 0 auto 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .qr-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-  }
-
-  .qr-cloture {
-    text-align: center;
-    color: var(--ion-color-step-800);
-  }
-
+  .qr-cloture { text-align: center; color: var(--ion-color-step-800); }
   .qr-cloture ion-icon { font-size: 3rem; }
   .qr-cloture p { margin-top: 8px; font-weight: 700; }
-
-  .qr-actions {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .qr-btn {
-    --background: rgba(255,255,255,0.2);
-    --border-color: rgba(255,255,255,0.4);
-    --color: white;
-    --border-radius: 12px;
-    margin: 0;
-  }
 
   .info-grid {
     display: grid;
@@ -572,48 +746,6 @@
     font-weight: 600;
   }
 
-  .timeline {
-    margin-top: 16px;
-  }
-
-  .timeline-item {
-    position: relative;
-    padding-left: 24px;
-    padding-bottom: 24px;
-  }
-
-  .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: 4px;
-    top: 20px;
-    bottom: 0;
-    width: 2px;
-    background: var(--ion-color-step-100);
-  }
-
-  .timeline-marker {
-    position: absolute;
-    left: 0;
-    top: 6px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--ion-color-primary);
-    border: 2px solid white;
-    z-index: 1;
-  }
-
-  .timeline-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-  }
-
-  .interv-tech { font-weight: 700; }
-  .interv-date { color: var(--ion-color-step-400); }
-
   .animate-fade-in {
     animation: fadeIn 0.4s ease-out;
   }
@@ -630,5 +762,10 @@
   @keyframes slideDown {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 360px) {
+    .hero-content h1 { font-size: 1.5rem; }
+    .workflow-actions-grid { grid-template-columns: 1fr; }
   }
 </style>

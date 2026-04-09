@@ -12,6 +12,7 @@ import {
   constructOutline,
   cubeOutline,
   personOutline,
+  homeOutline
 } from 'ionicons/icons';
 import { SyncService } from '../../core/services/sync.service';
 
@@ -25,6 +26,6 @@ export class TabsPage {
   syncService = inject(SyncService);
 
   constructor() {
-    addIcons({ constructOutline, cubeOutline, personOutline });
+    addIcons({ constructOutline, cubeOutline, personOutline, homeOutline });
   }
 }

@@ -7,15 +7,11 @@ import {
   IonContent,
   IonRefresher,
   IonRefresherContent,
-  IonLabel,
   IonButtons,
   IonButton,
   IonIcon,
-  IonModal,
-  IonRadioGroup,
-  IonRadio,
   IonSkeletonText,
-  IonItem
+  IonModal
 } from '@ionic/angular/standalone';
 import { TicketStore } from '../ticket.store';
 import { TicketCardComponent } from '../../../shared/components/ticket-card/ticket-card.component';
@@ -29,7 +25,8 @@ import {
   ticketOutline,
   filterOutline, 
   callOutline, 
-  playCircleOutline 
+  playCircleOutline,
+  checkmarkCircle
 } from 'ionicons/icons';
 
 @Component({
@@ -42,15 +39,11 @@ import {
     IonContent,
     IonRefresher,
     IonRefresherContent,
-    IonLabel,
     IonButtons,
     IonButton,
     IonIcon,
-    IonModal,
-    IonRadioGroup,
-    IonRadio,
     IonSkeletonText,
-    IonItem,
+    IonModal,
     TicketCardComponent,
     OfflineBannerComponent,
   ],
@@ -77,7 +70,8 @@ export class TicketListPage implements OnInit {
       ticketOutline,
       filterOutline, 
       callOutline, 
-      playCircleOutline 
+      playCircleOutline,
+      checkmarkCircle
     });
   }
 
@@ -90,9 +84,7 @@ export class TicketListPage implements OnInit {
     (event.target as HTMLIonRefresherElement).complete();
   }
 
-  onFilterChange(event: CustomEvent): void {
-    this.store.filterStatut.set(event.detail.value as TicketStatut | 'ALL');
-  }
+  // Managed directly in template
 
   onSearch(event: Event): void {
     const customEvent = event as CustomEvent;

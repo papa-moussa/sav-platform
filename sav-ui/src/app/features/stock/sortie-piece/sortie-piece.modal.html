@@ -3,7 +3,6 @@
     <ion-buttons slot="start">
       <ion-button (click)="dismiss()" color="medium">Annuler</ion-button>
     </ion-buttons>
-    <ion-title>Sortie de stock</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="submit()" [disabled]="form.invalid || loading()" color="primary" class="fw-bold">
         @if (loading()) { <ion-spinner name="crescent" /> }

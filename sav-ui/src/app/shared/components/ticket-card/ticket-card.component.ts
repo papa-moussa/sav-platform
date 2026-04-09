@@ -3,7 +3,13 @@ import { IonIcon } from '@ionic/angular/standalone';
 import { Ticket, TYPE_APPAREIL_LABELS } from '@sav/shared-models';
 import { StatutBadgeComponent } from '../statut-badge/statut-badge.component';
 import { addIcons } from 'ionicons';
-import { locationOutline, timeOutline, chevronForwardOutline } from 'ionicons/icons';
+import { 
+  locationOutline, 
+  timeOutline, 
+  chevronForwardOutline,
+  businessOutline,
+  constructOutline
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-ticket-card',
@@ -14,133 +20,198 @@ import { locationOutline, timeOutline, chevronForwardOutline } from 'ionicons/ic
   ],
   template: `
     <div 
-      class="ticket-card card-hover" 
+      class="ticket-card-v2 animate-in" 
       (click)="clicked.emit(ticket())"
       (keydown.enter)="clicked.emit(ticket())"
       role="button"
       tabindex="0"
     >
       <div class="card-header">
-        <div class="header-main">
-          <span class="ticket-number">{{ ticket().numero }}</span>
-          <h3 class="client-name">{{ ticket().clientNom }}</h3>
+        <div class="device-tag">
+          <ion-icon name="construct-outline"></ion-icon>
+          <span>{{ typeLabel() }}</span>
         </div>
-        <app-statut-badge [statut]="ticket().statut" />
+        <div class="status-glow" [class]="ticket().statut.toLowerCase()">
+          <div class="dot"></div>
+          <span class="status-text">{{ ticket().statut.replace('_', ' ') }}</span>
+        </div>
       </div>
-      
-      <div class="card-content">
-        <p class="device-info">
-          {{ typeLabel() }} <span class="divider">•</span> {{ ticket().marqueModele }}
-        </p>
-        
-        <div class="metadata">
-          <div class="meta-item">
-            <ion-icon name="location-outline"></ion-icon>
-            <span>{{ ticket().siteNom }}</span>
-          </div>
-          <div class="meta-item">
-            <ion-icon name="time-outline"></ion-icon>
-            <span>Reçu le {{ formatDate(ticket().createdAt) }}</span>
-          </div>
-        </div>
+
+      <div class="card-body">
+        <h3 class="client-name">{{ ticket().clientNom }}</h3>
+        <p class="marque-modele">{{ ticket().marqueModele }}</p>
       </div>
       
       <div class="card-footer">
-        <div class="chevron">
-          <ion-icon name="chevron-forward-outline"></ion-icon>
+        <div class="meta-item">
+          <span class="ticket-no">#{{ ticket().numero }}</span>
+        </div>
+        <div class="footer-divider"></div>
+        <div class="meta-item">
+          <ion-icon name="business-outline"></ion-icon>
+          <span>{{ ticket().siteNom }}</span>
+        </div>
+        <div class="footer-divider"></div>
+        <div class="meta-item">
+          <span>{{ formatDate(ticket().createdAt) }}</span>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .ticket-card {
-      background: var(--ion-card-background);
-      border-radius: var(--card-border-radius);
-      padding: 16px;
+    .ticket-card-v2 {
+      background: white;
+      border-radius: 22px;
+      padding: 20px;
       margin: 12px 16px;
-      border: 1px solid var(--ion-color-step-100);
-      box-shadow: var(--card-shadow);
-      position: relative;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 4px 12px -2px rgba(0,0,0,0.03);
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
       overflow: hidden;
+    }
+
+    .ticket-card-v2:active {
+      transform: scale(0.975) translateY(2px);
+      background: var(--ion-color-step-50);
+      box-shadow: 0 2px 4px -2px rgba(0,0,0,0.02);
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
     }
 
-    .header-main {
+    .device-tag {
       display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .ticket-number {
-      font-size: 0.7rem;
-      font-weight: 700;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(var(--ion-color-primary-rgb), 0.06);
+      border-radius: 12px;
       color: var(--ion-color-primary);
+      font-size: 0.75rem;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
+    .device-tag ion-icon {
+      font-size: 1rem;
+    }
+
+    /* Status Glow Dot */
+    .status-glow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      border-radius: 10px;
+    }
+
+    .status-glow .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ion-color-step-300);
+      box-shadow: 0 0 0 4px rgba(var(--ion-color-step-300-rgb), 0.1);
+    }
+
+    .status-text {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--ion-color-step-500);
+    }
+
+    /* Statut Specific Glows */
+    .status-glow.recu .dot { 
+      background: #10b981; 
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); 
+    }
+    .status-glow.recu .status-text { color: #10b981; }
+
+    .status-glow.en_diagnostic .dot { 
+      background: #f59e0b; 
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); 
+    }
+    .status-glow.en_diagnostic .status-text { color: #f59e0b; }
+
+    .status-glow.en_cours .dot { 
+      background: #3b82f6; 
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); 
+    }
+    .status-glow.en_cours .status-text { color: #3b82f6; }
+
+    .status-glow.termine .dot { 
+      background: #6366f1; 
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4); 
+    }
+    .status-glow.termine .status-text { color: #6366f1; }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     .client-name {
       margin: 0;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-size: 1.3rem;
+      font-weight: 800;
       color: var(--ion-text-color);
-      letter-spacing: -0.01em;
+      letter-spacing: -0.04em;
     }
 
-    .card-content {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .device-info {
+    .marque-modele {
       margin: 0;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--ion-color-step-700);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--ion-color-step-400);
     }
 
-    .divider {
-      color: var(--ion-color-step-300);
-      margin: 0 4px;
-    }
-
-    .metadata {
+    .card-footer {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0,0,0,0.04);
+    }
+
+    .footer-divider {
+      width: 4px;
+      height: 4px;
+      background: var(--ion-color-step-200);
+      border-radius: 50%;
     }
 
     .meta-item {
       display: flex;
       align-items: center;
       gap: 6px;
-      color: var(--ion-color-step-500);
-      font-size: 0.8rem;
-    }
-
-    .meta-item ion-icon {
-      font-size: 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 700;
       color: var(--ion-color-step-400);
     }
 
-    .card-footer {
-      position: absolute;
-      right: 16px;
-      bottom: 16px;
-      opacity: 0.3;
+    .ticket-no {
+      color: var(--ion-color-step-600);
+      font-weight: 800;
     }
 
-    .chevron {
-      font-size: 1.2rem;
+    .animate-in {
+      animation: slideIn 0.4s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   `]
 })
@@ -149,7 +220,13 @@ export class TicketCardComponent {
   clicked = output<Ticket>();
 
   constructor() {
-    addIcons({ locationOutline, timeOutline, chevronForwardOutline });
+    addIcons({ 
+      locationOutline, 
+      timeOutline, 
+      chevronForwardOutline,
+      businessOutline,
+      constructOutline
+    });
   }
 
   typeLabel() {

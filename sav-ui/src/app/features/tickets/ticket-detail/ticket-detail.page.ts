@@ -9,15 +9,13 @@ import {
   IonButtons,
   IonSpinner,
   IonIcon,
+  IonLabel,
   ModalController,
   ToastController,
   AlertController,
   IonButton,
   IonSegment,
   IonSegmentButton,
-  IonLabel,
-  IonList,
-  IonItem
 } from '@ionic/angular/standalone';
 import { DiagnosticModalComponent } from '../components/diagnostic-modal.component';
 import { AddActionModalComponent } from '../components/add-action-modal.component';
@@ -42,7 +40,12 @@ import {
   shareSocialOutline,
   alertCircleOutline,
   chevronForwardOutline,
-  chatboxOutline
+  chatboxOutline,
+  flagOutline,
+  receiptOutline,
+  alertOutline,
+  cubeOutline,
+  personCircleOutline
 } from 'ionicons/icons';
 import { TicketStore } from '../ticket.store';
 import { StatutBadgeComponent } from '../../../shared/components/statut-badge/statut-badge.component';
@@ -67,7 +70,6 @@ import {
     IonIcon,
     IonButton,
     IonSegment, IonSegmentButton, IonLabel,
-    IonList, IonItem,
     StatutBadgeComponent, OfflineBannerComponent,
   ],
 
@@ -104,8 +106,43 @@ export class TicketDetailPage implements OnInit {
       shareSocialOutline,
       alertCircleOutline,
       chevronForwardOutline,
-      chatboxOutline
+      chatboxOutline,
+      flagOutline,
+      receiptOutline,
+      alertOutline,
+      cubeOutline,
+      personCircleOutline
     });
+  }
+
+  getHistoryIcon(type: string): string {
+    switch (type.toUpperCase()) {
+      case 'DIAGNOSTIC': return 'build-outline';
+      case 'ACTION': return 'build-outline';
+      case 'PIÈCE':
+      case 'PIECE': return 'cube-outline';
+      case 'STATUT': return 'flag-outline';
+      case 'BLOCAGE': return 'alert-outline';
+      case 'REPRISE': return 'play-circle-outline';
+      case 'CRÉATION':
+      case 'CREATION': return 'receipt-outline';
+      default: return 'document-text-outline';
+    }
+  }
+
+  getHistoryColor(type: string): string {
+    switch (type.toUpperCase()) {
+      case 'DIAGNOSTIC': return 'blue';
+      case 'ACTION': return 'indigo';
+      case 'PIÈCE':
+      case 'PIECE': return 'purple';
+      case 'STATUT': return 'emerald';
+      case 'BLOCAGE': return 'amber';
+      case 'REPRISE': return 'green';
+      case 'CRÉATION':
+      case 'CREATION': return 'gray';
+      default: return 'slate';
+    }
   }
 
   ngOnInit(): void {

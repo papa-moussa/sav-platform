@@ -3,7 +3,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   IonHeader,
   IonToolbar,
-  IonTitle,
   IonContent,
   IonInput,
   IonButton,
@@ -29,7 +28,7 @@ import { Piece } from '@sav/shared-models';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonHeader, IonToolbar, IonContent,
     IonInput, IonButton, IonButtons, IonIcon,
     IonSpinner,
   ],

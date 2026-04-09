@@ -1,7 +1,7 @@
 import { Component, inject, Input } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { 
-  IonHeader, IonToolbar, IonTitle, IonContent, 
+  IonHeader, IonToolbar, IonContent, 
   IonButton, IonButtons, IonIcon, IonInput,
   ModalController
 } from '@ionic/angular/standalone';
@@ -15,7 +15,7 @@ import { Ticket } from '@sav/shared-models';
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonHeader, IonToolbar, IonContent,
     IonButton, IonButtons, IonIcon, IonInput
   ],
   template: `
@@ -24,7 +24,6 @@ import { Ticket } from '@sav/shared-models';
         <ion-buttons slot="start">
           <ion-button (click)="dismiss()" color="medium">Annuler</ion-button>
         </ion-buttons>
-        <ion-title>Nouvelle action</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="submit()" [disabled]="form.invalid" color="primary" class="fw-bold">
             Ajouter

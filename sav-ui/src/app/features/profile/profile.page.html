@@ -1,6 +1,6 @@
 <ion-header class="ion-no-border glass">
   <ion-toolbar>
-    <ion-title size="large">Mon Profil</ion-title>
+    <ion-title>Réglages</ion-title>
     <ion-buttons slot="end">
       <ion-button>
         <ion-icon name="notifications-outline" slot="icon-only"></ion-icon>
@@ -9,301 +9,330 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="no-scroll-content">
   <app-offline-banner />
 
-  <div class="profile-container">
-    <!-- Profile Header Compact -->
-    <div class="profile-hero-compact">
-      <div class="avatar-row">
-        <div class="avatar-wrapper">
-          <div class="avatar">
+  <div class="full-viewport-container">
+    
+    <!-- Hero Card Premium -->
+    <div class="hero-card-v2">
+      <div class="avatar-group">
+        <div class="avatar-ring">
+          <div class="avatar-inner">
             {{ (auth.currentNom() || 'T')?.substring(0, 1) }}
           </div>
-          <div class="status-indicator" [class.online]="network.isOnline()"></div>
+          <div class="status-dot" [class.is-online]="network.isOnline()"></div>
         </div>
-        <div class="user-meta">
-          <h1 class="technician-name">{{ auth.currentNom() ?? 'Technicien' }}</h1>
-          <p class="company-name">{{ auth.currentCompanyNom() ?? 'SAV Platform' }}</p>
+        <div class="name-group">
+          <h2>{{ auth.currentNom() ?? 'Technicien' }}</h2>
+          <p>{{ auth.currentCompanyNom() ?? 'SAV Platform' }}</p>
         </div>
       </div>
       
-      <div class="hero-badges">
-        <div class="badge-item primary">
-          <ion-icon name="shield-outline"></ion-icon>
-          <span>{{ auth.currentRole() }}</span>
+      <div class="role-badge">
+        <ion-icon name="shield-outline"></ion-icon>
+        <span>{{ auth.currentRole() }}</span>
+      </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="quick-stats">
+      <div class="stat-card" [class.has-pending]="syncService.pendingCount() > 0" (click)="syncNow()">
+        <div class="stat-icon">
+          @if (syncService.syncing()) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            <ion-icon name="sync-outline"></ion-icon>
+          }
         </div>
-        <div class="badge-item" [class.success]="network.isOnline()" [class.danger]="!network.isOnline()">
+        <div class="stat-info">
+          <span class="stat-label">Synchronisation</span>
+          <span class="stat-value">{{ syncService.pendingCount() }} en attente</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Grid 2x2 -->
+    <div class="actions-grid">
+      <div class="grid-item premium-card clickable">
+        <div class="grid-icon bg-indigo">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <span class="grid-label">Compte</span>
+      </div>
+      
+      <div class="grid-item premium-card clickable">
+        <div class="grid-icon bg-purple">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+        </div>
+        <span class="grid-label">Sécurité</span>
+      </div>
+
+      <div class="grid-item premium-card clickable">
+        <div class="grid-icon bg-amber">
+          <ion-icon name="help-circle-outline"></ion-icon>
+        </div>
+        <span class="grid-label">Assistance</span>
+      </div>
+
+      <div class="grid-item premium-card clickable">
+        <div class="grid-icon bg-blue">
           <ion-icon name="globe-outline"></ion-icon>
-          <span>{{ network.isOnline() ? 'En ligne' : 'Hors ligne' }}</span>
         </div>
+        <span class="grid-label">Langue</span>
       </div>
     </div>
 
-    <div class="settings-list-compact">
-      <!-- Sync & Data Section -->
-      <div class="settings-card">
-        <div class="setting-item">
-          <div class="setting-info">
-            <ion-icon name="sync-outline" class="icon-primary"></ion-icon>
-            <div class="text-content">
-              <span class="label">Synchronisation</span>
-              <span class="sub-label">{{ syncService.pendingCount() }} actions en attente</span>
-            </div>
-          </div>
-          <ion-button
-            fill="clear"
-            size="small"
-            class="sync-action-btn"
-            [disabled]="!network.isOnline() || syncService.syncing() || syncService.pendingCount() === 0"
-            (click)="syncNow()"
-          >
-            @if (syncService.syncing()) {
-              <ion-spinner name="crescent" />
-            } @else {
-              <ion-icon name="cloud-upload-outline" slot="icon-only" />
-            }
-          </ion-button>
-        </div>
-
-        <div class="setting-item clickable">
-          <div class="setting-info">
-            <ion-icon name="person-outline"></ion-icon>
-            <span class="label">Détails personnels</span>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
-        </div>
-
-        <div class="setting-item clickable">
-          <div class="setting-info">
-            <ion-icon name="lock-closed-outline"></ion-icon>
-            <span class="label">Sécurité & Accès</span>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
-        </div>
-
-        <div class="setting-item clickable">
-          <div class="setting-info">
-            <ion-icon name="help-circle-outline"></ion-icon>
-            <span class="label">Assistance</span>
-          </div>
-          <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
-        </div>
-      </div>
-
-      <!-- Logout -->
-      <div class="logout-container">
-        <ion-button
-          expand="block"
-          fill="outline"
-          color="danger"
-          class="logout-btn"
-          (click)="confirmLogout()"
-        >
-          <ion-icon name="log-out-outline" slot="start" />
-          Se déconnecter
-        </ion-button>
-        <p class="app-version">v2.1.0 • SAV Platform Premium</p>
-      </div>
+    <!-- Footer Logout Fixed -->
+    <div class="bottom-controls">
+      <ion-button expand="block" fill="clear" color="danger" class="logout-btn-v2" (click)="confirmLogout()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Déconnexion
+      </ion-button>
+      <p class="copyright">SAV Platform Premium • v2.1.0</p>
     </div>
+
   </div>
 </ion-content>
 
 <style>
-  .profile-container {
+  :host {
+    --card-bg: white;
+    --card-border: var(--ion-color-step-100);
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .no-scroll-content {
+    --overflow: hidden;
+  }
+
+  .full-viewport-container {
     height: 100%;
     display: flex;
     flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+    justify-content: space-between;
   }
 
-  .profile-hero-compact {
-    padding: 20px 20px 16px;
-    background: linear-gradient(180deg, var(--ion-color-step-50) 0%, var(--ion-background-color) 100%);
-    border-bottom: 1px solid var(--ion-color-step-100);
+  /* Hero Card v2 */
+  .hero-card-v2 {
+    background: linear-gradient(135deg, var(--ion-item-background) 0%, var(--ion-color-step-50) 100%);
+    border-radius: 28px;
+    padding: 20px;
+    border: 1px solid var(--card-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.03);
   }
 
-  .avatar-row {
+  .avatar-group {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-bottom: 16px;
   }
 
-  .avatar-wrapper {
+  .avatar-ring {
     position: relative;
-    width: 64px;
-    height: 64px;
+    width: 56px;
+    height: 56px;
   }
 
-  .avatar {
+  .avatar-inner {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-tertiary));
+    background: var(--ion-color-primary);
     color: white;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 800;
-    border-radius: 20px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 8px 16px -4px rgba(var(--ion-color-primary-rgb), 0.3);
   }
 
-  .status-indicator {
+  .status-dot {
     position: absolute;
     bottom: -2px;
     right: -2px;
-    width: 18px;
-    height: 18px;
-    background: var(--ion-color-danger);
-    border: 3px solid var(--ion-background-color);
+    width: 16px;
+    height: 16px;
+    background: #ef4444;
+    border: 3px solid var(--ion-item-background);
     border-radius: 50%;
   }
 
-  .status-indicator.online {
-    background: var(--ion-color-success);
+  .status-dot.is-online {
+    background: #10b981;
   }
 
-  .user-meta {
-    flex: 1;
-  }
-
-  .technician-name {
+  .name-group h2 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--ion-text-color);
+    letter-spacing: -0.02em;
   }
 
-  .company-name {
+  .name-group p {
     margin: 2px 0 0;
-    font-weight: 500;
+    font-size: 0.8rem;
     color: var(--ion-color-step-500);
-    font-size: 0.85rem;
+    font-weight: 600;
   }
 
-  .hero-badges {
-    display: flex;
-    gap: 8px;
-  }
-
-  .badge-item {
+  .role-badge {
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    color: var(--ion-color-primary);
+    padding: 6px 12px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 10px;
-    background: var(--ion-color-step-100);
-    border-radius: 30px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--ion-color-step-600);
+    font-size: 0.75rem;
+    font-weight: 800;
   }
 
-  .badge-item.primary {
-    background: rgba(var(--ion-color-primary-rgb), 0.1);
-    color: var(--ion-color-primary);
+  /* Quick Stats */
+  .quick-stats {
+    width: 100%;
   }
 
-  .badge-item.success {
-    background: rgba(var(--ion-color-success-rgb), 0.1);
-    color: var(--ion-color-success);
-  }
-
-  .badge-item.danger {
-    background: rgba(var(--ion-color-danger-rgb), 0.1);
-    color: var(--ion-color-danger);
-  }
-
-  .settings-list-compact {
-    padding: 16px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .settings-card {
-    background: var(--ion-item-background);
+  .stat-card {
+    background: var(--card-bg);
     border-radius: 20px;
-    border: 1px solid var(--ion-color-step-100);
-    box-shadow: var(--card-shadow);
-    overflow: hidden;
-  }
-
-  .setting-item {
+    padding: 16px;
+    border: 1px solid var(--card-border);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--ion-color-step-50);
+    gap: 16px;
+    transition: var(--transition-smooth);
+    cursor: pointer;
   }
 
-  .setting-item:last-child {
-    border-bottom: none;
-  }
-
-  .setting-item.clickable:active {
+  .stat-card:active {
+    transform: scale(0.98);
     background: var(--ion-color-step-50);
   }
 
-  .setting-info {
+  .stat-card.has-pending {
+    border-color: var(--ion-color-warning);
+    background: rgba(var(--ion-color-warning-rgb), 0.03);
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--ion-color-step-50);
+    color: var(--ion-color-primary);
+    border-radius: 14px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    font-size: 1.2rem;
   }
 
-  .setting-info ion-icon {
-    font-size: 1.25rem;
-    color: var(--ion-color-step-400);
+  .stat-card.has-pending .stat-icon {
+    background: var(--ion-color-warning);
+    color: white;
   }
 
-  .setting-info .label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--ion-text-color);
-  }
-
-  .setting-info .sub-label {
-    font-size: 0.75rem;
-    color: var(--ion-color-step-400);
-  }
-
-  .text-content {
+  .stat-info {
     display: flex;
     flex-direction: column;
   }
 
-  .icon-primary {
-    color: var(--ion-color-primary) !important;
-  }
-
-  .sync-action-btn {
-    --padding-start: 8px;
-    --padding-end: 8px;
-    margin: 0;
-  }
-
-  .logout-container {
-    margin-top: 20px;
-    text-align: center;
-  }
-
-  .logout-btn {
-    --height: 48px;
-    --border-radius: 14px;
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--ion-color-step-500);
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
-  .app-version {
-    margin: 12px 0 0;
+  .stat-value {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--ion-text-color);
+  }
+
+  /* Actions Grid */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    flex: 1;
+    margin: 8px 0;
+  }
+
+  .grid-item {
+    background: var(--card-bg);
+    border-radius: 24px;
+    border: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px;
+    transition: var(--transition-smooth);
+  }
+
+  .grid-item:active {
+    transform: translateY(2px);
+    background: var(--ion-color-step-50);
+  }
+
+  .grid-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: white;
+  }
+
+  .grid-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ion-text-color);
+  }
+
+  /* Grid Icon Backgrounds */
+  .bg-indigo { background: #6366f1; box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4); }
+  .bg-purple { background: #a855f7; box-shadow: 0 8px 16px -4px rgba(168, 85, 247, 0.4); }
+  .bg-amber  { background: #f59e0b; box-shadow: 0 8px 16px -4px rgba(245, 158, 11, 0.4); }
+  .bg-blue   { background: #3b82f6; box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.4); }
+
+  /* Bottom Controls */
+  .bottom-controls {
+    margin-top: auto;
+    padding-bottom: 8px;
+  }
+
+  .logout-btn-v2 {
+    --height: 52px;
+    --color: var(--ion-color-danger);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  .copyright {
+    text-align: center;
     font-size: 0.7rem;
     color: var(--ion-color-step-300);
-    font-weight: 500;
+    margin: 8px 0 0;
+    font-weight: 600;
   }
 
-  .chevron {
-    font-size: 0.9rem;
-    color: var(--ion-color-step-300);
+  /* Responsive Fix for extremely small screens */
+  @media (max-height: 600px) {
+    .full-viewport-container { gap: 8px; padding: 12px; }
+    .hero-card-v2 { padding: 12px; }
+    .grid-item { padding: 12px; gap: 8px; }
+    .grid-icon { width: 36px; height: 36px; font-size: 1.1rem; }
   }
 </style>
