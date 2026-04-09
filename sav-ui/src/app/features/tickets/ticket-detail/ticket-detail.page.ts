@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   IonHeader,
@@ -11,11 +11,19 @@ import {
   IonIcon,
   ModalController,
   ToastController,
-  IonFooter,
+  AlertController,
   IonButton,
-  IonActionSheet,
-  ActionSheetButton
+  IonSegment,
+  IonSegmentButton,
+  IonLabel,
+  IonList,
+  IonItem
 } from '@ionic/angular/standalone';
+import { DiagnosticModalComponent } from '../components/diagnostic-modal.component';
+import { AddActionModalComponent } from '../components/add-action-modal.component';
+import { BlockModalComponent } from '../components/block-modal.component';
+import { TerminateModalComponent } from '../components/terminate-modal.component';
+import { CommonModule, DatePipe } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { 
   addOutline, 
@@ -24,7 +32,17 @@ import {
   ellipsisHorizontalOutline,
   constructOutline,
   informationCircleOutline,
-  timeOutline
+  timeOutline,
+  buildOutline,
+  pauseCircleOutline,
+  playCircleOutline,
+  checkmarkCircleOutline,
+  qrCodeOutline,
+  downloadOutline,
+  shareSocialOutline,
+  alertCircleOutline,
+  chevronForwardOutline,
+  chatboxOutline
 } from 'ionicons/icons';
 import { TicketStore } from '../ticket.store';
 import { StatutBadgeComponent } from '../../../shared/components/statut-badge/statut-badge.component';
@@ -32,23 +50,28 @@ import { OfflineBannerComponent } from '../../../shared/components/offline-banne
 import {
   Ticket,
   TicketStatut,
-  TICKET_TRANSITIONS,
   STATUT_LABELS,
   TYPE_APPAREIL_LABELS,
+  BlockingReason,
+  ResultatIntervention
 } from '@sav/shared-models';
-import { AddInterventionModal } from '../add-intervention/add-intervention.modal';
-import { ChangeStatusModal } from '../change-status/change-status.modal';
 
 @Component({
   selector: 'app-ticket-detail',
   standalone: true,
   imports: [
+    CommonModule,
     IonHeader, IonToolbar, IonTitle, IonContent,
     IonBackButton, IonButtons,
     IonSpinner,
-    IonFooter, IonButton, IonIcon, IonActionSheet,
+    IonIcon,
+    IonButton,
+    IonSegment, IonSegmentButton, IonLabel,
+    IonList, IonItem,
     StatutBadgeComponent, OfflineBannerComponent,
   ],
+
+  providers: [DatePipe],
   templateUrl: './ticket-detail.page.html',
 })
 export class TicketDetailPage implements OnInit {
@@ -56,12 +79,12 @@ export class TicketDetailPage implements OnInit {
   readonly store     = inject(TicketStore);
   private modalCtrl  = inject(ModalController);
   private toastCtrl  = inject(ToastController);
+  private alertCtrl  = inject(AlertController);
 
   readonly STATUT_LABELS        = STATUT_LABELS;
   readonly TYPE_APPAREIL_LABELS = TYPE_APPAREIL_LABELS;
-  readonly TICKET_TRANSITIONS   = TICKET_TRANSITIONS;
 
-  public statusActionSheetButtons: ActionSheetButton[] = [];
+  activeSegment = signal<'workflow' | 'history'>('workflow');
 
   constructor() {
     addIcons({ 
@@ -71,7 +94,17 @@ export class TicketDetailPage implements OnInit {
       ellipsisHorizontalOutline,
       constructOutline,
       informationCircleOutline,
-      timeOutline
+      timeOutline,
+      buildOutline,
+      pauseCircleOutline,
+      playCircleOutline,
+      checkmarkCircleOutline,
+      qrCodeOutline,
+      downloadOutline,
+      shareSocialOutline,
+      alertCircleOutline,
+      chevronForwardOutline,
+      chatboxOutline
     });
   }
 
@@ -84,70 +117,88 @@ export class TicketDetailPage implements OnInit {
     return this.store.selectedTicket();
   }
 
-  get allowedTransitions(): TicketStatut[] {
-    return this.ticket ? TICKET_TRANSITIONS[this.ticket.statut] : [];
+  // --- Workflow Actions ---
+
+  async onStartDiagnostic() {
+    if (!this.ticket) return;
+    await this.store.startDiagnostic(this.ticket.id);
   }
 
-  get canAddIntervention(): boolean {
-    return this.ticket ? this.ticket.statut !== 'CLOTURE' : false;
-  }
-
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-    });
-  }
-
-  formatDateTime(date: string): string {
-    return new Date(date).toLocaleString('fr-FR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
-  }
-
-  setupStatusActionSheet() {
-    this.statusActionSheetButtons = this.allowedTransitions.map(s => ({
-      text: STATUT_LABELS[s],
-      handler: () => this.openChangeStatus(s)
-    }));
-    this.statusActionSheetButtons.push({ text: 'Annuler', role: 'cancel' });
-  }
-
-  async openAddIntervention(): Promise<void> {
+  async onCompleteDiagnostic() {
     if (!this.ticket) return;
     const modal = await this.modalCtrl.create({
-      component: AddInterventionModal,
-      componentProps: { ticketId: this.ticket.id },
-      breakpoints: [0, 0.85, 1],
-      initialBreakpoint: 0.85,
+      component: DiagnosticModalComponent,
+      componentProps: { ticket: this.ticket }
     });
     await modal.present();
-    const { data, role } = await modal.onWillDismiss<Ticket>();
+
+    const { data, role } = await modal.onWillDismiss();
     if (role === 'confirm' && data) {
-      this.store.updateTicketLocally(data);
-      await this.showToast('Intervention enregistrée.', 'success');
-      this.setupStatusActionSheet();
+      await this.store.completeDiagnostic(this.ticket.id, data);
     }
   }
 
-  async openChangeStatus(statut: TicketStatut): Promise<void> {
+  async onAddAction() {
     if (!this.ticket) return;
     const modal = await this.modalCtrl.create({
-      component: ChangeStatusModal,
-      componentProps: { ticket: this.ticket, targetStatut: statut },
-      breakpoints: [0, 0.5],
-      initialBreakpoint: 0.5,
+      component: AddActionModalComponent,
+      componentProps: { ticket: this.ticket }
     });
     await modal.present();
-    const { data, role } = await modal.onWillDismiss<Ticket>();
+
+    const { data, role } = await modal.onWillDismiss();
     if (role === 'confirm' && data) {
-      this.store.updateTicketLocally(data);
-      await this.showToast(
-        `Statut mis à jour : ${STATUT_LABELS[data.statut]}`,
-        'success'
-      );
-      this.setupStatusActionSheet();
+      await this.store.addAction(this.ticket.id, data);
     }
+  }
+
+  async onBlock() {
+    if (!this.ticket) return;
+    const modal = await this.modalCtrl.create({
+      component: BlockModalComponent,
+      componentProps: { ticket: this.ticket }
+    });
+    await modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+    if (role === 'confirm' && data) {
+      await this.store.blockTicket(this.ticket.id, data.reason, data.observation);
+    }
+  }
+
+  async onResume() {
+    if (!this.ticket) return;
+    await this.store.resumeTicket(this.ticket.id);
+  }
+
+  async onTerminate() {
+    if (!this.ticket) return;
+    const modal = await this.modalCtrl.create({
+      component: TerminateModalComponent,
+      componentProps: { ticket: this.ticket }
+    });
+    await modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+    if (role === 'confirm' && data) {
+      await this.store.terminateIntervention(this.ticket.id, data.result, data.observations, data.temps);
+    }
+  }
+
+  async downloadQr() {
+    const qr = this.store.qrCode();
+    if (!qr) return;
+    // Logic for mobile download/save
+    const toast = await this.toastCtrl.create({
+      message: 'QR Code prêt pour scan client.',
+      duration: 2000,
+      color: 'primary'
+    });
+    await toast.present();
+  }
+
+  async shareQr() {
+    // Logic for Native Sharing
   }
 
   private async showToast(message: string, color: string): Promise<void> {
@@ -160,3 +211,4 @@ export class TicketDetailPage implements OnInit {
     await toast.present();
   }
 }
+

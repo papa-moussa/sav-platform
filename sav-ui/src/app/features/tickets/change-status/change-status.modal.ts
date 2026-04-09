@@ -65,11 +65,12 @@ export class ChangeStatusModal {
   }
 
   async onStatutTap(statut: TicketStatut): Promise<void> {
-    // Garde : REPARE/IRREPARABLE nécessitent au moins une intervention
+    // Garde : TERMINE nécessite au moins une intervention
     if (
-      (statut === 'REPARE' || statut === 'IRREPARABLE') &&
+      statut === 'TERMINE' &&
       this.ticket.interventions.length === 0
     ) {
+
       const alert = await this.alertCtrl.create({
         header: 'Intervention requise',
         message: `Un rapport d'intervention est nécessaire avant de marquer ce ticket comme "${STATUT_LABELS[statut]}".`,

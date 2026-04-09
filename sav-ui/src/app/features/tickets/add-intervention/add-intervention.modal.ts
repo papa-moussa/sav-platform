@@ -101,7 +101,7 @@ export class AddInterventionModal {
         let updatedTicket: Ticket | null = null;
         const resultat = request.resultat;
         if (resultat === 'REPARE' || resultat === 'IRREPARABLE') {
-          const targetStatut: TicketStatut = resultat === 'REPARE' ? 'REPARE' : 'IRREPARABLE';
+          const targetStatut: TicketStatut = 'TERMINE';
           try {
             updatedTicket = await this.api.changeStatut(this.ticketId, targetStatut);
           } catch {
@@ -126,10 +126,9 @@ export class AddInterventionModal {
         // Action combinée offline
         const resultat = request.resultat;
         if (resultat === 'REPARE' || resultat === 'IRREPARABLE') {
-          const targetStatut: TicketStatut = resultat === 'REPARE' ? 'REPARE' : 'IRREPARABLE';
+          const targetStatut: TicketStatut = 'TERMINE';
           await this.syncSvc.queueStatusChange(this.ticketId, targetStatut);
         }
-
         const toast = await this.toastCtrl.create({
           message: 'Intervention sauvegardée hors ligne — sera synchronisée dès reconnexion.',
           color: 'warning',

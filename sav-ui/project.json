@@ -26,9 +26,10 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumWarning": "1mb",
+              "maximumError": "2mb"
             },
+
             {
               "type": "anyComponentStyle",
               "maximumWarning": "4kb",
@@ -37,7 +38,20 @@
           ],
           "outputHashing": "all"
         },
+
+
         "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        },
+        "mobile": {
+          "fileReplacements": [
+            {
+              "replace": "sav-ui/src/environments/environment.ts",
+              "with": "sav-ui/src/environments/environment.mobile.ts"
+            }
+          ],
           "optimization": false,
           "extractLicenses": false,
           "sourceMap": true
@@ -57,6 +71,10 @@
         },
         "development": {
           "buildTarget": "sav-ui:build:development"
+        },
+        "mobile": {
+          "buildTarget": "sav-ui:build:mobile",
+          "host": "0.0.0.0"
         }
       },
       "defaultConfiguration": "development"

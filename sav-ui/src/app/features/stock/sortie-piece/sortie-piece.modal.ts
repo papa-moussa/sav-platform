@@ -5,16 +5,20 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonItem,
   IonInput,
   IonButton,
   IonButtons,
   IonSpinner,
-  IonText,
-  IonLabel,
+  IonIcon,
   ModalController,
   ToastController,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  cubeOutline, 
+  removeCircleOutline, 
+  chatboxOutline 
+} from 'ionicons/icons';
 import { StockApiService } from '../../../core/services/stock-api.service';
 import { SyncService } from '../../../core/services/sync.service';
 import { NetworkService } from '../../../core/network/network.service';
@@ -26,8 +30,8 @@ import { Piece } from '@sav/shared-models';
   imports: [
     ReactiveFormsModule,
     IonHeader, IonToolbar, IonTitle, IonContent,
-    IonItem, IonInput, IonButton, IonButtons,
-    IonSpinner, IonText, IonLabel,
+    IonInput, IonButton, IonButtons, IonIcon,
+    IonSpinner,
   ],
   templateUrl: './sortie-piece.modal.html',
 })
@@ -49,6 +53,10 @@ export class SortiePieceModal {
     quantite: [1, [Validators.required, Validators.min(1)]],
     motif:    [''],
   });
+
+  constructor() {
+    addIcons({ cubeOutline, removeCircleOutline, chatboxOutline });
+  }
 
   dismiss(): void {
     this.modalCtrl.dismiss(null, 'cancel');

@@ -5,7 +5,8 @@ const config: CapacitorConfig = {
   appName: 'SAV Mobile',
   webDir: '../dist/sav-ui/browser',
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
+
   },
   plugins: {
     Preferences: {

@@ -62,12 +62,12 @@ export class TicketListPage implements OnInit {
 
   readonly filters: { label: string; value: TicketStatut | 'ALL' }[] = [
     { label: 'Tous',          value: 'ALL' },
-    { label: 'Reçus',         value: 'RECU' },
+    { label: 'Nouveaux',      value: 'RECU' },
     { label: 'Diagnostic',    value: 'EN_DIAGNOSTIC' },
-    { label: 'Réparation',    value: 'EN_REPARATION' },
-    { label: 'Attente pièces',value: 'EN_ATTENTE_PIECES' },
-    { label: 'Réparés',       value: 'REPARE' },
+    { label: 'En cours',      value: 'EN_COURS' },
+    { label: 'Terminés',      value: 'TERMINE' },
   ];
+
 
   constructor() {
     addIcons({ 

@@ -33,4 +33,49 @@ export class TicketApiService {
       this.http.post<Intervention>(`${this.base}/${id}/interventions`, request)
     );
   }
+
+  getQrCode(id: number): Promise<{ base64Image: string; expiresAt: string }> {
+    return firstValueFrom(
+      this.http.get<{ base64Image: string; expiresAt: string }>(`${this.base}/${id}/qrcode`)
+    );
+  }
+
+  // --- Workflow Methods ---
+
+  startDiagnostic(id: number): Promise<Ticket> {
+    return firstValueFrom(
+      this.http.post<Ticket>(`${this.base}/${id}/start-diagnostic`, {})
+    );
+  }
+
+  completeDiagnostic(id: number, diagnostic: string): Promise<Ticket> {
+    return firstValueFrom(
+      this.http.post<Ticket>(`${this.base}/${id}/complete-diagnostic`, { diagnostic })
+    );
+  }
+
+  addAction(id: number, description: string): Promise<any> {
+    return firstValueFrom(
+      this.http.post<any>(`${this.base}/${id}/actions`, { description })
+    );
+  }
+
+  blockTicket(id: number, reason: string, observation?: string): Promise<Ticket> {
+    return firstValueFrom(
+      this.http.post<Ticket>(`${this.base}/${id}/block`, { reason, observation })
+    );
+  }
+
+  resumeTicket(id: number): Promise<Ticket> {
+    return firstValueFrom(
+      this.http.post<Ticket>(`${this.base}/${id}/resume`, {})
+    );
+  }
+
+  terminateIntervention(id: number, result: string, observations?: string, tempsPasseHeures?: number): Promise<Ticket> {
+    return firstValueFrom(
+      this.http.post<Ticket>(`${this.base}/${id}/terminate`, { result, observations, tempsPasseHeures })
+    );
+  }
 }
+

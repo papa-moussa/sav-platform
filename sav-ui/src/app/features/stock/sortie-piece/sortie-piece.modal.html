@@ -1,11 +1,11 @@
-<ion-header>
-  <ion-toolbar color="primary">
+<ion-header class="ion-no-border glass">
+  <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="dismiss()">Annuler</ion-button>
+      <ion-button (click)="dismiss()" color="medium">Annuler</ion-button>
     </ion-buttons>
     <ion-title>Sortie de stock</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="submit()" [disabled]="form.invalid || loading()">
+      <ion-button (click)="submit()" [disabled]="form.invalid || loading()" color="primary" class="fw-bold">
         @if (loading()) { <ion-spinner name="crescent" /> }
         @else { Valider }
       </ion-button>
@@ -14,38 +14,177 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <ion-item lines="none">
-    <ion-label>
+  <!-- Piece Info Hero -->
+  <div class="piece-hero">
+    <div class="cube-icon-wrapper">
+      <ion-icon name="cube-outline"></ion-icon>
+    </div>
+    <div class="piece-meta">
       <h2>{{ piece.designation }}</h2>
-      <p>{{ piece.reference }} — Stock disponible : <b>{{ piece.quantite }}</b></p>
-    </ion-label>
-  </ion-item>
+      <p class="ref">{{ piece.reference }}</p>
+      <div class="stock-status">
+        <span class="label">Stock disponible :</span>
+        <span class="value">{{ piece.quantite }}</span>
+      </div>
+    </div>
+  </div>
 
-  <form [formGroup]="form" class="ion-margin-top">
-    <ion-item>
-      <ion-input
-        label="Quantité *"
-        labelPlacement="floating"
-        type="number"
-        formControlName="quantite"
-        [min]="1"
-        [max]="piece.quantite"
-      />
-    </ion-item>
+  <form [formGroup]="form" class="premium-form">
+    <div class="form-section">
+      <label class="section-label" for="qty-input">Quantité à sortir *</label>
+      <div class="custom-input-container">
+        <ion-icon name="remove-circle-outline"></ion-icon>
+        <ion-input
+          id="qty-input"
+          type="number"
+          formControlName="quantite"
+          placeholder="Ex: 1"
+          [min]="1"
+          [max]="piece.quantite"
+        ></ion-input>
+      </div>
+    </div>
 
-    <ion-item class="ion-margin-top">
-      <ion-input
-        label="Motif"
-        labelPlacement="floating"
-        formControlName="motif"
-        placeholder="Motif de sortie (optionnel)"
-      />
-    </ion-item>
+    <div class="form-section">
+      <label class="section-label" for="motif-input">Motif de sortie</label>
+      <div class="custom-input-container">
+        <ion-icon name="chatbox-outline"></ion-icon>
+        <ion-input
+          id="motif-input"
+          formControlName="motif"
+          placeholder="Ex: Réparation ticket #123..."
+        ></ion-input>
+      </div>
+    </div>
+
+    @if (error()) {
+      <div class="error-box">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ error() }}</span>
+      </div>
+    }
   </form>
-
-  @if (error()) {
-    <ion-text color="danger">
-      <p class="ion-padding-top">{{ error() }}</p>
-    </ion-text>
-  }
 </ion-content>
+
+<style>
+  .piece-hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, var(--ion-color-step-50) 0%, var(--ion-item-background) 100%);
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid var(--ion-color-step-100);
+    margin-bottom: 24px;
+  }
+
+  .cube-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    color: var(--ion-color-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .piece-meta h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ion-text-color);
+  }
+
+  .piece-meta .ref {
+    margin: 2px 0 8px;
+    font-size: 0.8rem;
+    color: var(--ion-color-step-500);
+    font-weight: 500;
+  }
+
+  .stock-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+  }
+
+  .stock-status .label {
+    color: var(--ion-color-step-600);
+  }
+
+  .stock-status .value {
+    font-weight: 800;
+    color: var(--ion-color-primary);
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .premium-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .section-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ion-color-step-600);
+    padding-left: 4px;
+  }
+
+  .custom-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ion-color-step-50);
+    border: 1px solid var(--ion-color-step-200);
+    border-radius: 16px;
+    padding: 2px 14px;
+    height: 52px;
+    transition: all 0.2s ease;
+  }
+
+  .custom-input-container:focus-within {
+    border-color: var(--ion-color-primary);
+    background: var(--ion-item-background);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+
+  .custom-input-container ion-icon {
+    font-size: 1.25rem;
+    color: var(--ion-color-step-400);
+  }
+
+  ion-input {
+    --padding-start: 0;
+    font-size: 0.95rem;
+    --placeholder-color: var(--ion-color-step-300);
+  }
+
+  .error-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(var(--ion-color-danger-rgb), 0.1);
+    color: var(--ion-color-danger);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 8px;
+  }
+
+  .fw-bold {
+    font-weight: 700;
+  }
+</style>

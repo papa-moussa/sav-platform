@@ -10,6 +10,19 @@
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+
+  <ion-toolbar class="segment-toolbar">
+    <ion-segment [value]="activeSegment()" (ionChange)="activeSegment.set($any($event).detail.value)">
+      <ion-segment-button value="workflow">
+        <ion-label>Intervention</ion-label>
+        <ion-icon name="wrench-outline"></ion-icon>
+      </ion-segment-button>
+      <ion-segment-button value="history">
+        <ion-label>Journal</ion-label>
+        <ion-icon name="time-outline"></ion-icon>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
@@ -26,134 +39,304 @@
       <p>Le ticket que vous recherchez n'existe plus ou n'est pas accessible.</p>
     </div>
   } @else {
-    <!-- Hero Section -->
-    <div class="hero-section">
-      <div class="hero-content">
-        <app-statut-badge [statut]="ticket.statut"></app-statut-badge>
-        <h1>{{ ticket.clientNom }}</h1>
-        <p class="device-summary">
-          <ion-icon name="construct-outline"></ion-icon>
-          {{ TYPE_APPAREIL_LABELS[ticket.typeAppareil] }} • {{ ticket.marqueModele }}
-        </p>
-      </div>
-    </div>
-
-    <div class="detail-container">
-      <!-- Info Cards -->
-      <section class="info-group">
-        <div class="detail-card">
-          <div class="card-header">
-            <ion-icon name="information-circle-outline"></ion-icon>
-            <h2>Informations Générales</h2>
+    
+    @if (activeSegment() === 'workflow') {
+      <div class="workflow-container animate-fade-in">
+        
+        <!-- Banner contextuel de blocage -->
+        @if (ticket.blockingReason) {
+          <div class="blocking-banner animate-slide-down">
+            <div class="banner-icon">
+              <ion-icon name="pause-circle-outline"></ion-icon>
+            </div>
+            <div class="banner-content">
+              <h3>Intervention suspendue</h3>
+              <p>Raison : <strong>{{ ticket.blockingReason }}</strong></p>
+              @if (ticket.blockingObservation) {
+                <p class="observation text-italic">"{{ ticket.blockingObservation }}"</p>
+              }
+              <ion-button fill="clear" color="light" class="resume-btn" (click)="onResume()">
+                <ion-icon name="play-circle-outline" slot="start"></ion-icon>
+                Reprendre l'intervention
+              </ion-button>
+            </div>
           </div>
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="label">Site</span>
-              <span class="value">{{ ticket.siteNom }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">N° de série</span>
-              <span class="value">{{ ticket.numeroSerie || '—' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">Technicien</span>
-              <span class="value">{{ ticket.technicienNom || 'Non assigné' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">Garantie</span>
-              <span class="value" [class.highlight]="ticket.sousGarantie">
-                {{ ticket.sousGarantie ? 'Sous garantie' : 'Hors garantie' }}
-              </span>
-            </div>
+        }
+
+        <!-- Hero Section : Informations Client -->
+        <div class="hero-section">
+          <div class="hero-content">
+            <app-statut-badge [statut]="ticket.statut"></app-statut-badge>
+            <h1>{{ ticket.clientNom }}</h1>
+            <p class="device-summary">
+              <ion-icon name="construct-outline"></ion-icon>
+              {{ TYPE_APPAREIL_LABELS[ticket.typeAppareil] }} • {{ ticket.marqueModele }}
+            </p>
           </div>
         </div>
 
-        <div class="detail-card">
-          <div class="card-header">
-            <ion-icon name="document-text-outline"></ion-icon>
-            <h2>Description de la panne</h2>
-          </div>
-          <p class="description-text">{{ ticket.descriptionPanne }}</p>
-        </div>
-
-        <div class="detail-card">
-          <div class="card-header">
-            <ion-icon name="time-outline"></ion-icon>
-            <h2>Historique ({{ ticket.interventions.length }})</h2>
-          </div>
+        <div class="detail-container">
           
-          <div class="timeline">
-            @if (ticket.interventions.length === 0) {
-              <div class="empty-timeline">
-                <p>Aucune intervention enregistrée.</p>
+          <!-- PHASE : RECU -->
+          @if (ticket.statut === 'RECU') {
+            <div class="phase-card recu-card">
+              <div class="card-icon">
+                <ion-icon name="wrench-outline"></ion-icon>
               </div>
-            } @else {
-              @for (interv of ticket.interventions; track interv.id) {
+              <h2>Démarrer l'intervention</h2>
+              <p>L'appareil a été reçu. Commencez le diagnostic pour identifier la panne.</p>
+              
+              <div class="complaint-box">
+                <span class="label">Panne déclarée</span>
+                <p>"{{ ticket.descriptionPanne }}"</p>
+              </div>
+
+              <ion-button expand="block" class="main-cta" (click)="onStartDiagnostic()">
+                Lancer le diagnostic
+                <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+              </ion-button>
+            </div>
+          }
+
+          <!-- PHASE : EN_DIAGNOSTIC -->
+          @if (ticket.statut === 'EN_DIAGNOSTIC') {
+            <div class="phase-card diagnostic-card">
+              <div class="card-header">
+                <ion-icon name="chatbox-text-outline"></ion-icon>
+                <h2>Diagnostic</h2>
+              </div>
+              <p>Veuillez renseigner les résultats du diagnostic technique.</p>
+              
+              <ion-button expand="block" fill="outline" class="form-btn" (click)="onCompleteDiagnostic()">
+                <ion-icon name="add-outline" slot="start"></ion-icon>
+                Saisir le diagnostic
+              </ion-button>
+            </div>
+          }
+
+          <!-- PHASE : EN_COURS -->
+          @if (ticket.statut === 'EN_COURS') {
+            <div class="phase-group">
+              <div class="detail-card actions-card">
+                <div class="card-header">
+                  <ion-icon name="wrench-outline"></ion-icon>
+                  <h2>Actions réalisées ({{ ticket.actions.length }})</h2>
+                </div>
+                
+                <ion-list lines="none">
+                  @for (action of ticket.actions; track action.id) {
+                    <ion-item class="action-item">
+                      <div class="bullet"></div>
+                      <ion-label>
+                        <h3>{{ action.description }}</h3>
+                        <p>{{ action.createdAt | date:'HH:mm' }} • {{ action.technicienNom }}</p>
+                      </ion-label>
+                    </ion-item>
+                  } @empty {
+                    <div class="empty-state-inner">
+                      <p>Aucune action enregistrée.</p>
+                    </div>
+                  }
+                </ion-list>
+
+                <ion-button expand="block" fill="clear" class="add-action-btn" (click)="onAddAction()" [disabled]="!!ticket.blockingReason">
+                  <ion-icon name="add-outline" slot="start"></ion-icon>
+                  Ajouter une action
+                </ion-button>
+              </div>
+
+                @if (!ticket.blockingReason) {
+                  <div class="workflow-actions-grid">
+                    <ion-button expand="block" fill="outline" color="warning" class="secondary-cta" (click)="onBlock()">
+                      <ion-icon name="pause-circle-outline" slot="start"></ion-icon>
+                      Bloquer
+                    </ion-button>
+                    <ion-button expand="block" color="dark" class="primary-cta" (click)="onTerminate()">
+                      <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+                      Terminer
+                    </ion-button>
+                  </div>
+                }
+
+            </div>
+          }
+
+          <!-- PHASE : TERMINE / CLOTURE -->
+          @if (ticket.statut === 'TERMINE' || ticket.statut === 'CLOTURE') {
+            <div class="phase-card feedback-card">
+              <div class="qr-section">
+                <div class="card-icon qr-icon">
+                  <ion-icon name="qr-code-outline"></ion-icon>
+                </div>
+                <h2>Passation Client</h2>
+                <p>Faites scanner ce code au client pour valider la réparation.</p>
+
+                <div class="qr-container">
+                  @if (store.qrCode()) {
+                    <img [src]="'data:image/png;base64,' + store.qrCode()?.base64Image" alt="QR Code" class="qr-img" />
+                  } @else if (ticket.statut === 'TERMINE') {
+                    <div class="qr-loader">
+                      <ion-spinner name="crescent"></ion-spinner>
+                    </div>
+                  } @else {
+                    <div class="qr-cloture">
+                      <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
+                      <p>Intervention Clôturée</p>
+                    </div>
+                  }
+                </div>
+
+                @if (ticket.statut === 'TERMINE' && store.qrCode()) {
+                  <div class="qr-actions">
+                    <ion-button fill="outline" class="qr-btn" (click)="downloadQr()">
+                      <ion-icon name="download-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                    <ion-button fill="outline" class="qr-btn" (click)="shareQr()">
+                      <ion-icon name="share-social-outline" slot="icon-only"></ion-icon>
+                    </ion-button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Infos Générales (toujours visibles mais plus discrètes) -->
+          <div class="detail-card info-card">
+            <div class="card-header">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              <h2>Détails complémentaires</h2>
+            </div>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Site</span>
+                <span class="value">{{ ticket.siteNom }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Garantie</span>
+                <span class="value" [class.highlight]="ticket.sousGarantie">
+                  {{ ticket.sousGarantie ? 'Sous garantie' : 'Hors garantie' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    }
+
+    @if (activeSegment() === 'history') {
+      <div class="history-container animate-fade-in">
+        <div class="detail-container">
+          <div class="detail-card">
+            <div class="card-header">
+              <ion-icon name="time-outline"></ion-icon>
+              <h2>Chronologie des évènements</h2>
+            </div>
+            
+            <div class="timeline">
+              @for (item of ticket.history; track item.id) {
                 <div class="timeline-item">
                   <div class="timeline-marker"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
-                      <span class="interv-tech">{{ interv.technicienNom }}</span>
-                      <span class="interv-date">{{ formatDateTime(interv.createdAt) }}</span>
+                      <span class="interv-tech">{{ item.utilisateurNom }}</span>
+                      <span class="interv-date">{{ item.timestamp | date:'dd/MM HH:mm' }}</span>
                     </div>
-                    <p class="interv-diag"><strong>Diagnostic :</strong> {{ interv.diagnostic }}</p>
-                    <p class="interv-actions">{{ interv.actionsRealisees }}</p>
-                    @if (interv.resultat) {
-                      <div class="interv-result">
-                        <span class="result-badge">{{ interv.resultat }}</span>
-                      </div>
-                    }
+                    <p class="interv-diag"><strong>{{ item.typeAction }} :</strong> {{ item.details }}</p>
                   </div>
                 </div>
+              } @empty {
+                <div class="empty-timeline">
+                  <p>Aucun historique disponible.</p>
+                </div>
               }
-            }
+            </div>
           </div>
         </div>
-      </section>
-    </div>
+      </div>
+    }
   }
 </ion-content>
 
-@if (ticket && !store.loading()) {
-  <ion-footer class="ion-no-border">
-    <div class="action-bar glass">
-      <ion-button 
-        fill="clear" 
-        class="secondary-btn"
-        id="open-status-action-sheet"
-        [disabled]="allowedTransitions.length === 0"
-        (click)="setupStatusActionSheet()">
-        <ion-icon name="swap-horizontal-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-      
-      <ion-button 
-        expand="block" 
-        class="primary-cta"
-        (click)="openAddIntervention()"
-        [disabled]="!canAddIntervention">
-        <ion-icon name="add-outline" slot="start"></ion-icon>
-        Ajouter Intervention
-      </ion-button>
-    </div>
-    
-    <ion-action-sheet 
-      trigger="open-status-action-sheet" 
-      header="Changer le statut" 
-      [buttons]="statusActionSheetButtons">
-    </ion-action-sheet>
-  </ion-footer>
-}
-
 <style>
+  .glass {
+    --background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+  }
+
+  .segment-toolbar {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --padding-bottom: 8px;
+  }
+
+  ion-segment {
+    --background: var(--ion-color-step-50);
+    border-radius: 12px;
+    padding: 2px;
+  }
+
+  ion-segment-button {
+    --border-radius: 10px;
+    --color: var(--ion-color-step-500);
+    --color-checked: var(--ion-color-primary);
+    --indicator-color: white;
+    min-height: 40px;
+  }
+
+  ion-segment-button ion-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
   .loader-container {
     padding: 100px 0;
     text-align: center;
   }
 
+  .blocking-banner {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .banner-icon {
+    font-size: 2rem;
+  }
+
+  .banner-content h3 {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+    font-weight: 800;
+  }
+
+  .banner-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .banner-content .observation {
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-style: italic;
+  }
+
+  .resume-btn {
+    margin-top: 12px;
+    --padding-start: 0;
+    font-weight: 700;
+    text-transform: none;
+  }
+
   .hero-section {
     padding: 32px 24px 24px;
     background: linear-gradient(180deg, var(--ion-color-step-50) 0%, var(--ion-background-color) 100%);
-    border-bottom: 1px solid var(--ion-color-step-100);
   }
 
   .hero-content h1 {
@@ -174,27 +357,91 @@
     font-size: 0.95rem;
   }
 
-  .device-summary ion-icon {
-    font-size: 1.2rem;
-    color: var(--ion-color-primary);
-  }
-
   .detail-container {
     padding: 16px;
-  }
-
-  .info-group {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
 
+  .phase-card {
+    background: white;
+    border-radius: 24px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
+    border: 1px solid var(--ion-color-step-100);
+  }
+
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--ion-color-primary);
+    color: white;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 16px -4px var(--ion-color-primary-tint);
+  }
+
+  .phase-card h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0 0 8px;
+  }
+
+  .phase-card p {
+    font-size: 0.95rem;
+    color: var(--ion-color-step-500);
+    margin: 0 0 20px;
+    line-height: 1.4;
+  }
+
+  .complaint-box {
+    background: var(--ion-color-step-50);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+
+  .complaint-box .label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--ion-color-step-400);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .complaint-box p {
+    margin: 0;
+    color: var(--ion-text-color);
+    font-style: italic;
+    font-size: 1rem;
+  }
+
+  .main-cta {
+    --border-radius: 16px;
+    --height: 54px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .form-btn {
+    --border-radius: 16px;
+    --height: 54px;
+    font-weight: 700;
+  }
+
   .detail-card {
-    background: var(--ion-item-background);
+    background: white;
     border-radius: 20px;
     padding: 20px;
     border: 1px solid var(--ion-color-step-100);
-    box-shadow: var(--card-shadow);
   }
 
   .card-header {
@@ -202,16 +449,108 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 16px;
-    color: var(--ion-color-primary);
   }
 
   .card-header h2 {
     margin: 0;
-    font-size: 0.875rem;
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 800;
     text-transform: uppercase;
+    color: var(--ion-color-step-500);
     letter-spacing: 0.05em;
-    color: var(--ion-color-step-600);
+  }
+
+  .action-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 12px;
+  }
+
+  .bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ion-color-primary);
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .action-item h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .action-item p {
+    font-size: 0.8rem;
+    color: var(--ion-color-step-400);
+  }
+
+  .add-action-btn {
+    margin-top: 8px;
+    font-weight: 700;
+  }
+
+  .workflow-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .workflow-actions-grid ion-button {
+    --height: 54px;
+    --border-radius: 16px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .feedback-card {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    color: white;
+    border: none;
+  }
+
+  .feedback-card h2, .feedback-card p { color: white; }
+  .feedback-card .qr-icon { background: white; color: var(--ion-color-primary); }
+
+  .qr-container {
+    background: white;
+    padding: 12px;
+    border-radius: 20px;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qr-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+  }
+
+  .qr-cloture {
+    text-align: center;
+    color: var(--ion-color-step-800);
+  }
+
+  .qr-cloture ion-icon { font-size: 3rem; }
+  .qr-cloture p { margin-top: 8px; font-weight: 700; }
+
+  .qr-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .qr-btn {
+    --background: rgba(255,255,255,0.2);
+    --border-color: rgba(255,255,255,0.4);
+    --color: white;
+    --border-radius: 12px;
+    margin: 0;
   }
 
   .info-grid {
@@ -220,48 +559,27 @@
     gap: 16px;
   }
 
-  .info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
   .info-item .label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: var(--ion-color-step-400);
-    font-weight: 500;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: block;
   }
 
   .info-item .value {
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--ion-text-color);
-  }
-
-  .info-item .value.highlight {
-    color: var(--ion-color-success);
-  }
-
-  .description-text {
-    margin: 0;
-    font-size: 1rem;
-    line-height: 1.6;
-    color: var(--ion-color-step-700);
-    white-space: pre-wrap;
   }
 
   .timeline {
-    margin-top: 8px;
+    margin-top: 16px;
   }
 
   .timeline-item {
     position: relative;
     padding-left: 24px;
     padding-bottom: 24px;
-  }
-
-  .timeline-item:last-child {
-    padding-bottom: 0;
   }
 
   .timeline-item::before {
@@ -274,10 +592,6 @@
     background: var(--ion-color-step-100);
   }
 
-  .timeline-item:last-child::before {
-    display: none;
-  }
-
   .timeline-marker {
     position: absolute;
     left: 0;
@@ -286,77 +600,35 @@
     height: 10px;
     border-radius: 50%;
     background: var(--ion-color-primary);
-    border: 2px solid var(--ion-item-background);
+    border: 2px solid white;
     z-index: 1;
-    box-shadow: 0 0 0 2px var(--ion-color-primary-tint);
   }
 
   .timeline-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
   }
 
-  .interv-tech {
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: var(--ion-text-color);
+  .interv-tech { font-weight: 700; }
+  .interv-date { color: var(--ion-color-step-400); }
+
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
   }
 
-  .interv-date {
-    font-size: 0.75rem;
-    color: var(--ion-color-step-400);
+  .animate-slide-down {
+    animation: slideDown 0.4s ease-out;
   }
 
-  .interv-diag {
-    font-size: 0.9rem;
-    margin: 0 0 4px;
-    color: var(--ion-color-step-800);
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  .interv-actions {
-    font-size: 0.85rem;
-    margin: 0;
-    color: var(--ion-color-step-600);
-  }
-
-  .interv-result {
-    margin-top: 8px;
-  }
-
-  .result-badge {
-    background: var(--ion-color-secondary-tint);
-    color: var(--ion-color-secondary-contrast);
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  .action-bar {
-    padding: 12px 20px 32px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .primary-cta {
-    flex: 1;
-    --height: 54px;
-    --border-radius: 16px;
-    font-weight: 700;
-    margin: 0;
-    box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.3);
-  }
-
-  .secondary-btn {
-    --height: 54px;
-    --border-radius: 16px;
-    --background: var(--ion-color-step-100);
-    --color: var(--ion-color-step-700);
-    margin: 0;
-    width: 60px;
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 </style>
