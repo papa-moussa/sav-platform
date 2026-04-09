@@ -68,7 +68,7 @@
                 </div>
                 <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center text-[12px]">
                   <p class="text-slate-400 font-medium">{{ formatDate(ticket.createdAt) }} • {{ ticket.siteNom }}</p>
-                  @if (ticket.interventions.length > 0) {
+                  @if (ticket.interventions && ticket.interventions.length > 0) {
                     <p class="text-primary font-bold">{{ ticket.interventions.length }} ajout(s)</p>
                   } @else {
                     <p class="text-slate-400 font-medium flex items-center group-hover:text-primary">Ouvrir <ng-icon name="lucideChevronRight" class="ml-1 w-4 h-4"></ng-icon></p>
@@ -134,7 +134,6 @@
 @if (selectedTicket()) {
   <app-ticket-detail-dialog
     [ticket]="selectedTicket()!"
-    viewMode="technical"
     (updated)="onTicketUpdated($event)"
     (closed)="closeDetail()" />
 }

@@ -8,6 +8,7 @@ export interface User {
   actif: boolean;
   siteId: number | null;
   siteNom: string | null;
+  telephone?: string;
 }
 
 export interface UserRequest {
@@ -16,4 +17,5 @@ export interface UserRequest {
   password: string;
   role: Role;
   siteId?: number;
+  telephone?: string;
 }

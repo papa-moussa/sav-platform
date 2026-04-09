@@ -14,7 +14,7 @@
     [hasReset]="false"
     searchPlaceholder="Nom, téléphone, email..."
     [searchValue]="searchControl.value ?? ''"
-    (searchChange)="searchControl.setValue($event)">
+    (searchChange)="searchControl.setValue($any($event))">
   </app-filter-bar>
 
   <!-- Tableau -->
@@ -52,7 +52,9 @@
                     <span class="font-semibold text-slate-800 text-[14px]">{{ client.nom }}</span>
                   </div>
                 </td>
-                <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-600">{{ client.telephone }}</td>
+                <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-600">
+                  {{ client.telephone }}
+                </td>
                 <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-500 hidden sm:table-cell">{{ client.email ?? '—' }}</td>
                 <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-500 hidden sm:table-cell">{{ client.adresse ?? '—' }}</td>
                 <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-400 hidden md:table-cell">{{ formatDate(client.createdAt) }}</td>
@@ -89,7 +91,7 @@
         </button>
       </div>
 
-      <div class="px-6 py-5 space-y-4">
+      <div class="px-6 py-5 space-y-4" [formGroup]="newClientForm">
         @if (error()) {
           <div class="bg-red-50 border border-red-100 text-red-600 text-[13px] font-medium px-4 py-3 rounded-xl flex items-center gap-2">
             <ng-icon name="lucideAlertTriangle" class="w-4 h-4"></ng-icon> {{ error() }}
@@ -97,7 +99,13 @@
         }
 
         <app-input [formControl]="$any(newClientForm.get('nom'))" label="Nom complet *" placeholder="Entrez le nom"></app-input>
-        <app-input [formControl]="$any(newClientForm.get('telephone'))" label="Téléphone *" placeholder="06..."></app-input>
+        
+        <app-phone-input 
+          formControlName="telephone" 
+          label="Téléphone *" 
+          [control]="$any(newClientForm.get('telephone'))">
+        </app-phone-input>
+
         <app-input [formControl]="$any(newClientForm.get('email'))" type="email" label="Email" placeholder="client@email.com"></app-input>
         <app-input [formControl]="$any(newClientForm.get('adresse'))" label="Adresse" placeholder="Adresse complète..."></app-input>
       </div>

@@ -62,8 +62,7 @@ export class TicketsListComponent implements OnInit {
   totalPages = signal(0);
 
   readonly allStatuts: TicketStatut[] = [
-    'RECU', 'EN_DIAGNOSTIC', 'EN_REPARATION', 'EN_ATTENTE_PIECES',
-    'REPARE', 'IRREPARABLE', 'EN_ATTENTE_FEEDBACK', 'CLOTURE'
+    'RECU', 'EN_DIAGNOSTIC', 'EN_COURS', 'TERMINE', 'CLOTURE'
   ];
 
   filters = this.fb.group({
@@ -186,7 +185,7 @@ export class TicketsListComponent implements OnInit {
 
   isUrgent(ticket: Ticket): boolean {
     const days = (Date.now() - new Date(ticket.createdAt).getTime()) / 86400000;
-    return days > 7 && !['REPARE', 'IRREPARABLE', 'CLOTURE'].includes(ticket.statut);
+    return days > 7 && !['TERMINE', 'CLOTURE'].includes(ticket.statut);
   }
 
   onSearchChange(val: string): void {

@@ -82,10 +82,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const sk = this.stockItems();
     
     return {
-      actifs: ts.filter(t => t.statut !== 'CLOTURE' && t.statut !== 'REPARE').length,
-      enCours: ts.filter(t => t.statut === 'EN_REPARATION' || t.statut === 'EN_DIAGNOSTIC').length,
+      actifs: ts.filter(t => !['TERMINE', 'CLOTURE'].includes(t.statut)).length,
+      enCours: ts.filter(t => ['EN_COURS', 'EN_DIAGNOSTIC'].includes(t.statut)).length,
       stockAlerte: sk.filter(p => p.enAlerteStock).length,
-      repares: ts.filter(t => t.statut === 'REPARE' || t.statut === 'CLOTURE').length
+      repares: ts.filter(t => ['TERMINE', 'CLOTURE'].includes(t.statut)).length
     };
   });
 
@@ -95,7 +95,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     threshold.setDate(threshold.getDate() - 3); // Plus de 3 jours
     
     return this.tickets()
-      .filter(t => t.statut !== 'CLOTURE' && t.statut !== 'REPARE' && new Date(t.createdAt) < threshold)
+      .filter(t => !['TERMINE', 'CLOTURE'].includes(t.statut) && new Date(t.createdAt) < threshold)
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
       .slice(0, 5);
   });
@@ -153,10 +153,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
 
     const closedData = last7Days.map(day => {
-      // Simplification: based on updatedAt if status is REPARE/CLOTURE
-      // Note: Real data would need more specific history
       return this.tickets().filter(t => 
-        (t.statut === 'REPARE' || t.statut === 'CLOTURE') && 
+        ['TERMINE', 'CLOTURE'].includes(t.statut) && 
         t.updatedAt?.startsWith(day)
       ).length;
     });

@@ -17,6 +17,7 @@ import { AppButtonComponent } from '../../../shared/ui/button/app-button.compone
 import { AppCardComponent } from '../../../shared/ui/card/app-card.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { lucidePlus, lucideShield, lucideX, lucideAlertTriangle, lucideUserCheck, lucideUserX } from '@ng-icons/lucide';
+import { PhoneInputComponent } from '../../../shared/ui/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-users-list',
@@ -25,7 +26,7 @@ import { lucidePlus, lucideShield, lucideX, lucideAlertTriangle, lucideUserCheck
     CommonModule, ReactiveFormsModule,
     HlmBadgeDirective, HlmTableDirective, HlmTbodyDirective, HlmTrowDirective, HlmThDirective, HlmTdDirective,
     HlmSelectDirective, AppFilterBarComponent, AppInputComponent, AppButtonComponent, AppCardComponent,
-    NgIconComponent, AppPaginationComponent
+    NgIconComponent, AppPaginationComponent, PhoneInputComponent
   ],
   providers: [provideIcons({ lucidePlus, lucideShield, lucideX, lucideAlertTriangle, lucideUserCheck, lucideUserX })],
   templateUrl: './users-list.component.html',
@@ -59,6 +60,7 @@ export class UsersListComponent implements OnInit {
     password: ['', [Validators.required, Validators.minLength(8)]],
     role: ['RECEPTIONNISTE' as Role, Validators.required],
     siteId: [null as number | null],
+    telephone: [''],
   });
 
   private searchSubject = new Subject<string>();
@@ -114,7 +116,17 @@ export class UsersListComponent implements OnInit {
     if (this.form.invalid) { this.error.set('Tous les champs obligatoires doivent être remplis.'); return; }
     this.saving.set(true);
     const v = this.form.value;
-    const request: UserRequest = { nom: v.nom!, email: v.email!, password: v.password!, role: v.role as Role, siteId: v.siteId ?? undefined };
+    
+    const { telephone } = v;
+
+    const request: UserRequest = { 
+      nom: v.nom!, 
+      email: v.email!, 
+      password: v.password!, 
+      role: v.role as Role, 
+      siteId: v.siteId ?? undefined,
+      telephone: telephone ?? undefined
+    };
     this.userService.create(request).subscribe({
       next: () => { this.saving.set(false); this.showDialog.set(false); this.loadUsers(); },
       error: (err) => { this.error.set(err.error?.message ?? 'Erreur lors de la création.'); this.saving.set(false); },

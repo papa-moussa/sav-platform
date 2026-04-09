@@ -19,6 +19,11 @@
           {
             "glob": "**/*",
             "input": "./sav-front/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "node_modules/intl-tel-input/dist/img",
+            "output": "assets/img"
           }
         ],
         "styles": ["./sav-front/src/styles.css"],

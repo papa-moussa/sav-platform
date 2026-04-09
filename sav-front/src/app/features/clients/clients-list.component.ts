@@ -13,6 +13,7 @@ import { AppCardComponent } from '../../shared/ui/card/app-card.component';
 import { AppPaginationComponent } from '../../shared/ui/pagination/app-pagination.component';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { lucidePlus, lucideUserPlus, lucideX, lucideUsers, lucideAlertTriangle } from '@ng-icons/lucide';
+import { PhoneInputComponent } from '../../shared/ui/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-clients-list',
@@ -21,7 +22,7 @@ import { lucidePlus, lucideUserPlus, lucideX, lucideUsers, lucideAlertTriangle }
     CommonModule, ReactiveFormsModule, RouterModule,
     HlmTableDirective, HlmTheadDirective, HlmTbodyDirective, HlmTrowDirective, HlmThDirective, HlmTdDirective,
     AppFilterBarComponent, AppInputComponent, AppButtonComponent, AppCardComponent,
-    AppPaginationComponent, NgIconComponent
+    AppPaginationComponent, NgIconComponent, PhoneInputComponent
   ],
   providers: [provideIcons({ lucidePlus, lucideUserPlus, lucideX, lucideUsers, lucideAlertTriangle })],
   templateUrl: './clients-list.component.html',
@@ -91,12 +92,18 @@ export class ClientsListComponent implements OnInit {
 
   saveClient(): void {
     const { nom, telephone, email, adresse } = this.newClientForm.value;
-    if (!nom?.trim() || !telephone?.trim()) {
+    if (!nom?.trim() || !telephone) {
       this.error.set('Nom et téléphone sont obligatoires.');
       return;
     }
+    
     this.saving.set(true);
-    const request: ClientRequest = { nom: nom!, telephone: telephone!, email: email ?? undefined, adresse: adresse ?? undefined };
+    const request: ClientRequest = { 
+      nom: nom!, 
+      telephone: telephone!, 
+      email: email ?? undefined, 
+      adresse: adresse ?? undefined 
+    };
     this.clientService.create(request).subscribe({
       next: () => {
         this.saving.set(false);

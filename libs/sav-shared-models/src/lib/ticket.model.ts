@@ -1,12 +1,13 @@
 export type TicketStatut =
   | 'RECU'
   | 'EN_DIAGNOSTIC'
-  | 'EN_REPARATION'
-  | 'EN_ATTENTE_PIECES'
-  | 'REPARE'
-  | 'IRREPARABLE'
-  | 'EN_ATTENTE_FEEDBACK'
+  | 'EN_COURS'
+  | 'TERMINE'
   | 'CLOTURE';
+
+export type BlockingReason = 'PIECES' | 'CLIENT' | 'AUTRE';
+
+export type FeedbackStatus = 'PENDING' | 'DONE' | 'EXPIRED';
 
 export type TypeAppareil =
   | 'REFRIGERATEUR'
@@ -23,23 +24,17 @@ export type ResultatIntervention = 'EN_COURS' | 'REPARE' | 'IRREPARABLE';
 // Transitions autorisées (miroir du backend) pour le frontend
 export const TICKET_TRANSITIONS: Record<TicketStatut, TicketStatut[]> = {
   RECU: ['EN_DIAGNOSTIC'],
-  EN_DIAGNOSTIC: ['EN_REPARATION', 'EN_ATTENTE_PIECES', 'REPARE', 'IRREPARABLE'],
-  EN_REPARATION: ['EN_ATTENTE_PIECES', 'REPARE', 'IRREPARABLE'],
-  EN_ATTENTE_PIECES: ['EN_REPARATION', 'REPARE', 'IRREPARABLE'],
-  REPARE: ['EN_ATTENTE_FEEDBACK'],
-  IRREPARABLE: ['EN_ATTENTE_FEEDBACK'],
-  EN_ATTENTE_FEEDBACK: ['CLOTURE'],
+  EN_DIAGNOSTIC: ['EN_COURS'],
+  EN_COURS: ['TERMINE'],
+  TERMINE: ['CLOTURE'],
   CLOTURE: [],
 };
 
 export const STATUT_LABELS: Record<TicketStatut, string> = {
   RECU: 'Reçu',
   EN_DIAGNOSTIC: 'En diagnostic',
-  EN_REPARATION: 'En réparation',
-  EN_ATTENTE_PIECES: 'En attente de pièces',
-  REPARE: 'Réparé',
-  IRREPARABLE: 'Irréparable',
-  EN_ATTENTE_FEEDBACK: 'En attente de feedback',
+  EN_COURS: 'En cours',
+  TERMINE: 'Terminé',
   CLOTURE: 'Clôturé',
 };
 
@@ -53,6 +48,21 @@ export const TYPE_APPAREIL_LABELS: Record<TypeAppareil, string> = {
   FOUR: 'Four',
   AUTRE: 'Autre',
 };
+
+export interface TicketAction {
+  id: number;
+  technicienNom: string;
+  description: string;
+  createdAt: string;
+}
+
+export interface TicketHistory {
+  id: number;
+  utilisateurNom: string;
+  typeAction: string;
+  details: string;
+  timestamp: string;
+}
 
 export interface Intervention {
   id: number;
@@ -84,8 +94,15 @@ export interface Ticket {
   createdAt: string;
   updatedAt: string;
   interventions: Intervention[];
+  actions: TicketAction[];
+  history: TicketHistory[];
   feedbackSoumis: boolean;
   qrTokenDisponible: boolean;
+  qrToken?: string;
+  feedbackStatus?: FeedbackStatus;
+  blockingReason?: BlockingReason;
+  blockingObservation?: string;
+  result?: ResultatIntervention;
 }
 
 export interface QrCodeResponse {
@@ -125,4 +142,23 @@ export interface InterventionRequest {
 
 export interface AssignRequest {
   technicienId: number;
+}
+
+export interface DiagnosticRequest {
+  diagnostic: string;
+}
+
+export interface BlockingRequest {
+  reason: BlockingReason;
+  observation?: string;
+}
+
+export interface TerminationRequest {
+  result: ResultatIntervention;
+  observations?: string;
+  tempsPasseHeures?: number;
+}
+
+export interface TicketActionRequest {
+  description: string;
 }

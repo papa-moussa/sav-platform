@@ -1,228 +1,182 @@
-import { Component, inject, signal, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TicketService } from '../../core/services/ticket.service';
-import { UserService } from '../../core/services/user.service';
+import { TicketWorkflowService } from '../../core/services/ticket-workflow.service';
 import { AuthService } from '../../core/auth/auth.service';
-import {
-  Ticket, TicketStatut, ResultatIntervention, InterventionRequest,
-  STATUT_LABELS, STATUT_COLORS, TYPE_APPAREIL_LABELS, TICKET_TRANSITIONS,
-  QrCodeResponse,
+import { 
+  Ticket, TicketStatut, STATUT_LABELS, STATUT_COLORS, 
+  TYPE_APPAREIL_LABELS, ResultatIntervention, BlockingReason,
+  QrCodeResponse
 } from '../../core/models/ticket.model';
-import { User } from '../../core/models/user.model';
 
-import { HlmBadgeDirective } from '@spartan-ng/ui-badge-helm';
+// Sub-components
+import { DiagnosticFormComponent } from './components/diagnostic-form.component';
+import { ActionListComponent } from './components/action-list.component';
+import { FinalizationFormComponent } from './components/finalization-form.component';
+import { TicketTimelineComponent } from './components/ticket-timeline.component';
+import { BlockingModalComponent } from './components/blocking-modal.component';
+
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { 
+  lucideX, lucideWrench, lucideHistory, lucideChevronRight, 
+  lucideAlertCircle, lucideCheckCircle2, lucidePauseCircle,
+  lucideQrCode, lucideDownload, lucideShare2, lucideChevronLeft
+} from '@ng-icons/lucide';
 
 @Component({
   selector: 'app-ticket-detail-dialog',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, FormsModule,
-    HlmBadgeDirective,
+    CommonModule, ReactiveFormsModule, 
+    NgIconComponent,
+    DiagnosticFormComponent, ActionListComponent, 
+    FinalizationFormComponent, TicketTimelineComponent,
+    BlockingModalComponent
   ],
-  templateUrl: './ticket-detail-dialog.component.html',
+  providers: [provideIcons({ 
+    lucideX, lucideWrench, lucideHistory, lucideChevronRight, 
+    lucideAlertCircle, lucideCheckCircle2, lucidePauseCircle,
+    lucideQrCode, lucideDownload, lucideShare2, lucideChevronLeft
+  })],
+  templateUrl: './ticket-detail-dialog.component.html'
 })
-export class TicketDetailDialogComponent implements OnInit {
-  @Input() ticket!: Ticket;
-  @Input() viewMode: 'standard' | 'technical' = 'standard';
-  @Output() updated = new EventEmitter<Ticket>();
-  @Output() closed = new EventEmitter<void>();
-
+export class TicketDetailDialogComponent {
   private ticketService = inject(TicketService);
-  private userService = inject(UserService);
+  private workflowService = inject(TicketWorkflowService);
   authService = inject(AuthService);
-  private fb = inject(FormBuilder);
 
-  techniciens = signal<User[]>([]);
-  activeTab = signal<'info' | 'interventions'>('info');
-  savingStatut = signal(false);
-  savingAssign = signal(false);
-  savingIntervention = signal(false);
-  error = signal<string | null>(null);
-  successMsg = signal<string | null>(null);
+  // Utilisation d'un signal interne pour garantir la réactivité des computed
+  ticketSignal = signal<Ticket | null>(null);
 
-  // ─── Statut Confirmation UX ──────────────────────────────────────────────
-  statusConfirmState = signal<{status: TicketStatut | null, confirm: boolean}>({status: null, confirm: false});
-  private transitionTimeout: ReturnType<typeof setTimeout> | undefined;
+  @Input() set ticket(t: Ticket | null) {
+    this.ticketSignal.set(t);
+    if (t) {
+      // Auto-switch to history if closed, or workflow if active
+      this.activeTab.set(['TERMINE', 'CLOTURE'].includes(t.statut) ? 'history' : 'workflow');
+      
+      // Reset workflow view when ticket changes (e.g. fresh load or status change)
+      this.workflowView.set('main');
 
-  // ─── QR Code ──────────────────────────────────────────────────────────────
-  qrCode = signal<QrCodeResponse | null>(null);
-  loadingQr = signal(false);
-
-  readonly statutLabels = STATUT_LABELS;
-  readonly statutColors = STATUT_COLORS;
-  readonly typeLabels = TYPE_APPAREIL_LABELS;
-
-  interventionForm = this.fb.group({
-    diagnostic: ['', Validators.required],
-    actionsRealisees: ['', Validators.required],
-    observations: [''],
-    tempsPasseHeures: [null as number | null],
-    resultat: ['EN_COURS' as ResultatIntervention, Validators.required],
-  });
-
-  selectedStatut = signal<TicketStatut | null>(null);
-  selectedTechnicienId = signal<number | null>(null);
-
-  get allowedTransitions(): TicketStatut[] {
-    return TICKET_TRANSITIONS[this.ticket.statut] ?? [];
-  }
-
-  get canChangeStatut(): boolean {
-    const r = this.authService.currentRole();
-    return r === 'ADMIN' || r === 'TECHNICIEN' || r === 'RECEPTIONNISTE';
-  }
-
-  get canAssign(): boolean {
-    const r = this.authService.currentRole();
-    return r === 'ADMIN' || r === 'RECEPTIONNISTE';
-  }
-
-  get canAddIntervention(): boolean {
-    const r = this.authService.currentRole();
-    const isClosed = this.ticket.statut === 'CLOTURE';
-    return (r === 'ADMIN' || r === 'TECHNICIEN') && !isClosed;
-  }
-
-  get hasInterventions(): boolean {
-    return this.ticket.interventions.length > 0;
-  }
-
-  ngOnInit(): void {
-    if (this.viewMode === 'technical') {
-      this.activeTab.set('interventions');
-    }
-
-    if (this.canAssign) {
-      this.userService.getAll('', 0, 200).subscribe({
-        next: (resp) => this.techniciens.set(resp.content.filter(x => x.role === 'TECHNICIEN' && x.actif)),
-      });
-    }
-    this.selectedTechnicienId.set(this.ticket.technicienId);
-
-    // Chargement automatique du QR Code si le ticket attend un feedback
-    if (this.ticket.statut === 'EN_ATTENTE_FEEDBACK' && !this.ticket.feedbackSoumis) {
-      this.loadQrCode();
-    }
-  }
-
-  setTab(tab: 'info' | 'interventions'): void {
-    this.activeTab.set(tab);
-    this.error.set(null);
-    this.successMsg.set(null);
-  }
-
-  requestStatusConfirm(nouveauStatut: TicketStatut): void {
-    if (this.statusConfirmState().status === nouveauStatut && this.statusConfirmState().confirm) {
-      this.executeChangeStatut(nouveauStatut);
-    } else {
-      this.statusConfirmState.set({ status: nouveauStatut, confirm: true });
-      clearTimeout(this.transitionTimeout);
-      this.transitionTimeout = setTimeout(() => {
-        this.statusConfirmState.set({ status: null, confirm: false });
-      }, 3000);
-    }
-  }
-
-  private executeChangeStatut(newStatut: TicketStatut): void {
-    // Vérification de sécurité frontend : intervention requise pour REPARE/IRREPARABLE
-    if ((newStatut === 'REPARE' || newStatut === 'IRREPARABLE') && !this.hasInterventions) {
-      if (this.authService.currentRole() !== 'ADMIN') {
-        this.error.set(`Un rapport d'intervention est requis pour marquer ce ticket comme ${this.statutLabels[newStatut].toLowerCase()}.`);
-        this.statusConfirmState.set({ status: null, confirm: false });
-        // Scroll to tab interventions to help user
-        this.setTab('interventions');
-        return;
+      // If TERMINE, check for QR Code
+      if (t.statut === 'TERMINE' && !this.qrCode()) {
+        this.loadQrCode();
       }
     }
+  }
+  get ticket(): Ticket | null { return this.ticketSignal(); }
 
-    this.savingStatut.set(true);
-    this.error.set(null);
-    this.statusConfirmState.set({ status: null, confirm: false });
+  @Output() closed = new EventEmitter<void>();
+  @Output() updated = new EventEmitter<Ticket>();
 
-    this.ticketService.changeStatut(this.ticket.id, newStatut).subscribe({
-      next: (t) => {
-        this.savingStatut.set(false);
-        this.successMsg.set(`Statut mis à jour : ${this.statutLabels[newStatut]}`);
-        this.ticket = { ...this.ticket, statut: t.statut, updatedAt: t.updatedAt };
-        this.updated.emit(this.ticket);
-        setTimeout(() => this.successMsg.set(null), 5000);
-      },
-      error: (err) => {
-        this.error.set(err.error?.message ?? 'Échec du changement de statut.');
-        this.savingStatut.set(false);
-      },
+  activeTab = signal<'workflow' | 'history'>('workflow');
+  workflowView = signal<'main' | 'finalizing'>('main');
+  loading = signal(false);
+  qrCode = signal<QrCodeResponse | null>(null);
+  showBlockModal = signal(false);
+
+  readonly labels = STATUT_LABELS;
+  readonly colors = STATUT_COLORS;
+  readonly types = TYPE_APPAREIL_LABELS;
+
+  // Visibility Flags basés sur le signal pour mise à jour immédiate
+  showDiagnosticForm = computed(() => this.ticketSignal()?.statut === 'EN_DIAGNOSTIC');
+  showActionList = computed(() => this.ticketSignal()?.statut === 'EN_COURS');
+  
+  isBlocked = computed(() => !!this.ticketSignal()?.blockingReason);
+  canStartDiagnostic = computed(() => this.ticketSignal()?.statut === 'RECU');
+  
+  showQrCodeSection = computed(() => 
+    this.ticketSignal()?.statut === 'TERMINE' && !this.ticketSignal()?.feedbackSoumis
+  );
+
+  loadQrCode() {
+    const t = this.ticketSignal();
+    if (!t) return;
+    this.ticketService.getQrCode(t.id).subscribe({
+      next: (resp) => this.qrCode.set(resp),
+      error: () => console.error('Erreur QR Code')
     });
   }
 
-  assignTechnicien(): void {
-    const id = this.selectedTechnicienId();
-    if (!id) return;
-    this.savingAssign.set(true);
-    this.error.set(null);
-    this.ticketService.assigner(this.ticket.id, { technicienId: id }).subscribe({
-      next: (t) => {
-        this.savingAssign.set(false);
-        this.successMsg.set('Technicien assigné.');
-        this.updated.emit({ ...this.ticket, technicienId: t.technicienId, technicienNom: t.technicienNom });
-        this.ticket = { ...this.ticket, technicienId: t.technicienId, technicienNom: t.technicienNom };
+  onStartDiagnostic() {
+    const t = this.ticketSignal();
+    if (!t) return;
+    this.loading.set(true);
+    this.workflowService.startDiagnostic(t.id).subscribe({
+      next: (updated) => {
+        this.loading.set(false);
+        this.updated.emit(updated);
       },
-      error: () => { this.error.set('Erreur lors de l\'assignation.'); this.savingAssign.set(false); },
+      error: () => this.loading.set(false)
     });
   }
 
-  addIntervention(): void {
-    if (this.interventionForm.invalid) { this.error.set('Remplissez les champs obligatoires.'); return; }
-    const v = this.interventionForm.value;
-    const requestedResult = (v.resultat as ResultatIntervention) || 'EN_COURS';
-
-    const request: InterventionRequest = {
-      diagnostic: v.diagnostic ?? '',
-      actionsRealisees: v.actionsRealisees ?? '',
-      observations: v.observations || undefined,
-      tempsPasseHeures: v.tempsPasseHeures ?? undefined,
-      resultat: requestedResult,
-    };
-
-    this.savingIntervention.set(true);
-    this.error.set(null);
-    this.ticketService.addIntervention(this.ticket.id, request).subscribe({
-      next: (interv) => {
-        this.savingIntervention.set(false);
-        this.successMsg.set('Intervention enregistrée.');
-        this.interventionForm.reset({ resultat: 'EN_COURS' });
-        
-        // Mise à jour locale immédiate de la liste d'interventions
-        this.ticket = { ...this.ticket, interventions: [...this.ticket.interventions, interv] };
-        this.updated.emit(this.ticket);
-
-        // --- ACTION COMBINÉE : Mise à jour automatique du statut ---
-        if (requestedResult === 'REPARE' || requestedResult === 'IRREPARABLE') {
-          const targetStatut: TicketStatut = requestedResult === 'REPARE' ? 'REPARE' : 'IRREPARABLE';
-          // On évite la confirmation pour l'action combinée car elle est explicite par le résultat du formulaire
-          this.executeChangeStatut(targetStatut);
-        }
-      },
-      error: (err) => {
-        this.error.set(err.error?.message ?? 'Erreur lors de l\'enregistrement.');
-        this.savingIntervention.set(false);
-      },
+  onWorkflowStepCompleted() {
+    const t = this.ticketSignal();
+    if (!t) return;
+    // Refresh to get new history and status
+    this.ticketService.getById(t.id).subscribe({
+      next: (updated) => {
+        this.updated.emit(updated);
+        this.workflowView.set('main'); // Reset view on success
+      }
     });
   }
 
-  loadQrCode(): void {
-    this.loadingQr.set(true);
-    this.ticketService.getQrCode(this.ticket.id).subscribe({
-      next: (qr) => { this.qrCode.set(qr); this.loadingQr.set(false); },
-      error: () => { this.error.set('Erreur lors du chargement du QR Code.'); this.loadingQr.set(false); },
+  onResume() {
+    const t = this.ticketSignal();
+    if (!t) return;
+    this.loading.set(true);
+    this.workflowService.resumeTicket(t.id).subscribe({
+      next: (updated) => {
+        this.loading.set(false);
+        this.updated.emit(updated);
+      },
+      error: () => this.loading.set(false)
     });
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  // Navigation interne au workflow EN_COURS
+  onStartFinalizing() {
+    this.workflowView.set('finalizing');
   }
 
-  formatDateTime(date: string): string {
-    return new Date(date).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  onCancelFinalizing() {
+    this.workflowView.set('main');
+  }
+
+  onOpenBlockModal() {
+    this.showBlockModal.set(true);
+  }
+
+  onBlockConfirmed(event: { reason: BlockingReason, observation?: string }) {
+    const t = this.ticketSignal();
+    if (!t) return;
+    this.loading.set(true);
+    this.workflowService.blockTicket(t.id, event.reason, event.observation).subscribe({
+      next: (updated) => {
+        this.loading.set(false);
+        this.showBlockModal.set(false);
+        this.updated.emit(updated);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.showBlockModal.set(false);
+      }
+    });
+  }
+
+  onBlockCancelled() {
+    this.showBlockModal.set(false);
+  }
+
+  downloadQr() {
+    const t = this.ticketSignal();
+    if (!this.qrCode() || !t) return;
+    const link = document.createElement('a');
+    link.href = 'data:image/png;base64,' + this.qrCode()?.base64Image;
+    link.download = `QR_Feedback_${t.numero}.png`;
+    link.click();
   }
 }

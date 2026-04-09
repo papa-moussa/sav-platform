@@ -60,4 +60,29 @@ export class TicketService {
   getQrCode(id: number): Observable<QrCodeResponse> {
     return this.http.get<QrCodeResponse>(`${this.base}/${id}/qrcode`);
   }
+
+  // Workflow Methods
+  startDiagnostic(id: number): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.base}/${id}/start-diagnostic`, {});
+  }
+
+  completeDiagnostic(id: number, diagnostic: string): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.base}/${id}/complete-diagnostic`, { diagnostic });
+  }
+
+  addAction(id: number, description: string): Observable<any> {
+    return this.http.post<any>(`${this.base}/${id}/actions`, { description });
+  }
+
+  blockTicket(id: number, reason: string, observation?: string): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.base}/${id}/block`, { reason, observation });
+  }
+
+  resumeTicket(id: number): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.base}/${id}/resume`, {});
+  }
+
+  terminateIntervention(id: number, result: string, observations?: string, tempsPasseHeures?: number): Observable<Ticket> {
+    return this.http.post<Ticket>(`${this.base}/${id}/terminate`, { result, observations, tempsPasseHeures });
+  }
 }

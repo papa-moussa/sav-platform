@@ -14,6 +14,7 @@ import { jwtInterceptor } from './core/auth/jwt.interceptor';
 import { DialogModule } from '@angular/cdk/dialog';
 import { provideBrnCalendarI18n } from '@spartan-ng/brain/calendar';
 import { provideNativeDateAdapter } from '@spartan-ng/brain/date-time';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import type { BrnCalendarI18n } from '@spartan-ng/brain/calendar';
 
 registerLocaleData(localeFr);
@@ -46,6 +47,7 @@ const frCalendarI18n: BrnCalendarI18n = {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideClientHydration(withEventReplay()),
+    provideAnimations(),
     provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes),
     provideHttpClient(withInterceptors([jwtInterceptor]), withFetch()),

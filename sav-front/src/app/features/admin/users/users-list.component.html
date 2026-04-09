@@ -30,6 +30,7 @@
             <tr hlmTrow>
               <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pl-6">Nom</th>
               <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Email</th>
+              <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Téléphone</th>
               <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Rôle</th>
               <th hlmTh class="text-center hidden md:table-cell text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Site</th>
               <th hlmTh class="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Statut</th>
@@ -44,6 +45,9 @@
                 </td>
                 <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-600">
                   {{ user.email }}
+                </td>
+                <td hlmTd class="text-center py-4 text-[13px] font-medium text-slate-500">
+                  {{ user.telephone ?? '—' }}
                 </td>
                 <td hlmTd class="text-center py-4">
                   <span hlmBadge [class]="roleBadgeClass(user.role) + ' px-2 py-0.5 rounded-[6px] text-[10px] font-bold tracking-wide uppercase inline-flex justify-center'">
@@ -107,6 +111,12 @@
         <app-input formControlName="nom" label="Nom complet *" placeholder="Entrez le nom"></app-input>
         <app-input formControlName="email" type="email" label="Email *" placeholder="utilisateur@email.com"></app-input>
         <app-input formControlName="password" type="password" label="Mot de passe *" placeholder="••••••••"></app-input>
+
+        <app-phone-input 
+          formControlName="telephone" 
+          label="Téléphone" 
+          [control]="$any(form.get('telephone'))">
+        </app-phone-input>
         
         <div class="space-y-1.5">
           <label for="role" class="text-[13px] font-semibold text-slate-800 ml-1">Rôle *</label>
