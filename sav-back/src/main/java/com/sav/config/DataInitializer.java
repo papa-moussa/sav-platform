@@ -46,7 +46,7 @@ public class DataInitializer implements ApplicationRunner {
                 .role(Role.SUPER_ADMIN)
                 .actif(true)
                 .company(null) // Pas de company — accès global
-                .telephone("+221770000000")
+                .telephone("+221 77 768 89 80")
                 .build();
         userRepository.save(superAdmin);
 
@@ -104,7 +104,7 @@ public class DataInitializer implements ApplicationRunner {
                 .actif(true)
                 .site(siege)
                 .company(company)
-                .telephone("+221771111111")
+                .telephone("+221 77 111 11 11")
                 .build();
         userRepository.save(admin);
 

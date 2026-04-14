@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { HeaderComponent } from '../../components/header/header.component';
 import { HeroComponent } from '../../components/hero/hero.component';
+import { PainPointsComponent } from '../../components/pain-points/pain-points.component';
+import { SolutionComponent } from '../../components/solution/solution.component';
 import { FeaturesComponent } from '../../components/features/features.component';
 import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.component';
 import { AdvantagesComponent } from '../../components/advantages/advantages.component';
-import { StatsComponent } from '../../components/stats/stats.component';
+import { PersonasComponent } from '../../components/personas/personas.component';
 import { CtaComponent } from '../../components/cta/cta.component';
 import { ContactComponent } from '../../components/contact/contact.component';
 import { FooterComponent } from '../../components/footer/footer.component';
@@ -15,10 +17,12 @@ import { FooterComponent } from '../../components/footer/footer.component';
   imports: [
     HeaderComponent,
     HeroComponent,
+    PainPointsComponent,
+    SolutionComponent,
     FeaturesComponent,
     HowItWorksComponent,
     AdvantagesComponent,
-    StatsComponent,
+    PersonasComponent,
     CtaComponent,
     ContactComponent,
     FooterComponent,
@@ -27,10 +31,12 @@ import { FooterComponent } from '../../components/footer/footer.component';
     <app-header />
     <main>
       <app-hero />
+      <app-pain-points />
+      <app-solution />
       <app-features />
       <app-how-it-works />
       <app-advantages />
-      <app-stats />
+      <app-personas />
       <app-cta />
       <app-contact />
     </main>

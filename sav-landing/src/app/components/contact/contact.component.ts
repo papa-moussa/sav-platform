@@ -1,120 +1,111 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import {
-  lucideMail,
-  lucidePhone,
-  lucideMapPin,
-  lucideSend,
-  lucideCheckCircle,
-} from '@ng-icons/lucide';
 import { FadeInDirective } from '../../shared/directives/fade-in.directive';
 
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgIconComponent, FadeInDirective],
-  viewProviders: [provideIcons({ lucideMail, lucidePhone, lucideMapPin, lucideSend, lucideCheckCircle })],
+  imports: [CommonModule, ReactiveFormsModule, FadeInDirective],
   template: `
-    <section id="contact" class="section-padding bg-slate-50">
+    <section id="contact" class="section-padding" style="background: var(--color-bg);">
       <div class="container-max">
 
-        <div appFadeIn class="text-center mb-16">
-          <span class="inline-block text-primary-600 font-semibold text-sm tracking-widest uppercase mb-4">
-            Contact
-          </span>
-          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-            Parlons de votre projet
+        <!-- Header -->
+        <div class="text-center max-w-2xl mx-auto mb-16" appFadeIn [fadeInDelay]="0">
+          <div class="section-badge w-fit mx-auto">Contact</div>
+          <h2 class="text-3xl sm:text-4xl font-bold leading-tight mb-5" style="color: var(--color-text);">
+            Organisons votre démo
           </h2>
-          <p class="text-lg text-slate-500 max-w-2xl mx-auto">
-            Notre équipe vous répond sous 24h pour organiser une démo personnalisée.
+          <p class="text-lg" style="color: var(--color-muted);">
+            Notre équipe vous répond en moins de 24h pour une démo personnalisée, sans engagement.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-5xl mx-auto">
 
-          <!-- Contact info -->
-          <div appFadeIn class="space-y-8">
-            <div>
-              <h3 class="text-xl font-semibold text-slate-900 mb-6">Nous contacter</h3>
-              <div class="space-y-5">
-                @for (info of contactInfo; track info.label) {
-                  <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <ng-icon [name]="info.icon" size="20" class="text-primary-600" />
-                    </div>
-                    <div>
-                      <p class="text-xs text-slate-400 mb-0.5">{{ info.label }}</p>
-                      <p class="text-slate-800 font-medium">{{ info.value }}</p>
-                    </div>
+          <!-- Left: Value props -->
+          <div appFadeIn [fadeInDelay]="0">
+            <h3 class="text-lg font-bold mb-6" style="color: var(--color-text);">Ce que vous obtiendrez :</h3>
+            <div class="space-y-4 mb-10">
+              @for (item of demoIncludes; track item.title) {
+                <div class="flex items-start gap-4 card-glass p-4">
+                  <span class="text-xl flex-shrink-0">{{ item.icon }}</span>
+                  <div>
+                    <p class="text-sm font-semibold mb-0.5" style="color: var(--color-text);">{{ item.title }}</p>
+                    <p class="text-sm" style="color: var(--color-muted);">{{ item.desc }}</p>
                   </div>
-                }
-              </div>
+                </div>
+              }
             </div>
 
-            <!-- Features list -->
-            <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-              <p class="font-semibold text-slate-900 mb-4">Ce que vous obtiendrez :</p>
-              <ul class="space-y-3">
-                @for (item of demoIncludes; track item) {
-                  <li class="flex items-center gap-3 text-sm text-slate-600">
-                    <ng-icon name="lucideCheckCircle" size="16" class="text-green-500 flex-shrink-0" />
-                    {{ item }}
-                  </li>
-                }
-              </ul>
+            <div class="rounded-xl p-5" style="background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);">
+              <p class="text-sm font-semibold mb-1" style="color: #A5B4FC;">
+                📧 contact&#64;sav-platform.fr
+              </p>
+              <p class="text-xs" style="color: var(--color-muted);">Réponse sous 24h ouvrées garantie</p>
             </div>
           </div>
 
-          <!-- Form -->
+          <!-- Right: Form -->
           <div appFadeIn [fadeInDelay]="100">
             @if (!submitted()) {
               <form [formGroup]="contactForm" (ngSubmit)="onSubmit()"
-                    class="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 space-y-5">
+                    class="card-glass p-8 space-y-5">
 
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Nom complet *</label>
-                  <input formControlName="name" type="text" placeholder="Jean Dupont"
-                         class="w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                         [class.border-red-300]="isInvalid('name')"
-                         [class.border-slate-200]="!isInvalid('name')" />
-                  @if (isInvalid('name')) {
-                    <p class="text-xs text-red-500 mt-1">Nom requis</p>
-                  }
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div>
+                    <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style="color: var(--color-muted);">
+                      Nom complet *
+                    </label>
+                    <input formControlName="name" type="text" placeholder="Jean Dupont"
+                           class="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all duration-200"
+                           style="background: rgba(255,255,255,0.04); border: 1px solid; color: var(--color-text);"
+                           [style.border-color]="isInvalid('name') ? '#EF4444' : 'rgba(255,255,255,0.08)'" />
+                    @if (isInvalid('name')) {
+                      <p class="text-xs mt-1" style="color: #EF4444;">Nom requis</p>
+                    }
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style="color: var(--color-muted);">
+                      Entreprise
+                    </label>
+                    <input formControlName="company" type="text" placeholder="Nom de votre société"
+                           class="w-full px-4 py-3 rounded-lg text-sm outline-none"
+                           style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--color-text);" />
+                  </div>
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Email professionnel *</label>
+                  <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style="color: var(--color-muted);">
+                    Email professionnel *
+                  </label>
                   <input formControlName="email" type="email" placeholder="jean&#64;entreprise.com"
-                         class="w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:border-primary-400"
-                         [class.border-red-300]="isInvalid('email')"
-                         [class.border-slate-200]="!isInvalid('email')" />
+                         class="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all duration-200"
+                         style="background: rgba(255,255,255,0.04); border: 1px solid; color: var(--color-text);"
+                         [style.border-color]="isInvalid('email') ? '#EF4444' : 'rgba(255,255,255,0.08)'" />
                   @if (isInvalid('email')) {
-                    <p class="text-xs text-red-500 mt-1">Email valide requis</p>
+                    <p class="text-xs mt-1" style="color: #EF4444;">Email valide requis</p>
                   }
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Entreprise</label>
-                  <input formControlName="company" type="text" placeholder="Nom de votre entreprise"
-                         class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:border-primary-400" />
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1.5">Message *</label>
-                  <textarea formControlName="message" rows="4" placeholder="Décrivez vos besoins..."
-                            class="w-full px-4 py-3 border rounded-xl text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:border-primary-400 resize-none"
-                            [class.border-red-300]="isInvalid('message')"
-                            [class.border-slate-200]="!isInvalid('message')"></textarea>
+                  <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style="color: var(--color-muted);">
+                    Message *
+                  </label>
+                  <textarea formControlName="message" rows="4"
+                            placeholder="Décrivez votre activité et vos besoins SAV..."
+                            class="w-full px-4 py-3 rounded-lg text-sm outline-none resize-none transition-all duration-200"
+                            style="background: rgba(255,255,255,0.04); border: 1px solid; color: var(--color-text);"
+                            [style.border-color]="isInvalid('message') ? '#EF4444' : 'rgba(255,255,255,0.08)'"></textarea>
                   @if (isInvalid('message')) {
-                    <p class="text-xs text-red-500 mt-1">Message requis (min. 10 caractères)</p>
+                    <p class="text-xs mt-1" style="color: #EF4444;">Message requis (min. 10 caractères)</p>
                   }
                 </div>
 
                 <button type="submit"
                         [disabled]="isSubmitting()"
-                        class="w-full flex items-center justify-center gap-2 py-3.5 px-6 gradient-primary text-white font-semibold rounded-xl hover:opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed">
+                        class="btn-primary w-full justify-center py-3.5 disabled:opacity-50 disabled:cursor-not-allowed">
                   @if (isSubmitting()) {
                     <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -122,24 +113,27 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
                     </svg>
                     Envoi en cours...
                   } @else {
-                    <ng-icon name="lucideSend" size="16" />
                     Envoyer ma demande
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
                   }
                 </button>
 
-                <p class="text-xs text-center text-slate-400">
-                  Réponse garantie sous 24h. Vos données restent confidentielles.
+                <p class="text-xs text-center" style="color: var(--color-muted);">
+                  Vos données restent confidentielles · Réponse garantie sous 24h
                 </p>
               </form>
             } @else {
-              <div class="bg-white rounded-2xl border border-green-100 shadow-sm p-10 text-center flex flex-col items-center gap-4">
-                <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
-                  <ng-icon name="lucideCheckCircle" size="32" class="text-green-500" />
+              <div class="card-glass p-10 text-center flex flex-col items-center gap-5">
+                <div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
+                     style="background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3);">
+                  ✅
                 </div>
-                <h3 class="text-xl font-semibold text-slate-900">Message envoyé !</h3>
-                <p class="text-slate-500">Nous avons bien reçu votre demande. Notre équipe vous contactera sous 24h.</p>
+                <h3 class="text-xl font-bold" style="color: var(--color-text);">Demande envoyée !</h3>
+                <p style="color: var(--color-muted);">Notre équipe vous contactera dans les 24h pour organiser votre démo.</p>
                 <button (click)="resetForm()"
-                        class="mt-2 text-sm text-primary-600 font-medium hover:underline">
+                        class="text-sm font-medium mt-2" style="color: #A5B4FC;">
                   Envoyer un autre message
                 </button>
               </div>
@@ -156,18 +150,10 @@ export class ContactComponent {
   isSubmitting = signal(false);
   submitted = signal(false);
 
-  contactInfo = [
-    { icon: 'lucideMail', label: 'Email', value: 'contact@sav-platform.fr' },
-    { icon: 'lucidePhone', label: 'Téléphone', value: '+33 1 23 45 67 89' },
-    { icon: 'lucideMapPin', label: 'Adresse', value: 'Paris, France' },
-  ];
-
   demoIncludes = [
-    'Démo personnalisée de 30 minutes',
-    'Présentation des fonctionnalités clés',
-    'Réponses à toutes vos questions',
-    'Offre tarifaire adaptée à votre taille',
-    'Accès à un essai gratuit de 14 jours',
+    { icon: '🎯', title: 'Démo personnalisée 30 min', desc: 'Adaptée à votre secteur et votre volume de tickets' },
+    { icon: '💬', title: 'Réponses à toutes vos questions', desc: 'Pricing, intégrations, déploiement, support' },
+    { icon: '🚀', title: 'Accès essai gratuit 14 jours', desc: 'Sans carte bancaire, sans engagement' },
   ];
 
   constructor(private fb: FormBuilder) {
@@ -190,9 +176,7 @@ export class ContactComponent {
       return;
     }
     this.isSubmitting.set(true);
-    // Simulate API call
     setTimeout(() => {
-      console.log('Contact form submitted:', this.contactForm.value);
       this.isSubmitting.set(false);
       this.submitted.set(true);
     }, 1200);

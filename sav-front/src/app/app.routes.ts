@@ -15,6 +15,13 @@ export const appRoutes: Route[] = [
       import('./features/feedback/feedback.component').then((m) => m.FeedbackComponent),
   },
   {
+    // Onboarding — plein écran, sans layout principal
+    path: 'onboarding',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/onboarding/onboarding.component').then((m) => m.OnboardingComponent),
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./layouts/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),

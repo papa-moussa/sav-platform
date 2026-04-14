@@ -1,22 +1,139 @@
-version: '3.8'
-
 services:
+
+  # ─────────────────────────────────────────────
+  # Base de données PostgreSQL
+  # ─────────────────────────────────────────────
   postgres:
     image: postgres:15
     container_name: sav_postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: sav_db
-      POSTGRES_USER: sav_user
-      POSTGRES_PASSWORD: sav_pass
-    ports:
-      - "5433:5432"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - sav_pgdata:/var/lib/postgresql/data
+    networks:
+      - sav-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sav_user -d sav_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-sav_user} -d sav_db"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
+
+  # ─────────────────────────────────────────────
+  # Backend Spring Boot
+  # ─────────────────────────────────────────────
+  backend:
+    build:
+      context: ./sav-back
+      dockerfile: Dockerfile
+    container_name: sav_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      DB_URL: jdbc:postgresql://postgres:5432/sav_db
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      DDL_AUTO: ${DDL_AUTO:-update}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_FROM_PHONE: ${TWILIO_FROM_PHONE}
+      TWILIO_WHATSAPP_NUMBER: ${TWILIO_WHATSAPP_NUMBER}
+      FRONTEND_URL: ${FRONTEND_URL:-https://app.sama-sav.com}
+    networks:
+      - sav-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ─────────────────────────────────────────────
+  # sav-front — Angular SSR (Node.js)
+  # ─────────────────────────────────────────────
+  sav-front-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.front
+    container_name: sav_front
+    restart: unless-stopped
+    networks:
+      - sav-network
+
+  # ─────────────────────────────────────────────
+  # sav-landing — Landing page (Nginx static)
+  # ─────────────────────────────────────────────
+  sav-landing-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.landing
+    container_name: sav_landing
+    restart: unless-stopped
+    networks:
+      - sav-network
+
+  # ─────────────────────────────────────────────
+  # sav-admin — Panel admin (Nginx static)
+  # ─────────────────────────────────────────────
+  sav-admin-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    container_name: sav_admin
+    restart: unless-stopped
+    networks:
+      - sav-network
+
+  # ─────────────────────────────────────────────
+  # Nginx — Reverse proxy (point d'entrée unique)
+  # ─────────────────────────────────────────────
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: sav_nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - sav-front-app
+      - sav-landing-app
+      - sav-admin-app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    networks:
+      - sav-network
+
+  # ─────────────────────────────────────────────
+  # Certbot — Renouvellement SSL automatique
+  # ─────────────────────────────────────────────
+  certbot:
+    image: certbot/certbot:latest
+    container_name: sav_certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    # Renouvellement automatique toutes les 12h
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --quiet; sleep 12h & wait $${!}; done"
+
+networks:
+  sav-network:
+    driver: bridge
 
 volumes:
   sav_pgdata:
+  certbot_certs:
+  certbot_www:

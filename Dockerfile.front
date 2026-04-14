@@ -1,0 +1,10 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# sav-front — Angular SSR (Node.js)
+# Pré-requis : npx nx build sav-front --configuration=production
+# ──────────────────────────────────────────────────────────────────────────────
+FROM node:22-alpine
+WORKDIR /app
+COPY dist/sav-front ./dist/sav-front
+EXPOSE 4000
+ENV PORT=4000
+CMD ["node", "dist/sav-front/server/server.mjs"]

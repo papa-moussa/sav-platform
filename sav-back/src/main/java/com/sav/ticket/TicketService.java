@@ -39,6 +39,7 @@ public class TicketService {
     private final TicketSequenceRepository sequenceRepository;
     private final TicketActionRepository actionRepository;
     private final TicketHistoryRepository historyRepository;
+    private final com.sav.notification.ClientNotificationService notificationService;
 
     @Transactional(readOnly = true)
     public PageResponse<TicketResponse> findAll(TicketStatut statut, Long siteId, Long technicienId,
@@ -101,9 +102,13 @@ public class TicketService {
                 .sousGarantie(request.sousGarantie())
                 .dateAchat(request.dateAchat())
                 .statut(TicketStatut.RECU)
+                .dueDate(LocalDateTime.now().plusDays(request.typeAppareil().getDefaultSlaDays()))
                 .build();
 
-        return toResponse(ticketRepository.save(ticket));
+        ensureQrToken(ticket);
+        TicketEntity saved = ticketRepository.save(ticket);
+        notificationService.sendStatusUpdate(saved);
+        return toResponse(saved);
     }
 
     @Transactional
@@ -201,6 +206,7 @@ public class TicketService {
             throw new IllegalArgumentException("Transition invalide : " + current + " -> " + newStatut);
         }
         ticket.setStatut(newStatut);
+        notificationService.sendStatusUpdate(ticket);
     }
 
     private void addHistory(TicketEntity ticket, String type, String details, String userEmail) {
@@ -264,6 +270,8 @@ public class TicketService {
                 .blockingReason(t.getBlockingReason())
                 .blockingObservation(t.getBlockingObservation())
                 .result(t.getResult())
+                .dueDate(t.getDueDate())
+                .quoteAmount(t.getQuoteAmount())
                 .interventions(t.getInterventions() != null 
                     ? t.getInterventions().stream().map(this::toInterventionResponse).toList() 
                     : List.of())

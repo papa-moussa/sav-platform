@@ -38,6 +38,12 @@
       },
       "configurations": {
         "production": {
+          "fileReplacements": [
+            {
+              "replace": "./sav-front/src/environments/environment.ts",
+              "with": "./sav-front/src/environments/environment.prod.ts"
+            }
+          ],
           "budgets": [
             {
               "type": "initial",

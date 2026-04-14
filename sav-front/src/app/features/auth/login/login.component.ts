@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { OnboardingService } from '../../../core/services/onboarding.service';
 import { AppInputComponent } from '../../../shared/ui/input/app-input.component';
 import { AppButtonComponent } from '../../../shared/ui/button/app-button.component';
 import { AppCardComponent } from '../../../shared/ui/card/app-card.component';
@@ -19,6 +20,7 @@ import { lucideEye, lucideEyeOff, lucideUser, lucideLock, lucideAlertCircle } fr
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private onboardingService = inject(OnboardingService);
   private router = inject(Router);
 
   form = this.fb.group({
@@ -41,7 +43,13 @@ export class LoginComponent {
 
     const { email, password } = this.form.value;
     this.authService.login({ email: email ?? '', password: password ?? '' }).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: () => {
+          if (this.onboardingService.needsOnboarding()) {
+            this.router.navigate(['/onboarding']);
+          } else {
+            this.router.navigate(['/']);
+          }
+        },
       error: (err) => {
         this.error.set(
           err.status === 401 ? 'Email ou mot de passe incorrect.' : 'Erreur de connexion. Réessayez.'

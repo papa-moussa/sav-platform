@@ -13,6 +13,7 @@ import com.sav.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -101,6 +102,10 @@ public class TicketEntity {
 
     @Enumerated(EnumType.STRING)
     private ResultatIntervention result;
+
+    private LocalDateTime dueDate;
+
+    private BigDecimal quoteAmount;
 
     @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

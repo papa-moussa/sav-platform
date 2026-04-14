@@ -9,6 +9,8 @@ import { StockService } from '../../core/services/stock.service';
 import { Ticket, STATUT_LABELS, STATUT_COLORS, TYPE_APPAREIL_LABELS } from '../../core/models/ticket.model';
 import { Piece } from '../../core/models/stock.model';
 import { AppCardComponent } from '../../shared/ui/card/app-card.component';
+import { OnboardingChecklistComponent } from '../../shared/ui/onboarding-checklist/onboarding-checklist.component';
+import { OnboardingService } from '../../core/services/onboarding.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { lucideCalendar, lucideClock, lucideAlertTriangle, lucideChevronRight, lucideBuilding, lucideTrendingUp, lucideActivity, lucideCheckCircle, lucidePackage2 } from '@ng-icons/lucide';
 import { HlmBadgeDirective } from '@spartan-ng/ui-badge-helm';
@@ -50,10 +52,11 @@ export type ChartOptions = {
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     RouterModule,
     NgApexchartsModule,
     AppCardComponent,
+    OnboardingChecklistComponent,
     NgIconComponent,
     HlmBadgeDirective
   ],
@@ -62,6 +65,7 @@ export type ChartOptions = {
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
+  onboardingService = inject(OnboardingService);
   private ticketService = inject(TicketService);
   private stockService = inject(StockService);
 

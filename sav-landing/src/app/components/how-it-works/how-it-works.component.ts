@@ -1,62 +1,56 @@
 import { Component } from '@angular/core';
-import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import {
-  lucidePlusCircle,
-  lucideUserCheck,
-  lucideQrCode,
-  lucideStar,
-  lucideTrendingUp,
-} from '@ng-icons/lucide';
 import { FadeInDirective } from '../../shared/directives/fade-in.directive';
 
 @Component({
   selector: 'app-how-it-works',
   standalone: true,
-  imports: [NgIconComponent, FadeInDirective],
-  viewProviders: [provideIcons({ lucidePlusCircle, lucideUserCheck, lucideQrCode, lucideStar, lucideTrendingUp })],
+  imports: [FadeInDirective],
   template: `
-    <section id="comment-ca-marche" class="section-padding bg-white">
+    <section id="comment-ca-marche" class="section-padding" style="background: var(--color-bg);">
       <div class="container-max">
 
         <!-- Header -->
-        <div appFadeIn class="text-center mb-16">
-          <span class="inline-block text-primary-600 font-semibold text-sm tracking-widest uppercase mb-4">
-            Processus
-          </span>
-          <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 mb-4">
-            Comment ça marche ?
+        <div class="text-center max-w-2xl mx-auto mb-20" appFadeIn [fadeInDelay]="0">
+          <div class="section-badge w-fit mx-auto">Workflow</div>
+          <h2 class="text-3xl sm:text-4xl font-bold leading-tight mb-5" style="color: var(--color-text);">
+            De la réception à la<br/>
+            <span class="gradient-text">satisfaction client</span>
           </h2>
-          <p class="text-lg text-slate-500 max-w-2xl mx-auto">
-            Un flux de travail simple et efficace, de la création du ticket jusqu'à la clôture.
+          <p class="text-lg" style="color: var(--color-muted);">
+            Le cycle complet d'un ticket en 6 étapes claires.
           </p>
         </div>
 
-        <!-- Steps — desktop: horizontal, mobile: vertical -->
-        <div class="relative">
+        <!-- Timeline -->
+        <div class="max-w-3xl mx-auto">
+          @for (step of steps; track step.number; let last = $last) {
+            <div appFadeIn [fadeInDelay]="step.number * 80"
+                 class="flex gap-6">
 
-          <!-- Horizontal connector line (desktop) -->
-          <div class="hidden lg:block absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-200 via-indigo-300 to-blue-200 z-0 mx-40"></div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 relative z-10">
-            @for (step of steps; track step.title; let i = $index) {
-              <div appFadeIn [fadeInDelay]="i * 120" class="flex flex-col items-center text-center group">
-
-                <!-- Step number + icon -->
-                <div class="relative mb-6">
-                  <div class="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
-                       [style.background]="step.bgColor">
-                    <ng-icon [name]="step.icon" size="26" [style.color]="step.iconColor" />
-                  </div>
-                  <span class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white border-2 border-primary-200 text-primary-700 text-xs font-bold flex items-center justify-center shadow-sm">
-                    {{ i + 1 }}
-                  </span>
-                </div>
-
-                <h3 class="text-base font-semibold text-slate-900 mb-2">{{ step.title }}</h3>
-                <p class="text-sm text-slate-500 leading-relaxed">{{ step.description }}</p>
+              <!-- Left: dot + line -->
+              <div class="flex flex-col items-center">
+                <div class="timeline-dot">{{ step.number }}</div>
+                @if (!last) {
+                  <div class="timeline-line my-1"></div>
+                }
               </div>
-            }
-          </div>
+
+              <!-- Right: content -->
+              <div [class.pb-10]="!last" [class.pb-0]="last" class="flex-1 pt-1.5">
+                <div class="card-glass p-5 mb-1">
+                  <div class="flex items-start gap-4">
+                    <span class="text-2xl flex-shrink-0">{{ step.icon }}</span>
+                    <div>
+                      <h3 class="text-base font-bold mb-1.5" style="color: var(--color-text);">{{ step.title }}</h3>
+                      <p class="text-sm leading-relaxed mb-3" style="color: var(--color-muted);">{{ step.description }}</p>
+                      <p class="text-xs font-medium" style="color: #A5B4FC;">→ {{ step.detail }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          }
         </div>
 
       </div>
@@ -66,39 +60,46 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
 export class HowItWorksComponent {
   steps = [
     {
-      icon: 'lucidePlusCircle',
-      title: 'Créez un ticket',
-      description: 'Le réceptionniste enregistre la panne et les informations de l\'appareil.',
-      bgColor: '#eff6ff',
-      iconColor: '#2563eb',
+      number: 1,
+      icon: '📥',
+      title: 'Réception',
+      description: 'Le ticket est créé avec les infos client, l\'appareil et le problème décrit.',
+      detail: 'Numéro auto généré, QR token créé, client notifié par WhatsApp.',
     },
     {
-      icon: 'lucideUserCheck',
-      title: 'Intervention technicien',
-      description: 'Un technicien est assigné, diagnostique et répare l\'appareil.',
-      bgColor: '#f0fdf4',
-      iconColor: '#16a34a',
+      number: 2,
+      icon: '🔍',
+      title: 'Diagnostic',
+      description: 'Le technicien inspecte l\'appareil, note ses observations et identifie les pièces nécessaires.',
+      detail: 'Durée tracée, pièces identifiées, actions enregistrées.',
     },
     {
-      icon: 'lucideQrCode',
-      title: 'Scan du QR code',
-      description: 'À la remise, le client scanne le QR code généré sur le ticket.',
-      bgColor: '#fdf4ff',
-      iconColor: '#9333ea',
+      number: 3,
+      icon: '📄',
+      title: 'Devis (si nécessaire)',
+      description: 'Un devis est envoyé au client. Il l\'approuve ou le refuse depuis son smartphone.',
+      detail: 'Aucun appel. Validation sécurisée en 1 clic via lien QR.',
     },
     {
-      icon: 'lucideStar',
-      title: 'Client donne son avis',
-      description: 'Le client note la prestation et laisse un commentaire instantanément.',
-      bgColor: '#fff7ed',
-      iconColor: '#ea580c',
+      number: 4,
+      icon: '🔧',
+      title: 'Réparation',
+      description: 'L\'intervention est lancée. Le stock est débité automatiquement des pièces utilisées.',
+      detail: 'Technicien guidé, temps passé mesuré, résultat enregistré.',
     },
     {
-      icon: 'lucideTrendingUp',
-      title: 'Analyse des performances',
-      description: 'Le manager consulte les KPIs et améliore continuellement le service.',
-      bgColor: '#eef2ff',
-      iconColor: '#4f46e5',
+      number: 5,
+      icon: '✅',
+      title: 'Clôture',
+      description: 'L\'appareil est prêt. Le client est notifié. Le ticket est fermé avec son résultat.',
+      detail: 'Résultat : RÉPARÉ / IRRÉPARABLE / EN COURS. Historique complet conservé.',
+    },
+    {
+      number: 6,
+      icon: '⭐',
+      title: 'Feedback',
+      description: 'Un QR code de satisfaction est envoyé. Le client note le technicien et l\'entreprise.',
+      detail: 'Données exploitables pour piloter et améliorer votre service.',
     },
   ];
 }

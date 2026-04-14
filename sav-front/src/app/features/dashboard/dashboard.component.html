@@ -24,6 +24,11 @@
 
   <div class="w-full h-px bg-slate-200/60"></div>
 
+  <!-- Onboarding Checklist — affiché si wizard non complété ou steps incomplets -->
+  @if (!onboardingService.dismissed() && !onboardingService.isFullyActivated()) {
+    <app-onboarding-checklist />
+  }
+
   <!-- KPI Cards -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <!-- Tickets Ouverts -->

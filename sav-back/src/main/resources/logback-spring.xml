@@ -148,7 +148,8 @@
       <appender-ref ref="FILE_ERROR"/>
     </logger>
 
-    <root level="WARN">
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
       <appender-ref ref="ASYNC_FILE"/>
       <appender-ref ref="FILE_ERROR"/>
     </root>

@@ -6,47 +6,76 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
   standalone: true,
   imports: [FadeInDirective],
   template: `
-    <section class="section-padding bg-white">
+    <section class="section-padding" style="background: var(--color-surface);">
       <div class="container-max">
-        <div appFadeIn
-             class="relative overflow-hidden rounded-3xl gradient-primary p-12 sm:p-16 text-center shadow-2xl">
+        <div appFadeIn [fadeInDelay]="0"
+             class="relative overflow-hidden rounded-3xl p-12 sm:p-16 text-center"
+             style="background: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #22D3EE 100%);">
 
-          <!-- Background decoration -->
+          <!-- Background decorations -->
           <div class="absolute inset-0 pointer-events-none overflow-hidden">
-            <div class="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+            <div class="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-20"
+                 style="background: white;"></div>
+            <div class="absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-3xl opacity-15"
+                 style="background: white;"></div>
+            <!-- Grid overlay -->
+            <svg class="absolute inset-0 w-full h-full opacity-5" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="ctaGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#ctaGrid)" />
+            </svg>
           </div>
 
-          <div class="relative z-10">
-            <span class="inline-flex items-center gap-2 bg-white/20 text-white text-sm font-medium px-4 py-1.5 rounded-full mb-6">
+          <div class="relative z-10 max-w-2xl mx-auto">
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-8"
+                  style="background: rgba(255,255,255,0.2); color: white;">
               <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-              Démo gratuite disponible
+              Démo gratuite — Réponse en 24h
             </span>
 
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-              Prêt à améliorer votre SAV ?
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-5">
+              Prêt à moderniser<br/>votre SAV ?
             </h2>
-            <p class="text-blue-100 text-lg sm:text-xl mb-10 max-w-2xl mx-auto">
-              Rejoignez plus de 500 entreprises qui ont transformé leur service après-vente avec notre plateforme.
+            <p class="text-lg mb-10" style="color: rgba(255,255,255,0.8);">
+              Rejoignez les entreprises qui ont choisi de passer<br/>
+              d'un SAV subi à un SAV maîtrisé.
             </p>
 
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <!-- Inline CTA -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <a href="#contact"
-                 class="inline-flex items-center justify-center gap-2 px-10 py-4 bg-white text-primary-600 font-bold rounded-xl hover:bg-slate-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-base">
+                 class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all duration-200 hover:-translate-y-1"
+                 style="background: white; color: #4F46E5; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
                 Demander une démo gratuite
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </a>
               <a href="http://localhost:4200"
-                 class="inline-flex items-center justify-center gap-2 px-10 py-4 border-2 border-white/40 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-200 text-base">
+                 class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-base transition-all duration-200"
+                 style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);">
                 Se connecter
               </a>
             </div>
 
-            <p class="text-blue-200 text-sm mt-6">
-              Aucune carte bancaire requise · Démo personnalisée · Mise en place en 24h
-            </p>
+            <!-- Reassurance -->
+            <div class="flex flex-wrap items-center justify-center gap-6 text-sm" style="color: rgba(255,255,255,0.75);">
+              <span class="flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                Réponse en moins de 24h
+              </span>
+              <span class="flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                Démo personnalisée
+              </span>
+              <span class="flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                Aucune carte bancaire
+              </span>
+            </div>
           </div>
         </div>
       </div>

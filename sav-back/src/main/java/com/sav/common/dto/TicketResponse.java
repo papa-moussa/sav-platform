@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -43,4 +44,6 @@ public class TicketResponse {
     private BlockingReason blockingReason;
     private String blockingObservation;
     private ResultatIntervention result;
+    private LocalDateTime dueDate;
+    private BigDecimal quoteAmount;
 }

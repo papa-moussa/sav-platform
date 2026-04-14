@@ -1,0 +1,14 @@
+node_modules/
+sav-landing/node_modules/
+sav-admin/node_modules/
+sav-front/node_modules/
+.git/
+.gitignore
+logs/
+sav-ui/
+*.log
+.env
+.env.local
+android/
+.nx/
+.angular/
