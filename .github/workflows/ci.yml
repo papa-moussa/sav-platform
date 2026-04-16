@@ -7,7 +7,7 @@ on:
       - 'hotfix/**'
   pull_request:
     branches:
-      - main
+      - master
 
 concurrency:
   group: ci-${{ github.ref }}
