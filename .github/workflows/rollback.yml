@@ -1,0 +1,58 @@
+name: Rollback Manuel
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version vers laquelle revenir (ex: v38, v37...)'
+        required: true
+
+jobs:
+  rollback:
+    name: Rollback production vers ${{ inputs.version }}
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Rollback via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            VERSION="${{ inputs.version }}"
+            echo "==> ROLLBACK production vers $VERSION"
+            cd /opt/sav-production
+
+            echo "IMAGE_TAG=$VERSION" > .env.deploy
+
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --remove-orphans
+
+            echo "==> Rollback terminé: $VERSION"
+
+      - name: Vérification après rollback
+        run: |
+          sleep 30
+          STATUS=$(curl -sf https://sama-sav.com/actuator/health -o /dev/null -w "%{http_code}" || echo "000")
+          echo "Health check: $STATUS"
+          [ "$STATUS" == "200" ] && echo "Rollback OK" || (echo "Rollback KO !" && exit 1)
+
+      - name: Email rollback
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: contact@sama-sav.com
+          from: SAV CI/CD <${{ secrets.MAIL_USERNAME }}>
+          subject: "${{ job.status == 'success' && '⏪ Rollback' || '❌ Rollback échoué'}} vers ${{ inputs.version }}"
+          body: |
+            Rollback manuel vers la version ${{ inputs.version }}.
+            Statut : ${{ job.status }}
+            Déclenché par : ${{ github.actor }}
+            Logs : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}

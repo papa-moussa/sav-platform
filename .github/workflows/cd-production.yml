@@ -1,0 +1,297 @@
+name: CD — Deploy Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version à déployer (ex: v42) — laisse vide pour la version courante'
+        required: false
+
+env:
+  REGISTRY: docker.io
+  DOCKERHUB_USER: mikeysav
+  # Tag = numéro de run incrémental (v1, v2, v3...) — simple et traçable
+  VERSION: ${{ github.event.inputs.version || format('v{0}', github.run_number) }}
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 1 — Build backend (Maven dans Docker via BuildKit)
+  # ─────────────────────────────────────────────────────────────────
+  build-backend:
+    name: Build & Push — Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push sav-backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./sav-back
+          file: ./sav-back/Dockerfile
+          push: true
+          tags: |
+            mikeysav/sav-backend:${{ env.VERSION }}
+            mikeysav/sav-backend:latest
+          # Cache Maven layers entre les runs (économise 2-3min par build)
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
+
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 2 — Build frontends (NX build → Docker copy dist/)
+  # ─────────────────────────────────────────────────────────────────
+  build-frontends:
+    name: Build & Push — Frontends
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Restore NX cache
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: nx-prod-${{ runner.os }}-${{ hashFiles('nx.json', 'package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            nx-prod-${{ runner.os }}-${{ hashFiles('nx.json', 'package-lock.json') }}-
+
+      # Compile les 3 frontends en parallèle
+      - name: Build all frontends
+        run: npx nx run-many -t build --projects=sav-front,sav-admin,sav-landing --parallel=3 --configuration=production
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push sav-front
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.front
+          push: true
+          tags: |
+            mikeysav/sav-front:${{ env.VERSION }}
+            mikeysav/sav-front:latest
+          cache-from: type=gha,scope=front
+          cache-to: type=gha,scope=front,mode=max
+
+      - name: Build & Push sav-admin
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.admin
+          push: true
+          tags: |
+            mikeysav/sav-admin:${{ env.VERSION }}
+            mikeysav/sav-admin:latest
+          cache-from: type=gha,scope=admin
+          cache-to: type=gha,scope=admin,mode=max
+
+      - name: Build & Push sav-landing
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.landing
+          push: true
+          tags: |
+            mikeysav/sav-landing:${{ env.VERSION }}
+            mikeysav/sav-landing:latest
+          cache-from: type=gha,scope=landing
+          cache-to: type=gha,scope=landing,mode=max
+
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 3 — Build Nginx
+  # ─────────────────────────────────────────────────────────────────
+  build-nginx:
+    name: Build & Push — Nginx
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push sav-nginx
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nginx
+          file: ./nginx/Dockerfile
+          push: true
+          tags: |
+            mikeysav/sav-nginx:${{ env.VERSION }}
+            mikeysav/sav-nginx:latest
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,scope=nginx,mode=max
+
+  # ─────────────────────────────────────────────────────────────────
+  # JOB 4 — Déploiement sur VPS Production
+  # ─────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontends, build-nginx]
+    environment:
+      name: production
+      url: https://sama-sav.com
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            DEPLOY_DIR="/opt/sav-production"
+            VERSION="${{ env.VERSION }}"
+
+            echo "==> Déploiement version: $VERSION"
+            cd $DEPLOY_DIR
+
+            # Sauvegarde de la version actuelle pour rollback
+            cp .env.deploy .env.deploy.bak 2>/dev/null || true
+
+            # Backup base de données avant déploiement
+            echo "==> Backup PostgreSQL..."
+            docker exec sav_postgres pg_dump -U $(grep DB_USER .env | cut -d= -f2) sav_db \
+              > backups/sav_db_$(date +%Y%m%d_%H%M%S)_pre_${VERSION}.sql
+            ls -t backups/*.sql | tail -n +11 | xargs -r rm -f
+
+            # Mise à jour du tag de version
+            echo "IMAGE_TAG=$VERSION" > .env.deploy
+
+            # Pull des nouvelles images depuis Docker Hub
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+
+            # Déploiement : backend en premier, puis frontends
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --remove-orphans
+
+            echo "==> Déploiement terminé: $VERSION"
+
+      # Health check 60s après le déploiement
+      - name: Health check
+        run: |
+          echo "Attente démarrage (60s)..."
+          sleep 60
+
+          API=$(curl -sf https://sama-sav.com/actuator/health -o /dev/null -w "%{http_code}" || echo "000")
+          APP=$(curl -sf https://app.sama-sav.com -o /dev/null -w "%{http_code}" || echo "000")
+          LANDING=$(curl -sf https://sama-sav.com -o /dev/null -w "%{http_code}" || echo "000")
+
+          echo "API: $API | App: $APP | Landing: $LANDING"
+
+          if [[ "$API" != "200" || "$APP" != "200" || "$LANDING" != "200" ]]; then
+            echo "Health check échoué — rollback automatique..."
+            exit 1
+          fi
+          echo "Tous les services sont UP"
+
+      # Rollback automatique si health check échoue
+      - name: Rollback automatique
+        if: failure()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/sav-production
+            if [ -f .env.deploy.bak ]; then
+              echo "==> ROLLBACK vers version précédente..."
+              cp .env.deploy.bak .env.deploy
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+              docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --remove-orphans
+              echo "==> Rollback terminé"
+            else
+              echo "Pas de version précédente trouvée"
+            fi
+
+      # Notification email — succès
+      - name: Email succès
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: contact@sama-sav.com
+          from: SAV CI/CD <${{ secrets.MAIL_USERNAME }}>
+          subject: "✅ Déploiement ${{ env.VERSION }} réussi — sama-sav.com"
+          body: |
+            Le déploiement de la version ${{ env.VERSION }} s'est terminé avec succès.
+
+            Commit : ${{ github.sha }}
+            Auteur : ${{ github.actor }}
+            Lien   : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            https://sama-sav.com est opérationnel.
+
+      # Notification email — échec
+      - name: Email échec
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          to: contact@sama-sav.com
+          from: SAV CI/CD <${{ secrets.MAIL_USERNAME }}>
+          subject: "❌ Déploiement ${{ env.VERSION }} échoué — rollback effectué"
+          body: |
+            Le déploiement de la version ${{ env.VERSION }} a échoué.
+            Un rollback automatique a été déclenché.
+
+            Commit : ${{ github.sha }}
+            Auteur : ${{ github.actor }}
+            Logs   : https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Vérifie les logs pour identifier le problème.
+
+      # Création d'un tag Git sur succès
+      - name: Tag Git
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ env.VERSION }}',
+              sha: context.sha
+            })

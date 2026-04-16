@@ -1,0 +1,64 @@
+name: Docker Build & Push
+description: Build une image Docker et la pousse sur Docker Hub avec versioning sémantique
+
+inputs:
+  image-name:
+    description: Nom de l'image (ex: sav-backend)
+    required: true
+  dockerfile:
+    description: Chemin vers le Dockerfile
+    required: true
+  context:
+    description: Contexte de build Docker
+    required: true
+    default: '.'
+  dockerhub-username:
+    description: Username Docker Hub
+    required: true
+  dockerhub-token:
+    description: Token Docker Hub
+    required: true
+  version:
+    description: Version sémantique de l'image
+    required: true
+
+outputs:
+  image-tag:
+    description: Tag complet de l'image poussée
+    value: ${{ steps.meta.outputs.tags }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ inputs.dockerhub-username }}
+        password: ${{ inputs.dockerhub-token }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ inputs.dockerhub-username }}/${{ inputs.image-name }}
+        tags: |
+          type=raw,value=${{ inputs.version }}
+          type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+          type=sha,prefix=sha-,format=short
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ inputs.context }}
+        file: ${{ inputs.dockerfile }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha                      # Cache GitHub Actions (layer caching)
+        cache-to: type=gha,mode=max
+        build-args: |
+          BUILD_VERSION=${{ inputs.version }}
+          BUILD_DATE=${{ github.event.repository.updated_at }}

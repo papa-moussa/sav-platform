@@ -1,0 +1,30 @@
+# Override production — remplace les builds locaux par les images Docker Hub
+# Usage sur le VPS :
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build
+#
+# IMAGE_TAG est défini dans .env.deploy (géré par le pipeline CI/CD)
+
+services:
+  backend:
+    build: ~
+    image: mikeysav/sav-backend:${IMAGE_TAG:-latest}
+
+  sav-front-app:
+    build: ~
+    image: mikeysav/sav-front:${IMAGE_TAG:-latest}
+
+  sav-admin-app:
+    build: ~
+    image: mikeysav/sav-admin:${IMAGE_TAG:-latest}
+
+  sav-landing-app:
+    build: ~
+    image: mikeysav/sav-landing:${IMAGE_TAG:-latest}
+
+  nginx:
+    build: ~
+    image: mikeysav/sav-nginx:${IMAGE_TAG:-latest}
+    env_file:
+      - .env
+      - .env.deploy

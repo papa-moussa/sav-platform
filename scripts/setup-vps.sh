@@ -1,0 +1,60 @@
+#!/bin/bash
+# Setup initial du VPS production — à exécuter UNE seule fois en tant que mikey (avec sudo)
+# Usage : bash setup-vps.sh
+set -e
+
+DEPLOY_DIR="/opt/sav-production"
+USER="mikey"
+
+echo "==> Création du répertoire de déploiement..."
+sudo mkdir -p $DEPLOY_DIR/backups
+sudo chown -R $USER:$USER $DEPLOY_DIR
+
+echo "==> Création du fichier .env.deploy initial..."
+echo "IMAGE_TAG=latest" > $DEPLOY_DIR/.env.deploy
+
+echo ""
+echo "==> ÉTAPES MANUELLES À FAIRE UNE SEULE FOIS :"
+echo ""
+echo "── 1. Copier les fichiers Docker Compose sur le VPS ──"
+echo "   Depuis ton PC local :"
+echo "   scp docker-compose.yml docker-compose.prod.yml mikey@87.106.171.35:/opt/sav-production/"
+echo ""
+echo "── 2. Créer le fichier .env dans /opt/sav-production/ ──"
+echo "   cat > /opt/sav-production/.env << 'EOF'"
+echo "   DB_URL=jdbc:postgresql://postgres:5432/sav_db"
+echo "   DB_USER=sav_user"
+echo "   DB_PASSWORD=<MOT_DE_PASSE_FORT>"
+echo "   JWT_SECRET=<GENERER_AVEC: openssl rand -hex 32>"
+echo "   SPRING_PROFILES_ACTIVE=prod"
+echo "   DDL_AUTO=update"
+echo "   MAIL_USERNAME=sn.dev.senior@gmail.com"
+echo "   MAIL_PASSWORD=<APP_PASSWORD_GMAIL>"
+echo "   MAIL_FROM=sn.dev.senior@gmail.com"
+echo "   TWILIO_ACCOUNT_SID=<SID>"
+echo "   TWILIO_AUTH_TOKEN=<TOKEN>"
+echo "   TWILIO_FROM_PHONE=<PHONE>"
+echo "   TWILIO_WHATSAPP_NUMBER=whatsapp:<NUMBER>"
+echo "   FRONTEND_URL=https://app.sama-sav.com"
+echo "   EOF"
+echo ""
+echo "── 3. Générer la clé SSH GitHub Actions ──"
+echo "   Depuis ton PC local :"
+echo "   ssh-keygen -t ed25519 -C 'github-actions-sav' -f ~/.ssh/github_actions_sav"
+echo "   # Copier la clé publique sur le VPS :"
+echo "   ssh-copy-id -i ~/.ssh/github_actions_sav.pub mikey@87.106.171.35"
+echo "   # Copier la clé PRIVÉE dans GitHub Secrets :"
+echo "   cat ~/.ssh/github_actions_sav  # → coller dans VPS_SSH_KEY"
+echo ""
+echo "── 4. Configurer les GitHub Secrets ──"
+echo "   Aller sur : github.com/<TON_REPO>/settings/secrets/actions"
+echo "   Ajouter :"
+echo "     VPS_HOST          = 87.106.171.35"
+echo "     VPS_USER          = mikey"
+echo "     VPS_SSH_KEY        = <clé privée SSH générée ci-dessus>"
+echo "     DOCKERHUB_USERNAME = mikeysav"
+echo "     DOCKERHUB_TOKEN    = <token Docker Hub>"
+echo "     MAIL_USERNAME      = sn.dev.senior@gmail.com"
+echo "     MAIL_PASSWORD      = <app password Gmail>"
+echo ""
+echo "==> Setup terminé"

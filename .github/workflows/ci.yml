@@ -1,0 +1,97 @@
+name: CI — Build & Test
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'hotfix/**'
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────
+  # 1. Build & Test — Backend Spring Boot
+  # ─────────────────────────────────────────
+  backend-ci:
+    name: Backend — Build & Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: sav_test
+          POSTGRES_USER: sav_user
+          POSTGRES_PASSWORD: sav_pass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build & Run tests
+        working-directory: sav-back
+        run: mvn -B verify --no-transfer-progress
+        env:
+          SPRING_PROFILES_ACTIVE: test
+          DB_URL: jdbc:postgresql://localhost:5432/sav_test
+          DB_USER: sav_user
+          DB_PASSWORD: sav_pass
+          JWT_SECRET: ci-test-secret-key-minimum-32-characters
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: sav-back/target/surefire-reports/
+
+  # ─────────────────────────────────────────
+  # 2. Lint & Build — Frontends Angular
+  # ─────────────────────────────────────────
+  frontend-ci:
+    name: Frontend — Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Restore NX cache
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ hashFiles('nx.json', 'package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            nx-${{ runner.os }}-${{ hashFiles('nx.json', 'package-lock.json') }}-
+
+      - name: Lint
+        run: npx nx run-many -t lint --projects=sav-front,sav-admin,sav-landing --parallel=3
+
+      - name: Build
+        run: npx nx run-many -t build --projects=sav-front,sav-admin,sav-landing --parallel=2 --configuration=production
