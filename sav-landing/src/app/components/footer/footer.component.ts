@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   lucideTwitter,
@@ -20,11 +21,10 @@ import {
           <!-- Brand -->
           <div class="md:col-span-2">
             <a href="#accueil" class="flex items-center gap-2.5 mb-5 w-fit">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center"
-                   style="background: linear-gradient(135deg, #6366F1 0%, #22D3EE 100%);">
-                <ng-icon name="lucideZap" size="16" class="text-white" />
+              <div class="w-8 h-8 flex items-center justify-center">
+                <img src="/assets/sav.png" alt="Sama SAV" class="w-full h-full object-contain" />
               </div>
-              <span class="font-bold text-white">SAV Platform</span>
+              <span class="font-bold" style="color: var(--color-text);">Sama SAV</span>
             </a>
             <p class="text-sm leading-relaxed mb-6 max-w-xs" style="color: var(--color-muted);">
               La plateforme SaaS qui transforme votre Service Après-Vente en avantage concurrentiel.
@@ -34,7 +34,7 @@ import {
               @for (social of socials; track social.label) {
                 <a [href]="social.href"
                    class="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200"
-                   style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);"
+                   style="background: #F8FAFF; border: 1px solid var(--color-border);"
                    [attr.aria-label]="social.label">
                   <ng-icon [name]="social.icon" size="16" style="color: var(--color-muted);" />
                 </a>
@@ -89,7 +89,7 @@ import {
       <div style="border-top: 1px solid var(--color-border);">
         <div class="container-max px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p class="text-sm" style="color: var(--color-muted);">
-            © {{ currentYear }} SAV Platform. Tous droits réservés.
+            © {{ currentYear }} Sama SAV. Tous droits réservés.
           </p>
           <div class="flex items-center gap-6">
             <a href="#" class="text-xs transition-colors" style="color: var(--color-muted);"
@@ -116,6 +116,7 @@ import {
 })
 export class FooterComponent {
   currentYear = new Date().getFullYear();
+  appUrl = environment.appUrl;
 
   socials = [
     { icon: 'lucideLinkedin', label: 'LinkedIn', href: '#' },
@@ -135,6 +136,6 @@ export class FooterComponent {
     { label: 'Contact', href: '#contact' },
     { label: 'Support', href: '#contact' },
     { label: 'Documentation', href: '#' },
-    { label: 'Se connecter', href: 'http://localhost:4200' },
+    { label: 'Se connecter', href: this.appUrl },
   ];
 }

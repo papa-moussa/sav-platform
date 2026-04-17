@@ -136,14 +136,16 @@
     <!-- HikariCP : warn uniquement -->
     <logger name="com.zaxxer.hikari"                    level="WARN"/>
 
-    <!-- Métier SAV : INFO en prod -->
+    <!-- Métier SAV : INFO en prod + console pour Portainer/Docker -->
     <logger name="com.sav"                              level="INFO" additivity="false">
+      <appender-ref ref="CONSOLE"/>
       <appender-ref ref="ASYNC_FILE"/>
       <appender-ref ref="FILE_ERROR"/>
     </logger>
 
-    <!-- Feedback / OTP : INFO (pas les traces) -->
+    <!-- Feedback / OTP : toujours visible en console (debug SMS/OTP) -->
     <logger name="com.sav.feedback"                     level="INFO" additivity="false">
+      <appender-ref ref="CONSOLE"/>
       <appender-ref ref="ASYNC_FILE"/>
       <appender-ref ref="FILE_ERROR"/>
     </logger>

@@ -1,12 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { FadeInDirective } from '../../shared/directives/fade-in.directive';
+import { ContactService } from '../../services/contact.service';
 
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FadeInDirective],
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule, FadeInDirective],
   template: `
     <section id="contact" class="section-padding" style="background: var(--color-bg);">
       <div class="container-max">
@@ -39,9 +41,9 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
               }
             </div>
 
-            <div class="rounded-xl p-5" style="background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);">
-              <p class="text-sm font-semibold mb-1" style="color: #A5B4FC;">
-                📧 contact&#64;sav-platform.fr
+            <div class="rounded-xl p-5" style="background: #EFF6FF; border: 1px solid #BFDBFE;">
+              <p class="text-sm font-semibold mb-1" style="color: var(--color-primary);">
+                📧 contact&#64;sama-sav.com
               </p>
               <p class="text-xs" style="color: var(--color-muted);">Réponse sous 24h ouvrées garantie</p>
             </div>
@@ -53,15 +55,21 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
               <form [formGroup]="contactForm" (ngSubmit)="onSubmit()"
                     class="card-glass p-8 space-y-5">
 
+                @if (errorMessage()) {
+                  <div class="rounded-lg px-4 py-3 text-sm" style="background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626;">
+                    {{ errorMessage() }}
+                  </div>
+                }
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style="color: var(--color-muted);">
                       Nom complet *
                     </label>
                     <input formControlName="name" type="text" placeholder="Jean Dupont"
-                           class="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all duration-200"
-                           style="background: rgba(255,255,255,0.04); border: 1px solid; color: var(--color-text);"
-                           [style.border-color]="isInvalid('name') ? '#EF4444' : 'rgba(255,255,255,0.08)'" />
+                           class="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all duration-200 form-input-light"
+                           style="background: #FFFFFF; border: 1px solid; color: var(--color-text);"
+                           [style.border-color]="isInvalid('name') ? '#EF4444' : 'var(--color-border)'" />
                     @if (isInvalid('name')) {
                       <p class="text-xs mt-1" style="color: #EF4444;">Nom requis</p>
                     }
@@ -71,8 +79,8 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
                       Entreprise
                     </label>
                     <input formControlName="company" type="text" placeholder="Nom de votre société"
-                           class="w-full px-4 py-3 rounded-lg text-sm outline-none"
-                           style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--color-text);" />
+                           class="w-full px-4 py-3 rounded-lg text-sm outline-none form-input-light"
+                           style="background: #FFFFFF; border: 1px solid var(--color-border); color: var(--color-text);" />
                   </div>
                 </div>
 
@@ -81,9 +89,9 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
                     Email professionnel *
                   </label>
                   <input formControlName="email" type="email" placeholder="jean&#64;entreprise.com"
-                         class="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all duration-200"
-                         style="background: rgba(255,255,255,0.04); border: 1px solid; color: var(--color-text);"
-                         [style.border-color]="isInvalid('email') ? '#EF4444' : 'rgba(255,255,255,0.08)'" />
+                         class="w-full px-4 py-3 rounded-lg text-sm outline-none transition-all duration-200 form-input-light"
+                         style="background: #FFFFFF; border: 1px solid; color: var(--color-text);"
+                         [style.border-color]="isInvalid('email') ? '#EF4444' : 'var(--color-border)'" />
                   @if (isInvalid('email')) {
                     <p class="text-xs mt-1" style="color: #EF4444;">Email valide requis</p>
                   }
@@ -95,9 +103,9 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
                   </label>
                   <textarea formControlName="message" rows="4"
                             placeholder="Décrivez votre activité et vos besoins SAV..."
-                            class="w-full px-4 py-3 rounded-lg text-sm outline-none resize-none transition-all duration-200"
-                            style="background: rgba(255,255,255,0.04); border: 1px solid; color: var(--color-text);"
-                            [style.border-color]="isInvalid('message') ? '#EF4444' : 'rgba(255,255,255,0.08)'"></textarea>
+                            class="w-full px-4 py-3 rounded-lg text-sm outline-none resize-none transition-all duration-200 form-input-light"
+                            style="background: #FFFFFF; border: 1px solid; color: var(--color-text);"
+                            [style.border-color]="isInvalid('message') ? '#EF4444' : 'var(--color-border)'"></textarea>
                   @if (isInvalid('message')) {
                     <p class="text-xs mt-1" style="color: #EF4444;">Message requis (min. 10 caractères)</p>
                   }
@@ -127,13 +135,13 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
             } @else {
               <div class="card-glass p-10 text-center flex flex-col items-center gap-5">
                 <div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
-                     style="background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3);">
+                     style="background: #ECFDF5; border: 1px solid #A7F3D0;">
                   ✅
                 </div>
                 <h3 class="text-xl font-bold" style="color: var(--color-text);">Demande envoyée !</h3>
                 <p style="color: var(--color-muted);">Notre équipe vous contactera dans les 24h pour organiser votre démo.</p>
                 <button (click)="resetForm()"
-                        class="text-sm font-medium mt-2" style="color: #A5B4FC;">
+                        class="text-sm font-medium mt-2" style="color: var(--color-primary);">
                   Envoyer un autre message
                 </button>
               </div>
@@ -149,6 +157,7 @@ export class ContactComponent {
   contactForm: FormGroup;
   isSubmitting = signal(false);
   submitted = signal(false);
+  errorMessage = signal<string | null>(null);
 
   demoIncludes = [
     { icon: '🎯', title: 'Démo personnalisée 30 min', desc: 'Adaptée à votre secteur et votre volume de tickets' },
@@ -156,7 +165,7 @@ export class ContactComponent {
     { icon: '🚀', title: 'Accès essai gratuit 14 jours', desc: 'Sans carte bancaire, sans engagement' },
   ];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private contactService: ContactService) {
     this.contactForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -175,15 +184,27 @@ export class ContactComponent {
       this.contactForm.markAllAsTouched();
       return;
     }
+
     this.isSubmitting.set(true);
-    setTimeout(() => {
-      this.isSubmitting.set(false);
-      this.submitted.set(true);
-    }, 1200);
+    this.errorMessage.set(null);
+
+    const { name, email, company, message } = this.contactForm.value;
+
+    this.contactService.send({ name, email, company, message }).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.submitted.set(true);
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        this.errorMessage.set('Une erreur est survenue. Veuillez réessayer ou contacter contact@sama-sav.com directement.');
+      }
+    });
   }
 
   resetForm(): void {
     this.contactForm.reset();
     this.submitted.set(false);
+    this.errorMessage.set(null);
   }
 }

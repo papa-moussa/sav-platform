@@ -29,7 +29,7 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
             <div class="card-pain p-7" appFadeIn [fadeInDelay]="pain.delay">
               <!-- Icon -->
               <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5"
-                   style="background: rgba(239,68,68,0.1);">
+                   style="background: #FEF2F2;">
                 {{ pain.icon }}
               </div>
               <!-- Title -->
@@ -39,7 +39,7 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
               <!-- Impact tag -->
               <div class="mt-5 flex items-center gap-2">
                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
-                      style="background: rgba(239,68,68,0.1); color: #EF4444;">
+                      style="background: #FEF2F2; color: #DC2626;">
                   ↑ {{ pain.impact }}
                 </span>
               </div>

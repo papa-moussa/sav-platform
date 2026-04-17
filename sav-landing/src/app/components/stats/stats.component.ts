@@ -14,14 +14,14 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
             Ils nous font confiance
           </h2>
           <p class="text-blue-100 text-lg max-w-xl mx-auto">
-            Des centaines d'entreprises utilisent SAV Platform pour optimiser leur service après-vente.
+            Des centaines d'entreprises utilisent Sama SAV pour optimiser leur service après-vente.
           </p>
         </div>
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
           @for (stat of stats; track stat.label; let i = $index) {
             <div appFadeIn [fadeInDelay]="i * 100"
-                 class="text-center p-6 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/15 transition-all duration-300">
+                 class="text-center p-6 bg-white/15 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
               <div class="text-4xl sm:text-5xl font-bold mb-2">{{ stat.value }}</div>
               <div class="text-blue-100 font-medium">{{ stat.label }}</div>
               <div class="text-blue-200 text-sm mt-1">{{ stat.sub }}</div>
@@ -33,7 +33,7 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
         <div appFadeIn class="mt-16 text-center">
           <blockquote class="max-w-3xl mx-auto">
             <p class="text-xl sm:text-2xl font-medium text-white leading-relaxed mb-6">
-              "SAV Platform a transformé notre façon de gérer les réparations. Nos clients sont ravis et nos techniciens sont plus efficaces que jamais."
+              "Sama SAV a transformé notre façon de gérer les réparations. Nos clients sont ravis et nos techniciens sont plus efficaces que jamais."
             </p>
             <footer class="flex items-center justify-center gap-4">
               <div class="w-12 h-12 gradient-primary rounded-full border-2 border-white/40 flex items-center justify-center">

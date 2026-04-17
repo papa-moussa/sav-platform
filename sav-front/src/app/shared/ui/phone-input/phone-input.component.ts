@@ -47,96 +47,116 @@ import { HlmLabelDirective } from '@spartan-ng/ui-label-helm';
     </div>
   `,
   styles: [`
-    :host ::ng-deep {
-      .iti {
-        width: 100% !important;
-        display: block !important;
-      }
-      
-      .iti input {
-        width: 100% !important;
-        height: 48px !important;
-        border-radius: 14px !important;
-        border: 1px solid #e2e8f0 !important;
-        font-size: 14px !important;
-        color: #1e293b !important;
-        transition: all 0.2s ease !important;
-        padding-right: 16px !important;
-        /* Padding left must account for the flag container width */
-        padding-left: 115px !important; 
-        background-color: #ffffff !important;
-      }
+    :host ::ng-deep .iti {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      width: 100% !important;
+      height: 48px !important;
+      padding: 4px !important;
+      gap: 8px !important;
+      background-color: #ffffff !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 14px !important;
+      transition: all 0.2s ease !important;
+    }
+    
+    :host ::ng-deep .iti:focus-within {
+      border-color: #94a3b8 !important;
+      box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.06) !important;
+    }
 
-      .iti input:focus {
-        border-color: #94a3b8 !important;
-        box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.06) !important;
-        outline: none !important;
-      }
+    :host ::ng-deep .iti__flag-container {
+      position: relative !important;
+      align-items: center !important;
+      height: 100% !important;
+      flex-shrink: 0 !important;
+      background-color: #f8fafc !important;
+      border-radius: 10px !important;
+      transition: all 0.2s ease !important;
+    }
 
-      /* Flag container styling */
-      .iti__flag-container {
-        padding: 0 !important;
-        border-radius: 14px 0 0 14px !important;
-      }
+    :host ::ng-deep .iti__flag-container:hover {
+      background-color: #f1f5f9 !important;
+    }
 
-      /* Flag styling */
-      .iti__flag {
-        border-radius: 3px !important;
-      }
+    :host ::ng-deep .iti__selected-flag {
+      background: transparent !important;
+      padding: 0 10px 0 12px !important;
+      height: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      border: none !important;
+      outline: none !important;
+    }
 
-      .iti__selected-flag {
-        background: transparent !important;
-        padding: 0 12px 0 16px !important;
-        height: 100% !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        /* create the vertical separator */
-        border-right: 1px solid #e2e8f0 !important;
-        width: 100px !important;
-      }
+    :host ::ng-deep .iti__flag {
+      border-radius: 3px !important;
+      min-width: 20px !important;
+      min-height: 14px !important;
+      flex-shrink: 0 !important; /* Empêche le drapeau d'être écrasé/rétréci par Flexbox */
+    }
+    
+    :host ::ng-deep .iti--separate-dial-code .iti__selected-dial-code {
+      margin-left: 2px !important;
+      font-weight: 600 !important;
+      color: #334155 !important;
+      font-size: 13px !important;
+    }
 
-      .iti--separate-dial-code .iti__selected-dial-code {
-        margin-left: 4px !important;
-        font-weight: 500 !important;
-        color: #1e293b !important;
-        font-size: 14px !important;
-      }
+    :host ::ng-deep .iti__arrow {
+      border-top-color: #64748b !important;
+      margin-left: 2px !important;
+    }
+    
+    :host ::ng-deep .iti__arrow--up {
+      border-bottom-color: #64748b !important;
+    }
 
-      /* Dropdown arrow styling */
-      .iti__arrow {
-        border-top-color: #64748b !important;
-        margin-left: 6px !important;
-      }
-      
-      .iti__arrow--up {
-        border-bottom-color: #64748b !important;
-      }
+    :host ::ng-deep .iti__tel-input {
+      flex: 1 !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      border: none !important;
+      background: transparent !important;
+      padding: 0 12px 0 4px !important; 
+      font-size: 14px !important;
+      color: #1e293b !important;
+      font-weight: 500 !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    :host ::ng-deep .iti__tel-input:focus {
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
 
-      /* Country list styling */
-      .iti__country-list {
-        border-radius: 16px !important;
-        border: 1px solid #f1f5f9 !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-        z-index: 1050 !important;
-        max-width: 320px !important;
-        margin-top: 8px !important;
-        padding: 8px 0 !important;
-      }
+    :host ::ng-deep .iti__country-list {
+      border-radius: 16px !important;
+      border: 1px solid #f1f5f9 !important;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+      z-index: 1050 !important;
+      max-width: 320px !important;
+      max-height: 250px !important;
+      overflow-y: auto !important;
+      margin-top: 8px !important;
+      padding: 8px 0 !important;
+    }
 
-      .iti__country {
-        padding: 10px 16px !important;
-        outline: none !important;
-      }
+    :host ::ng-deep .iti__country {
+      padding: 10px 16px !important;
+      outline: none !important;
+    }
 
-      .iti__country:hover {
-        background-color: #f8fafc !important;
-      }
-      
-      .iti__flag-container:hover .iti__selected-flag {
-        background: #f8fafc !important;
-        border-radius: 14px 0 0 14px !important;
-      }
+    :host ::ng-deep .iti__country:hover {
+      background-color: #f8fafc !important;
+    }
+    
+    :host ::ng-deep .iti__country.iti__highlight {
+      background-color: #f1f5f9 !important;
     }
   `]
 })

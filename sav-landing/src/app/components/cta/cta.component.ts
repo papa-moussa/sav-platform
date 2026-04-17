@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FadeInDirective } from '../../shared/directives/fade-in.directive';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-cta',
@@ -10,7 +11,7 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
       <div class="container-max">
         <div appFadeIn [fadeInDelay]="0"
              class="relative overflow-hidden rounded-3xl p-12 sm:p-16 text-center"
-             style="background: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #22D3EE 100%);">
+             style="background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);">
 
           <!-- Background decorations -->
           <div class="absolute inset-0 pointer-events-none overflow-hidden">
@@ -48,13 +49,13 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
             <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <a href="#contact"
                  class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all duration-200 hover:-translate-y-1"
-                 style="background: white; color: #4F46E5; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+                 style="background: white; color: #1D4ED8; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
                 Demander une démo gratuite
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </a>
-              <a href="http://localhost:4200"
+              <a [href]="appUrl"
                  class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-base transition-all duration-200"
                  style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3);">
                 Se connecter
@@ -82,4 +83,6 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
     </section>
   `,
 })
-export class CtaComponent {}
+export class CtaComponent {
+  appUrl = environment.appUrl;
+}

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">SAV Mobile</string>
-    <string name="title_activity_main">SAV Mobile</string>
+    <string name="app_name">Sama SAV</string>
+    <string name="title_activity_main">Sama SAV</string>
     <string name="package_name">com.sav.mobile</string>
     <string name="custom_url_scheme">com.sav.mobile</string>
 </resources>

@@ -2,6 +2,7 @@ import { Component, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { lucideMenu, lucideX, lucideZap } from '@ng-icons/lucide';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-header',
@@ -12,21 +13,20 @@ import { lucideMenu, lucideX, lucideZap } from '@ng-icons/lucide';
     <header
       class="sticky top-0 z-50 transition-all duration-300"
       [class.bg-transparent]="!isScrolled()"
-      [class.bg-gray-950\/90]="isScrolled()"
+      [class.bg-white\/95]="isScrolled()"
       [class.backdrop-blur-xl]="isScrolled()"
       [class.border-b]="isScrolled()"
-      [style.border-color]="isScrolled() ? 'rgba(31,41,55,0.8)' : 'transparent'"
+      [style.border-color]="isScrolled() ? 'rgba(226,232,240,1)' : 'transparent'"
     >
       <div class="container-max px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
 
           <!-- Logo -->
           <a href="#accueil" class="flex items-center gap-2.5 group">
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center"
-                 style="background: linear-gradient(135deg, #6366F1 0%, #22D3EE 100%);">
-              <ng-icon name="lucideZap" size="16" class="text-white" />
+            <div class="w-8 h-8 flex items-center justify-center">
+              <img src="/assets/sav.png" alt="Sama SAV" class="w-full h-full object-contain" />
             </div>
-            <span class="font-bold text-white text-sm tracking-tight">SAV Platform</span>
+            <span class="font-bold text-sm tracking-tight" style="color: var(--color-text);">Sama SAV</span>
           </a>
 
           <!-- Desktop Nav -->
@@ -63,7 +63,7 @@ import { lucideMenu, lucideX, lucideZap } from '@ng-icons/lucide';
 
           <!-- Desktop CTA -->
           <div class="hidden md:flex items-center gap-3">
-            <a href="http://localhost:4200" class="btn-ghost text-sm py-2 px-4">
+            <a [href]="appUrl" class="btn-ghost text-sm py-2 px-4">
               Se connecter
             </a>
             <a href="#contact" class="btn-primary text-sm py-2 px-4">
@@ -87,7 +87,7 @@ import { lucideMenu, lucideX, lucideZap } from '@ng-icons/lucide';
 
         <!-- Mobile menu -->
         @if (mobileMenuOpen()) {
-          <div class="md:hidden py-4 border-t animate-fade-in" style="border-color: var(--color-border);">
+          <div class="md:hidden py-4 border-t animate-fade-in" style="border-color: var(--color-border); background: white;">
             <nav class="flex flex-col gap-1">
               <a href="#fonctionnalites" (click)="closeMobileMenu()"
                  class="px-3 py-2.5 text-sm font-medium rounded-lg transition-colors"
@@ -110,7 +110,7 @@ import { lucideMenu, lucideX, lucideZap } from '@ng-icons/lucide';
                 Contact
               </a>
               <div class="pt-3 flex flex-col gap-2 mt-2" style="border-top: 1px solid var(--color-border);">
-                <a href="http://localhost:4200" class="btn-ghost text-sm text-center justify-center">
+                <a [href]="appUrl" class="btn-ghost text-sm text-center justify-center">
                   Se connecter
                 </a>
                 <a href="#contact" (click)="closeMobileMenu()" class="btn-primary text-sm justify-center">
@@ -127,6 +127,7 @@ import { lucideMenu, lucideX, lucideZap } from '@ng-icons/lucide';
 export class HeaderComponent {
   isScrolled = signal(false);
   mobileMenuOpen = signal(false);
+  appUrl = environment.appUrl;
 
   @HostListener('window:scroll')
   onScroll(): void {

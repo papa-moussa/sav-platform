@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: SAV Platform API
+  title: Sama SAV API
   description: API multi-tenant SaaS pour la gestion de service après-vente
   version: 1.0.0
 servers:

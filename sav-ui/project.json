@@ -23,6 +23,12 @@
       },
       "configurations": {
         "production": {
+          "fileReplacements": [
+            {
+              "replace": "sav-ui/src/environments/environment.ts",
+              "with": "sav-ui/src/environments/environment.prod.ts"
+            }
+          ],
           "budgets": [
             {
               "type": "initial",

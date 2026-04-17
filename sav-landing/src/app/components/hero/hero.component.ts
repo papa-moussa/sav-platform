@@ -6,14 +6,14 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
   standalone: true,
   imports: [FadeInDirective],
   template: `
-    <section id="accueil" class="relative overflow-hidden min-h-screen flex items-center gradient-hero-bg grid-bg">
+    <section id="accueil" class="relative overflow-hidden min-h-screen flex items-center gradient-hero-bg dot-grid-bg">
 
       <!-- Background blobs -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-32 left-1/4 w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
-             style="background: radial-gradient(circle, #6366F1 0%, transparent 70%)"></div>
-        <div class="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-3xl opacity-10"
-             style="background: radial-gradient(circle, #22D3EE 0%, transparent 70%)"></div>
+        <div class="absolute -top-32 left-1/4 w-[600px] h-[600px] rounded-full blur-3xl"
+             style="background: radial-gradient(circle, rgba(29,78,216,0.10) 0%, transparent 70%); opacity: 0.6;"></div>
+        <div class="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-3xl"
+             style="background: radial-gradient(circle, rgba(249,115,22,0.08) 0%, transparent 70%); opacity: 0.8;"></div>
       </div>
 
       <div class="container-max section-padding relative z-10 w-full pt-32 pb-24">
@@ -24,8 +24,8 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
 
             <!-- Badge -->
             <div class="badge-hero mb-8 w-fit">
-              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
-              Plateforme SAV nouvelle génération
+              <span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background: #1D4ED8;"></span>
+              Plateforme Sama SAV nouvelle génération
             </div>
 
             <!-- H1 -->
@@ -79,55 +79,59 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
           <div class="lg:col-span-2 hidden lg:block" appFadeIn [fadeInDelay]="150">
             <div class="relative">
 
-              <!-- Main card -->
-              <div class="card-glass p-5 shadow-2xl" style="box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);">
-                <!-- Window bar -->
-                <div class="flex items-center justify-between mb-5">
-                  <div class="flex items-center gap-2">
-                    <div class="flex gap-1.5">
-                      <div class="w-2.5 h-2.5 rounded-full" style="background:#EF4444"></div>
-                      <div class="w-2.5 h-2.5 rounded-full" style="background:#F59E0B"></div>
-                      <div class="w-2.5 h-2.5 rounded-full" style="background:#10B981"></div>
-                    </div>
+              <!-- Browser chrome frame -->
+              <div class="rounded-2xl overflow-hidden" style="background: #FFFFFF; border: 1px solid var(--color-border); box-shadow: 0 25px 60px rgba(15,23,42,0.12);">
+
+                <!-- Browser chrome bar -->
+                <div class="flex items-center gap-3 px-4 py-3" style="background: #F8FAFF; border-bottom: 1px solid var(--color-border);">
+                  <div class="flex gap-1.5">
+                    <div class="w-3 h-3 rounded-full" style="background:#EF4444"></div>
+                    <div class="w-3 h-3 rounded-full" style="background:#F59E0B"></div>
+                    <div class="w-3 h-3 rounded-full" style="background:#10B981"></div>
                   </div>
-                  <div class="text-xs font-mono px-2 py-0.5 rounded" style="background: rgba(255,255,255,0.05); color: var(--color-muted);">
-                    Tickets — Aujourd'hui
+                  <div class="flex-1 mx-2 px-3 py-1 rounded-md text-xs font-mono flex items-center gap-1.5"
+                       style="background: #FFFFFF; border: 1px solid var(--color-border); color: var(--color-subtle);">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    app.sama-sav.com/tickets
                   </div>
                 </div>
 
-                <!-- KPI row -->
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                  @for (kpi of kpis; track kpi.label) {
-                    <div class="rounded-xl p-3" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);">
-                      <p class="text-xs mb-1" style="color: var(--color-muted);">{{ kpi.label }}</p>
-                      <p class="text-lg font-bold" style="color: var(--color-text);">{{ kpi.value }}</p>
-                      <p class="text-xs mt-0.5" [style.color]="kpi.up ? '#10B981' : '#F59E0B'">{{ kpi.change }}</p>
-                    </div>
-                  }
-                </div>
-
-                <!-- Ticket list -->
-                <p class="text-xs font-medium mb-3" style="color: var(--color-muted);">Tickets actifs</p>
-                <div class="space-y-2">
-                  @for (ticket of tickets; track ticket.id) {
-                    <div class="flex items-center gap-3 rounded-lg px-3 py-2.5"
-                         style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04);">
-                      <div class="w-1.5 h-1.5 rounded-full flex-shrink-0" [style.background]="ticket.dot"></div>
-                      <div class="flex-1 min-w-0">
-                        <p class="text-xs font-medium truncate" style="color: var(--color-text);">{{ ticket.title }}</p>
-                        <p class="text-xs" style="color: var(--color-muted);">{{ ticket.ref }}</p>
+                <!-- App content -->
+                <div class="p-4" style="background: #F8FAFF;">
+                  <!-- KPI row -->
+                  <div class="grid grid-cols-2 gap-2.5 mb-3.5">
+                    @for (kpi of kpis; track kpi.label) {
+                      <div class="rounded-xl p-3" style="background: #FFFFFF; border: 1px solid var(--color-border);">
+                        <p class="text-xs mb-1" style="color: var(--color-muted);">{{ kpi.label }}</p>
+                        <p class="text-lg font-bold" style="color: var(--color-text); font-family: 'Bricolage Grotesque', sans-serif;">{{ kpi.value }}</p>
+                        <p class="text-xs mt-0.5" [style.color]="kpi.up ? '#10B981' : '#F59E0B'">{{ kpi.change }}</p>
                       </div>
-                      <span class="badge-status" [class]="ticket.badgeClass">{{ ticket.status }}</span>
-                    </div>
-                  }
+                    }
+                  </div>
+
+                  <!-- Ticket list -->
+                  <p class="text-xs font-semibold mb-2.5" style="color: var(--color-muted);">Tickets actifs</p>
+                  <div class="space-y-1.5">
+                    @for (ticket of tickets; track ticket.id) {
+                      <div class="flex items-center gap-3 rounded-xl px-3 py-2.5"
+                           style="background: #FFFFFF; border: 1px solid var(--color-border);">
+                        <div class="w-1.5 h-1.5 rounded-full flex-shrink-0" [style.background]="ticket.dot"></div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-xs font-medium truncate" style="color: var(--color-text);">{{ ticket.title }}</p>
+                          <p class="text-xs" style="color: var(--color-muted);">{{ ticket.ref }}</p>
+                        </div>
+                        <span class="badge-status" [class]="ticket.badgeClass">{{ ticket.status }}</span>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
 
               <!-- Floating — WhatsApp notification -->
-              <div class="absolute -top-5 -left-6 rounded-xl px-3.5 py-2.5 shadow-xl flex items-center gap-2.5"
-                   style="background: var(--color-surface); border: 1px solid rgba(255,255,255,0.08);">
+              <div class="absolute -top-4 -left-6 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
+                   style="background: #FFFFFF; border: 1px solid var(--color-border); box-shadow: 0 8px 24px rgba(0,0,0,0.10);">
                 <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                     style="background: rgba(37,211,102,0.15);">
+                     style="background: #ECFDF5;">
                   <span class="text-sm">💬</span>
                 </div>
                 <div>
@@ -137,8 +141,8 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
               </div>
 
               <!-- Floating — Feedback badge -->
-              <div class="absolute -bottom-5 -right-5 rounded-xl px-3.5 py-2.5 shadow-xl flex items-center gap-2.5"
-                   style="background: var(--color-surface); border: 1px solid rgba(255,255,255,0.08);">
+              <div class="absolute -bottom-4 -right-4 rounded-xl px-3.5 py-2.5 flex items-center gap-2.5"
+                   style="background: #FFFFFF; border: 1px solid var(--color-border); box-shadow: 0 8px 24px rgba(0,0,0,0.10);">
                 <span class="text-base">⭐</span>
                 <div>
                   <p class="text-xs font-semibold" style="color: var(--color-text);">Feedback reçu</p>
@@ -163,7 +167,7 @@ export class HeroComponent {
   ];
 
   tickets = [
-    { id: 1, title: 'Réfrigérateur Samsung — bruit anormal', ref: 'TKT-2026-00241', status: 'REÇU', dot: '#22D3EE', badgeClass: 'badge-recu' },
+    { id: 1, title: 'Réfrigérateur Samsung — bruit anormal', ref: 'TKT-2026-00241', status: 'REÇU', dot: '#1D4ED8', badgeClass: 'badge-recu' },
     { id: 2, title: 'Lave-linge Bosch — fuite eau', ref: 'TKT-2026-00238', status: 'DIAGNOSTIC', dot: '#F59E0B', badgeClass: 'badge-diagnostic' },
     { id: 3, title: 'Four Brandt — résistance HS', ref: 'TKT-2026-00235', status: 'RÉPARÉ', dot: '#10B981', badgeClass: 'badge-repare' },
   ];

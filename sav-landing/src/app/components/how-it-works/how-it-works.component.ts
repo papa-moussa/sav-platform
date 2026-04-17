@@ -43,7 +43,7 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
                     <div>
                       <h3 class="text-base font-bold mb-1.5" style="color: var(--color-text);">{{ step.title }}</h3>
                       <p class="text-sm leading-relaxed mb-3" style="color: var(--color-muted);">{{ step.description }}</p>
-                      <p class="text-xs font-medium" style="color: #A5B4FC;">→ {{ step.detail }}</p>
+                      <p class="text-xs font-medium" style="color: var(--color-primary);">→ {{ step.detail }}</p>
                     </div>
                   </div>
                 </div>

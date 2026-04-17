@@ -24,25 +24,25 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
           <!-- Technicien -->
           <div appFadeIn [fadeInDelay]="0"
                class="rounded-2xl p-8 relative overflow-hidden"
-               style="background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.2);">
+               style="background: #EFF6FF; border: 1px solid #BFDBFE;">
             <!-- Glow -->
-            <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-20"
-                 style="background: #6366F1;"></div>
+            <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl"
+                 style="background: #DBEAFE; opacity: 0.15;"></div>
 
             <div class="relative z-10">
               <!-- Avatar + tag -->
               <div class="flex items-center gap-3 mb-6">
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                     style="background: rgba(99,102,241,0.2);">🔧</div>
+                     style="background: #DBEAFE;">🔧</div>
                 <div>
                   <p class="font-bold" style="color: var(--color-text);">Le Technicien</p>
-                  <p class="text-xs" style="color: #A5B4FC;">Mobile-first · Rapide · Efficace</p>
+                  <p class="text-xs" style="color: var(--color-primary);">Mobile-first · Rapide · Efficace</p>
                 </div>
               </div>
 
               <!-- Quote -->
               <blockquote class="text-base italic leading-relaxed mb-8 pl-4"
-                          style="color: var(--color-muted); border-left: 2px solid rgba(99,102,241,0.5);">
+                          style="color: var(--color-muted); border-left: 2px solid rgba(29,78,216,0.4);">
                 "Je reçois ma liste d'interventions du jour. Je sais exactement quoi faire, dans quel ordre."
               </blockquote>
 
@@ -50,7 +50,7 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
               <ul class="space-y-3">
                 @for (item of techItems; track item) {
                   <li class="flex items-center gap-3 text-sm" style="color: var(--color-text);">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
                       <path d="M20 6L9 17l-5-5"/>
                     </svg>
                     {{ item }}
@@ -63,25 +63,25 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
           <!-- Client -->
           <div appFadeIn [fadeInDelay]="100"
                class="rounded-2xl p-8 relative overflow-hidden"
-               style="background: rgba(34,211,238,0.05); border: 1px solid rgba(34,211,238,0.2);">
+               style="background: #FFF7ED; border: 1px solid #FED7AA;">
             <!-- Glow -->
-            <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl opacity-10"
-                 style="background: #22D3EE;"></div>
+            <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full blur-3xl"
+                 style="background: rgba(249,115,22,0.08); opacity: 0.8;"></div>
 
             <div class="relative z-10">
               <!-- Avatar + tag -->
               <div class="flex items-center gap-3 mb-6">
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
-                     style="background: rgba(34,211,238,0.1);">📱</div>
+                     style="background: #FED7AA;">📱</div>
                 <div>
                   <p class="font-bold" style="color: var(--color-text);">Le Client</p>
-                  <p class="text-xs" style="color: #22D3EE;">Transparent · Rassurant · Sans friction</p>
+                  <p class="text-xs" style="color: var(--color-accent);">Transparent · Rassurant · Sans friction</p>
                 </div>
               </div>
 
               <!-- Quote -->
               <blockquote class="text-base italic leading-relaxed mb-8 pl-4"
-                          style="color: var(--color-muted); border-left: 2px solid rgba(34,211,238,0.4);">
+                          style="color: var(--color-muted); border-left: 2px solid rgba(249,115,22,0.4);">
                 "J'ai reçu un message WhatsApp pour chaque étape. J'ai suivi ma réparation sans appeler une seule fois."
               </blockquote>
 
@@ -89,7 +89,7 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
               <ul class="space-y-3">
                 @for (item of clientItems; track item) {
                   <li class="flex items-center gap-3 text-sm" style="color: var(--color-text);">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22D3EE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
                       <path d="M20 6L9 17l-5-5"/>
                     </svg>
                     {{ item }}

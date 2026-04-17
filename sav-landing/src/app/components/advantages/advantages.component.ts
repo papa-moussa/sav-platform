@@ -35,7 +35,7 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
             <div appFadeIn [fadeInDelay]="i * 100" class="card-glass p-7">
               <div class="flex items-start gap-4">
                 <div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
-                     style="background: rgba(99,102,241,0.12);">
+                     style="background: #EFF6FF;">
                   {{ arg.icon }}
                 </div>
                 <div>

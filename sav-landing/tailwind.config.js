@@ -6,7 +6,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+        sans:    ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['"Bricolage Grotesque"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         primary: {
@@ -33,6 +34,11 @@ module.exports = {
           800: '#3730a3',
           900: '#312e81',
         },
+      },
+      boxShadow: {
+        'card': '0 4px 24px rgba(0,0,0,0.06)',
+        'card-hover': '0 8px 32px rgba(0,0,0,0.10)',
+        'hero-mockup': '0 25px 60px rgba(15,23,42,0.12)',
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.6s ease-out forwards',

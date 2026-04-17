@@ -17,11 +17,12 @@ import {
 import { AuthService } from '../../../core/auth/auth.service';
 import { addIcons } from 'ionicons';
 import {
-  shieldCheckmarkOutline,
   mailOutline,
   lockClosedOutline,
   alertCircleOutline,
-  arrowForwardOutline
+  arrowForwardOutline,
+  eyeOutline,
+  eyeOffOutline,
 } from 'ionicons/icons';
 
 @Component({
@@ -46,16 +47,22 @@ export class LoginPage {
 
   constructor() {
     addIcons({
-      shieldCheckmarkOutline,
       mailOutline,
       lockClosedOutline,
       alertCircleOutline,
-      arrowForwardOutline
+      arrowForwardOutline,
+      eyeOutline,
+      eyeOffOutline,
     });
   }
 
-  loading = signal(false);
-  error   = signal<string | null>(null);
+  loading      = signal(false);
+  error        = signal<string | null>(null);
+  showPassword = signal(false);
+
+  togglePassword(): void {
+    this.showPassword.update(v => !v);
+  }
 
   form = this.fb.group({
     email:    ['', [Validators.required, Validators.email]],

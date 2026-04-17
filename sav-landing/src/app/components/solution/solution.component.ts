@@ -23,14 +23,14 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
 
           <!-- Description -->
           <p class="text-lg leading-relaxed mb-16" style="color: var(--color-muted);">
-            SAV Platform centralise la réception, le suivi, la communication et la clôture
+            Sama SAV centralise la réception, le suivi, la communication et la clôture
             de chaque ticket de réparation. Vos équipes gagnent en efficacité.
             Vos clients gagnent en confiance.
           </p>
 
           <!-- 3 pillars -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-px rounded-2xl overflow-hidden"
-               style="background: var(--color-border);">
+               style="background: var(--color-border); box-shadow: 0 4px 24px rgba(0,0,0,0.06);">
             @for (pillar of pillars; track pillar.icon) {
               <div class="p-8 flex flex-col items-center text-center" style="background: var(--color-surface);">
                 <div class="text-3xl mb-4">{{ pillar.icon }}</div>

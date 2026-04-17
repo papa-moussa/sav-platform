@@ -110,6 +110,10 @@ public class FeedbackService {
         String phone       = ticket.getClient().getTelephone();
         String maskedPhone = maskPhone(phone);
 
+        // Log OTP (visible en prod pour debug — à retirer une fois Twilio validé)
+        log.info(">>> [OTP DEBUG] Ticket={} | Téléphone={} | OTP={} | Expire dans {}min",
+                ticket.getNumero(), maskedPhone, otp, otpValidityMinutes);
+
         // Envoyer le SMS
         twilioService.sendOtp(phone, otp);
 

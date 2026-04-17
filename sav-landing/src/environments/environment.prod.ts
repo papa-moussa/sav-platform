@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.sama-sav.com/api',
+  appUrl: 'https://app.sama-sav.com'
 };

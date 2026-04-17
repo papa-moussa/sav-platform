@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
  *
  * <p>Flow complet :
  * <ol>
- *   <li>GET  /public/feedback?token=XYZ      → Valide le token QR, envoie un OTP par SMS, retourne le numéro masqué</li>
- *   <li>POST /public/feedback/verify-otp     → Vérifie l'OTP, retourne un accessToken + données du formulaire</li>
- *   <li>POST /public/feedback/submit         → Soumet le feedback (notes + commentaires) via l'accessToken</li>
+ *   <li>GET  /api/public/feedback?token=XYZ      → Valide le token QR, envoie un OTP par SMS, retourne le numéro masqué</li>
+ *   <li>POST /api/public/feedback/verify-otp     → Vérifie l'OTP, retourne un accessToken + données du formulaire</li>
+ *   <li>POST /api/public/feedback/submit         → Soumet le feedback (notes + commentaires) via l'accessToken</li>
  * </ol>
  */
 @RestController
-@RequestMapping("/public/feedback")
+@RequestMapping("/api/public/feedback")
 @RequiredArgsConstructor
 @Tag(name = "Feedback Client (Public — OTP SMS)")
 public class FeedbackController {

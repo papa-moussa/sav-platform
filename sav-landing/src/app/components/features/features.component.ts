@@ -35,8 +35,8 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
               <!-- Description -->
               <p class="text-sm leading-relaxed" style="color: var(--color-muted);">{{ feature.description }}</p>
               <!-- Benefit tag -->
-              <div class="mt-5 pt-5" style="border-top: 1px solid rgba(255,255,255,0.05);">
-                <span class="text-xs font-semibold" style="color: #A5B4FC;">→ {{ feature.benefit }}</span>
+              <div class="mt-5 pt-5" style="border-top: 1px solid var(--color-border);">
+                <span class="text-xs font-semibold" style="color: var(--color-primary);">→ {{ feature.benefit }}</span>
               </div>
             </div>
           }
@@ -53,42 +53,42 @@ export class FeaturesComponent {
       title: 'Tickets structurés, zéro oubli',
       description: 'De la réception REÇU à la CLÔTURE, chaque ticket suit un workflow guidé. Numérotation automatique, SLA calculé, historique complet.',
       benefit: 'Aucun ticket ne tombe dans l\'oubli',
-      iconBg: 'rgba(99,102,241,0.12)',
+      iconBg: '#EFF6FF',
     },
     {
       icon: '🔧',
       title: 'Techniciens pilotés, pas noyés',
       description: 'Assignation en 1 clic, diagnostic détaillé, suivi du temps passé. Vos techniciens savent exactement quoi faire, quand et comment.',
       benefit: 'Productivité technicien +35%',
-      iconBg: 'rgba(16,185,129,0.12)',
+      iconBg: '#ECFDF5',
     },
     {
       icon: '📲',
       title: 'Clients notifiés automatiquement',
       description: 'WhatsApp automatique à chaque changement de statut. "Votre appareil est prêt" — sans que votre équipe lève le petit doigt.',
       benefit: '-40% d\'appels entrants inutiles',
-      iconBg: 'rgba(34,211,238,0.12)',
+      iconBg: '#F0F9FF',
     },
     {
       icon: '📦',
       title: 'Stock géré, ruptures évitées',
       description: 'Seuils d\'alerte automatiques, mouvements tracés, pièces reliées aux interventions. Vous savez toujours ce qu\'il vous reste.',
       benefit: 'Fini les interventions bloquées',
-      iconBg: 'rgba(245,158,11,0.12)',
+      iconBg: '#FFFBEB',
     },
     {
       icon: '📊',
       title: 'Devis accepté en 1 clic',
       description: 'Envoyez un devis, le client l\'approuve via son lien QR sécurisé. Aucun appel inutile. Transaction fluide et traçable.',
       benefit: 'Validation client 3x plus rapide',
-      iconBg: 'rgba(99,102,241,0.12)',
+      iconBg: '#EFF6FF',
     },
     {
       icon: '⭐',
       title: 'Satisfaction mesurée, fidélité construite',
       description: 'QR code de feedback à chaque clôture. Note technicien, note entreprise. Identifiez les axes d\'amélioration. Construisez votre réputation.',
       benefit: 'Données actionnables en temps réel',
-      iconBg: 'rgba(245,158,11,0.12)',
+      iconBg: '#FFFBEB',
     },
   ];
 }

@@ -12,8 +12,8 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class FeedbackService {
   private http = inject(HttpClient);
-  /** Base URL publique — pas de /api puisque ces endpoints ne requièrent pas d'auth */
-  private base = `${environment.apiUrl.replace('/api', '')}/public/feedback`;
+  /** Base URL publique — ces endpoints sont sous /api/public (pas d'auth requise) */
+  private base = `${environment.apiUrl}/public/feedback`;
 
   /**
    * Étape 1 — Valide le token QR et envoie l'OTP par SMS.
