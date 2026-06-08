@@ -27,16 +27,17 @@ jobs:
             cd /opt/sav-production
 
             echo "IMAGE_TAG=$VERSION" > .env.deploy
+            export IMAGE_TAG=$VERSION
 
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build --remove-orphans
+            docker compose -f docker-compose.backend.yml pull backend
+            docker compose -f docker-compose.backend.yml up -d --remove-orphans
 
             echo "==> Rollback terminé: $VERSION"
 
       - name: Vérification après rollback
         run: |
           sleep 30
-          STATUS=$(curl -sf https://sama-sav.com/actuator/health -o /dev/null -w "%{http_code}" || echo "000")
+          STATUS=$(curl -sf https://82.165.31.102.sslip.io/actuator/health -o /dev/null -w "%{http_code}" || echo "000")
           echo "Health check: $STATUS"
           [ "$STATUS" == "200" ] && echo "Rollback OK" || (echo "Rollback KO !" && exit 1)
 
@@ -48,7 +49,7 @@ jobs:
           server_port: 587
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          to: contact@sama-sav.com
+          to: pamodiallo@gmail.com
           from: SAV CI/CD <${{ secrets.MAIL_USERNAME }}>
           subject: "${{ job.status == 'success' && '⏪ Rollback' || '❌ Rollback échoué'}} vers ${{ inputs.version }}"
           body: |

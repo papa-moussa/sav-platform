@@ -1,0 +1,75 @@
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: sav_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sav_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - sav_pgdata:/var/lib/postgresql/data
+    networks:
+      - sav-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-sav_user} -d sav_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./sav-back
+      dockerfile: Dockerfile
+    image: mikeysav/sav-backend:${IMAGE_TAG:-latest}
+    container_name: sav_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - sav-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.api
+    container_name: sav_nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot_certs:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    networks:
+      - sav-network
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: sav_certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --quiet; sleep 12h & wait $${!}; done"
+
+networks:
+  sav-network:
+    driver: bridge
+
+volumes:
+  sav_pgdata:
+  certbot_certs:
+  certbot_www:
