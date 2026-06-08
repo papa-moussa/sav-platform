@@ -6,43 +6,47 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
   standalone: true,
   imports: [FadeInDirective],
   template: `
-    <section id="avantages" class="section-padding" style="background: var(--color-surface);">
-      <div class="container-max">
+    <section id="resultats" class="section" style="background: var(--surface);">
+      <div class="wrap">
 
         <!-- Header -->
-        <div class="text-center max-w-2xl mx-auto mb-16" appFadeIn [fadeInDelay]="0">
-          <div class="section-badge w-fit mx-auto">Résultats</div>
-          <h2 class="text-3xl sm:text-4xl font-bold leading-tight mb-5" style="color: var(--color-text);">
-            Des résultats mesurables<br/>
-            <span class="gradient-text">dès le premier mois</span>
+        <div class="max-w-[720px]" appFadeIn [fadeInDelay]="0">
+          <span class="eyebrow">Résultats</span>
+          <h2 class="text-[2rem] sm:text-[2.5rem] leading-[1.08] mb-4">
+            Des résultats mesurables,<br/>
+            <span style="color: var(--text-muted);">dès le premier mois.</span>
           </h2>
+          <p class="text-[16.5px] leading-relaxed max-w-[580px]" style="color: var(--text-mid);">
+            Les équipes qui utilisent Sama SAV constatent des gains concrets sur les délais, les coûts et la satisfaction.
+          </p>
         </div>
 
-        <!-- KPI metrics — big numbers -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-16" appFadeIn [fadeInDelay]="50">
-          @for (kpi of kpis; track kpi.metric) {
-            <div class="card-glass p-6 text-center">
-              <p class="text-3xl sm:text-4xl font-bold mb-2 gradient-text">{{ kpi.metric }}</p>
-              <p class="text-sm font-medium mb-1" style="color: var(--color-text);">{{ kpi.label }}</p>
-              <p class="text-xs" style="color: var(--color-muted);">{{ kpi.sublabel }}</p>
+        <!-- KPI strip — Linear-style -->
+        <div class="mt-14 grid grid-cols-2 lg:grid-cols-4 rounded-[12px] overflow-hidden"
+             style="border: 1px solid var(--border);" appFadeIn [fadeInDelay]="50">
+          @for (kpi of kpis; track kpi.label; let i = $index; let last = $last) {
+            <div class="p-6 sm:p-7"
+                 [style]="'background: var(--surface); ' +
+                          (i < 2 ? 'border-bottom: 1px solid var(--border);' : '') +
+                          (i % 2 === 0 ? 'border-right: 1px solid var(--border);' : '')">
+              <p class="num-2xl mb-2" [style.color]="kpi.color">{{ kpi.metric }}</p>
+              <p class="text-[14px] font-semibold mb-0.5" style="color: var(--text);">{{ kpi.label }}</p>
+              <p class="text-[12.5px]" style="color: var(--text-muted);">{{ kpi.sublabel }}</p>
             </div>
           }
         </div>
 
-        <!-- Trust arguments -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          @for (arg of trustArgs; track arg.icon; let i = $index) {
-            <div appFadeIn [fadeInDelay]="i * 100" class="card-glass p-7">
-              <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
-                     style="background: #EFF6FF;">
-                  {{ arg.icon }}
-                </div>
-                <div>
-                  <h3 class="font-bold mb-2 text-sm" style="color: var(--color-text);">{{ arg.title }}</h3>
-                  <p class="text-sm leading-relaxed" style="color: var(--color-muted);">{{ arg.description }}</p>
-                </div>
+        <!-- Arguments grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
+          @for (arg of args; track arg.title; let i = $index) {
+            <div class="surface-card p-7" appFadeIn [fadeInDelay]="i * 80">
+              <div class="icon-tile-lg mb-5" [class]="arg.iconClass">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path [attr.d]="arg.iconPath"/>
+                </svg>
               </div>
+              <h3 class="text-[15px] font-semibold mb-2 leading-snug">{{ arg.title }}</h3>
+              <p class="text-[13.5px] leading-relaxed" style="color: var(--text-muted);">{{ arg.description }}</p>
             </div>
           }
         </div>
@@ -53,27 +57,30 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
 })
 export class AdvantagesComponent {
   kpis = [
-    { metric: '-40%', label: 'Rappels clients', sublabel: 'Grâce aux notifications auto' },
-    { metric: '+85%', label: 'Satisfaction client', sublabel: 'Mesurée par QR feedback' },
-    { metric: '2x', label: 'Rapidité d\'exécution', sublabel: 'Vs. gestion manuelle' },
-    { metric: '100%', label: 'Traçabilité tickets', sublabel: 'Historique complet' },
+    { metric: '−40%', label: 'Rappels entrants',       sublabel: 'Grâce aux notifications auto',  color: 'var(--text)' },
+    { metric: '+85%', label: 'Satisfaction client',     sublabel: 'Mesurée via QR feedback',        color: 'var(--text)' },
+    { metric: '2×',   label: 'Vitesse d\'exécution',    sublabel: 'Vs. suivi manuel / tableurs',    color: 'var(--text)' },
+    { metric: '100%', label: 'Traçabilité',             sublabel: 'Historique complet conservé',    color: 'var(--text)' },
   ];
 
-  trustArgs = [
+  args = [
     {
-      icon: '🏢',
-      title: 'Multi-sites et multi-techniciens',
-      description: 'Gérez plusieurs agences depuis un seul back-office. Chaque site a ses propres stocks, ses propres équipes.',
+      title: 'Multi-sites & multi-techniciens',
+      description: 'Pilotez plusieurs agences depuis un back-office unifié. Stocks, équipes et rapports propres à chaque site.',
+      iconClass: 'icon-tile-primary',
+      iconPath: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10',
     },
     {
-      icon: '🔒',
-      title: 'Données sécurisées et isolées',
-      description: 'Architecture multi-tenant : vos données sont strictement séparées de celles des autres entreprises.',
+      title: 'Données isolées & sécurisées',
+      description: 'Architecture multi-tenant stricte. Chaque entreprise a son espace, ses rôles, ses droits. Conformité garantie.',
+      iconClass: 'icon-tile-success',
+      iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4',
     },
     {
-      icon: '🚀',
-      title: 'Déploiement rapide, sans formation longue',
-      description: 'Interface intuitive. Vos équipes sont opérationnelles en 48h. Support inclus pendant les 30 premiers jours.',
+      title: 'Déploiement en 48h',
+      description: 'Interface intuitive, onboarding dédié, support inclus 30 jours. Vos équipes opérationnelles immédiatement.',
+      iconClass: 'icon-tile-warning',
+      iconPath: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z',
     },
   ];
 }

@@ -6,41 +6,50 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
   standalone: true,
   imports: [FadeInDirective],
   template: `
-    <section class="section-padding" style="background: var(--color-surface);">
-      <div class="container-max">
+    <section class="section" style="background: var(--surface);">
+      <div class="wrap">
 
         <!-- Header -->
-        <div class="text-center max-w-2xl mx-auto mb-16" appFadeIn [fadeInDelay]="0">
-          <p class="text-sm font-semibold uppercase tracking-widest mb-4" style="color: #EF4444;">
-            Le problème
-          </p>
-          <h2 class="text-3xl sm:text-4xl font-bold leading-tight mb-5" style="color: var(--color-text);">
-            Votre SAV vous coûte plus cher<br/>
-            <span class="gradient-text-warm">que vous ne le pensez.</span>
+        <div class="max-w-[720px]" appFadeIn [fadeInDelay]="0">
+          <span class="eyebrow" style="color: var(--danger);">Le problème</span>
+          <h2 class="text-[2rem] sm:text-[2.5rem] leading-[1.08] mb-4">
+            Votre SAV vous coûte<br/>
+            <span style="color: var(--text-muted);">plus cher que vous ne le croyez.</span>
           </h2>
-          <p class="text-lg" style="color: var(--color-muted);">
-            3 problèmes qui plombent la rentabilité des services SAV aujourd'hui.
+          <p class="text-[16.5px] leading-relaxed max-w-[580px]" style="color: var(--text-mid);">
+            Ces trois frictions plombent la rentabilité des services SAV —
+            et aucune n'est visible dans un tableur.
           </p>
         </div>
 
-        <!-- Pain cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          @for (pain of pains; track pain.icon) {
-            <div class="card-pain p-7" appFadeIn [fadeInDelay]="pain.delay">
-              <!-- Icon -->
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5"
-                   style="background: #FEF2F2;">
-                {{ pain.icon }}
+        <!-- Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-16">
+          @for (pain of pains; track pain.title; let i = $index) {
+            <div class="surface-card p-7" appFadeIn [fadeInDelay]="i * 90">
+
+              <div class="flex items-center justify-between mb-6">
+                <div class="icon-tile-lg" style="background: var(--danger-soft); border-color: rgba(220,38,38,0.14); color: var(--danger);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path [attr.d]="pain.iconPath"/>
+                  </svg>
+                </div>
+                <span class="mono text-[11px] font-semibold tracking-wider" style="color: var(--text-subtle);">
+                  0{{ i + 1 }}
+                </span>
               </div>
-              <!-- Title -->
-              <h3 class="text-lg font-bold mb-3" style="color: var(--color-text);">{{ pain.title }}</h3>
-              <!-- Description -->
-              <p class="leading-relaxed text-sm" style="color: var(--color-muted);">{{ pain.description }}</p>
-              <!-- Impact tag -->
-              <div class="mt-5 flex items-center gap-2">
-                <span class="text-xs font-semibold px-2.5 py-1 rounded-full"
-                      style="background: #FEF2F2; color: #DC2626;">
-                  ↑ {{ pain.impact }}
+
+              <h3 class="text-[17px] font-semibold mb-2 leading-snug">{{ pain.title }}</h3>
+              <p class="text-[14px] leading-relaxed mb-5" style="color: var(--text-muted);">
+                {{ pain.description }}
+              </p>
+
+              <div class="pt-4 flex items-center gap-2" style="border-top: 1px solid var(--border);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                  <polyline points="17 6 23 6 23 12"/>
+                </svg>
+                <span class="text-[12.5px] font-semibold" style="color: var(--danger);">
+                  {{ pain.impact }}
                 </span>
               </div>
             </div>
@@ -54,25 +63,22 @@ import { FadeInDirective } from '../../shared/directives/fade-in.directive';
 export class PainPointsComponent {
   pains = [
     {
-      icon: '🗂️',
-      title: 'Tickets perdus, délais oubliés',
-      description: 'Sans outil centralisé, les tickets traînent dans des tableurs, des cahiers ou des mails. Résultat : retards, client mécontent, image dégradée.',
-      impact: 'jusqu\'à 30% de tickets mal suivis',
-      delay: 0,
+      title: 'Tickets éparpillés, délais oubliés',
+      description: 'Carnets, tableurs, WhatsApp, e-mails. Le suivi se perd. Les échéances passent. Les clients attendent — et s\'en souviennent.',
+      impact: 'Jusqu\'à 30% des tickets mal suivis',
+      iconPath: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2 M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2 M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2 M12 14l-2 2 2 2',
     },
     {
-      icon: '📡',
       title: 'Zéro visibilité pour le client',
-      description: 'Le client rappelle 5 fois pour savoir où en est sa réparation. Vos équipes perdent du temps. Votre réputation en prend un coup.',
+      description: 'Le client rappelle, rappelle encore. Votre équipe perd du temps à rassurer au lieu de réparer. Chaque rappel coûte.',
       impact: '40% des appels = demandes de statut',
-      delay: 100,
+      iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M12 8v4 M12 16h.01',
     },
     {
-      icon: '📦',
-      title: 'Stocks ingérables, interventions bloquées',
-      description: 'Un technicien arrive sans les pièces. Un stock vide découvert trop tard. Des interventions repoussées inutilement — et un client de moins.',
-      impact: '1 intervention sur 5 retardée par rupture',
-      delay: 200,
+      title: 'Stock ingérable, interventions bloquées',
+      description: 'Un technicien sans la pièce. Un stock vide découvert trop tard. L\'intervention est repoussée — et un client est perdu.',
+      impact: '1 intervention sur 5 retardée',
+      iconPath: 'M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16',
     },
   ];
 }
