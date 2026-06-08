@@ -1,0 +1,15 @@
+{
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npx nx build sav-front --configuration=production",
+  "outputDirectory": "dist/sav-front/browser",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://82.165.31.102.sslip.io/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
